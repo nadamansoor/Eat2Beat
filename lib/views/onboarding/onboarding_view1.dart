@@ -9,7 +9,6 @@ class OnboardingView1 extends StatelessWidget {
       backgroundColor: Color(0xFFF9F7FF),
       body: Stack(
         children: [
-         
           Positioned(
             top: 0,
             left: 0,
@@ -34,7 +33,7 @@ class OnboardingView1 extends StatelessWidget {
                   const SizedBox(height: 100), 
             
                   Container(
-                    height: 350,
+                    height: 370,
                     margin: EdgeInsets.only(top: 20), 
                     child: Image.asset(
                       "assets/images/Illustration.png",   
@@ -71,58 +70,12 @@ class OnboardingView1 extends StatelessWidget {
 
                   const Spacer(),
 
-                  // Bottom Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          "Skip",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-
-                      Row(
-                        children: [
-                          _dot(true),
-                          const SizedBox(width: 6),
-                          _dot(false),
-                          const SizedBox(width: 6),
-                          _dot(false),
-                        ],
-                      ),
-
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: const Color(0xFF8468ff),
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
+                  SizedBox(height: 80),
                 ],
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _dot(bool active) {
-    return Container(
-      height: 8,
-      width: active ? 18 : 8,
-      decoration: BoxDecoration(
-        color: active ? const Color(0xFF6C63FF) : Colors.grey[400],
-        borderRadius: BorderRadius.circular(20),
       ),
     );
   }

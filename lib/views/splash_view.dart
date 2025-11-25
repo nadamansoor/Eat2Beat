@@ -1,4 +1,4 @@
-import 'package:eat2beat/views/onboarding_view1.dart';
+import 'package:eat2beat/views/onboarding/onboarding_view.dart';
 import 'package:flutter/material.dart';
 
 class LogoView extends StatefulWidget {
@@ -37,7 +37,7 @@ class _LogoViewState extends State<LogoView>
     Future.delayed(const Duration(seconds: 3), () {
      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const OnboardingView1()),
+        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
 );
 
     });
