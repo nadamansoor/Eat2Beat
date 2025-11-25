@@ -9,6 +9,7 @@ class OnboardingView1 extends StatelessWidget {
       backgroundColor: Color(0xFFF9F7FF),
       body: Stack(
         children: [
+         
           Positioned(
             top: 0,
             left: 0,
@@ -30,17 +31,18 @@ class OnboardingView1 extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 children: [
-                  const SizedBox(height: 98), 
-                    Container(
-                      height: 350,
-                      margin: EdgeInsets.only(top: 25), 
-                      child: Image.asset(
-                        "assets/images/Illustration.png",   
-                        fit: BoxFit.contain,
-                      ),
+                  const SizedBox(height: 100), 
+            
+                  Container(
+                    height: 350,
+                    margin: EdgeInsets.only(top: 20), 
+                    child: Image.asset(
+                      "assets/images/Illustration.png",   
+                      fit: BoxFit.cover,
                     ),
+                  ),
 
-                  const SizedBox(height: 25), 
+                  const SizedBox(height: 10),
 
                   Text(
                     "Turn Leftovers into\nOpportunities",
@@ -53,7 +55,7 @@ class OnboardingView1 extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
 
                   Text(
                     "Together, we can make a real impact.\n"
@@ -69,7 +71,7 @@ class OnboardingView1 extends StatelessWidget {
 
                   const Spacer(),
 
-                  // Bottom Section wid1 
+                  // Bottom Section
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
