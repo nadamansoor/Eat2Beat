@@ -31,8 +31,6 @@ class CustomTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var screenHeight = MediaQuery.of(context).size.height;
-    var screenWidth = MediaQuery.of(context).size.width;
     return TextFormField(
       decoration: InputDecoration(
         enabledBorder: builtOutlineBorder(borderSideColor),
@@ -45,6 +43,8 @@ class CustomTextFormField extends StatelessWidget {
         suffixIconColor: borderSideColor,
         hintText: hintText,
         hintStyle: hintStyle,
+        fillColor: Colors.white,
+        filled: true
       ),
       style: hintStyle,
       cursorColor: borderSideColor,

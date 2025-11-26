@@ -5,10 +5,12 @@ import '../../utils/app_routes.dart';
 import '../../utils/app_styles.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/leading_widget.dart';
 import '../../widgets/login_widget.dart';
 
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
+  final formKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -18,112 +20,164 @@ class RegisterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    return Scaffold(
-      backgroundColor: AppColors.light,
-      body: Stack(
-        children: [
-          Image.asset(AppImages.pattern),
-          SizedBox(height: screenHeight*0.0,),
-          Padding(
-            padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.04,
-                vertical: screenHeight*0.02
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: screenHeight*0.1,),
-                Center(
-                  child: Text("Hello! Register to get\n            started",
-                    style: AppStyles.black24Bold,
-                  ),
-                ),
-                SizedBox(height: screenHeight*0.03,),
-                CustomTextFormField(
-                    hintText: "Username",
-                    controller: nameController
-                ),
-                SizedBox(height: screenHeight*0.02,),
-                CustomTextFormField(
-                  hintText: "Email",
-                  controller: emailController,
-                  keyBoardType: TextInputType.emailAddress,
-                ),
-                SizedBox(height: screenHeight*0.02,),
-                CustomTextFormField(
-                    hintText: "Password",
-                    obscureText: true,
-                    controller: passwordController,
-                    suffixIcon: Icon(Icons.remove_red_eye),
-                ),
-                SizedBox(height: screenHeight*0.02,),
-                CustomTextFormField(
-                  hintText: "Confirm Password",
-                  controller: confirmController,
-                  obscureText: true,
-                  suffixIcon: Icon(Icons.remove_red_eye),
-                ),
-                SizedBox(height: screenHeight*0.03,),
-                CustomButton(text: "Register", onPressed: (){}),
-                SizedBox(height: screenHeight*0.04,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: screenWidth * 0.25,
-                      height: 1,
-                      color: AppColors.grey,
-                    ),
-                    SizedBox(width: screenWidth * 0.03),
-                    Text("OR Register With", style: AppStyles.grey16w400),
-                    SizedBox(width: screenWidth * 0.03),
-                    Container(
-                      width: screenWidth * 0.25,
-                      height: 1,
-                      color: AppColors.grey,
-                    ),
-                  ],
-                ),
-                SizedBox(height: screenHeight*0.04,),
-                Row(
-                  children: [
-                    Expanded(
-                        child: LoginWidget(imagePath: AppImages.facebookLogo)
-                    ),
-                    SizedBox(width: screenWidth*0.02,),
-                    Expanded(
-                        child: LoginWidget(imagePath: AppImages.googleLogo)
-                    ),
-                    SizedBox(width: screenWidth*0.02,),
-                    Expanded(
-                        child: LoginWidget(imagePath: AppImages.appleLogo)
-                    ),
-                  ],
-                ),
-                Spacer(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Already have an account ?", style: AppStyles.black16w500),
-                    SizedBox(width: screenWidth * 0.01),
 
-                    InkWell(
-                      onTap: () {
-                        Navigator.of(context).pushReplacementNamed(AppRoutes.loginRouteName);
-                      },
-                      child: Text(
-                        "Login Now",
-                        style: AppStyles.blue16w500.copyWith(
-                          fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: AppColors.light,
+        body: Form(
+          key: formKey,
+          child: Stack(
+            children: [
+              Image.asset(AppImages.pattern),
+              SizedBox(height: screenHeight*0.0,),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight*0.02
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LeadingWidget(),
+                      SizedBox(height: screenHeight*0.04,),
+                      Center(
+                        child: Text("Hello! Register to get\n            started",
+                          style: AppStyles.black24Bold,
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: screenHeight*0.03,),
+                      CustomTextFormField(
+                          hintText: "Username",
+                          controller: nameController,
+                          validator: (value){
+                            if(value == null || value.trim().isEmpty){
+                              return "Please, Enter your name";
+                            }
+                              return null;
+                          },
+                      ),
+                      SizedBox(height: screenHeight*0.02,),
+                      CustomTextFormField(
+                        hintText: "Email",
+                        controller: emailController,
+                        keyBoardType: TextInputType.emailAddress,
+                        validator: (value){
+                          if (value == null || value.trim().isEmpty) {
+                            return "Email required";
+                          }
+                          String pattern = r'^[^@]+@[^@]+\.[^@]+';
+                          if (!RegExp(pattern).hasMatch(value)) {
+                            return "Invalid email";
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: screenHeight*0.02,),
+                      CustomTextFormField(
+                          hintText: "Password",
+                          obscureText: true,
+                          controller: passwordController,
+                          suffixIcon: Icon(Icons.remove_red_eye),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return "Password required";
+                            }
+                            if (value.length < 6) {
+                              return "Password must be at least 6 characters";
+                            }
+                            return null;
+                          },
+                      ),
+                      SizedBox(height: screenHeight*0.02,),
+                      CustomTextFormField(
+                        hintText: "Confirm Password",
+                        controller: confirmController,
+                        obscureText: true,
+                        suffixIcon: Icon(Icons.remove_red_eye),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Re Password required";
+                          }
+                          if (value.length < 6) {
+                            return "Password must be at least 6 characters";
+                          }
+                          if(value != passwordController.text){
+                            return "Re-password doesn't match password";
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: screenHeight*0.03,),
+                      CustomButton(text: "Register",
+                          onPressed: (){
+                            if(formKey.currentState!.validate()){
+                              print("registered successfully");
+                            }
+                          }
+                      ),
+                      SizedBox(height: screenHeight*0.04,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: screenWidth * 0.25,
+                            height: 1,
+                            color: AppColors.grey,
+                          ),
+                          SizedBox(width: screenWidth * 0.03),
+                          Text("OR Register With", style: AppStyles.grey16w400),
+                          SizedBox(width: screenWidth * 0.03),
+                          Container(
+                            width: screenWidth * 0.25,
+                            height: 1,
+                            color: AppColors.grey,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: screenHeight*0.04,),
+                      Row(
+                        children: [
+                          Expanded(
+                              child: LoginWidget(imagePath: AppImages.facebookLogo)
+                          ),
+                          SizedBox(width: screenWidth*0.02,),
+                          Expanded(
+                              child: LoginWidget(imagePath: AppImages.googleLogo)
+                          ),
+                          SizedBox(width: screenWidth*0.02,),
+                          Expanded(
+                              child: LoginWidget(imagePath: AppImages.appleLogo)
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: screenHeight*0.08,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Already have an account ?", style: AppStyles.black16w500),
+                          SizedBox(width: screenWidth * 0.01),
+
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).pushReplacementNamed(AppRoutes.loginRouteName);
+                            },
+                            child: Text(
+                              "Login Now",
+                              style: AppStyles.blue16w500.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          )
-        ],
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
