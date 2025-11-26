@@ -36,7 +36,7 @@ class OnboardingView2 extends StatelessWidget {
                     height: 370,
                     margin: EdgeInsets.only(top: 20), 
                     child: Image.asset(
-                      "assets/images/11750411_4809888.png",   
+                      "assets/images/onboarding2.png",   
                       fit: BoxFit.cover,
                     ),
                   ),
