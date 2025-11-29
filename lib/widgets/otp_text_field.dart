@@ -4,7 +4,14 @@ import 'package:flutter/material.dart';
 
 class OtpTextField extends StatelessWidget {
   TextEditingController controller;
-  OtpTextField({super.key , required this.controller});
+  FocusNode node;
+  Function(String?)? onChanged;
+  OtpTextField({
+    super.key ,
+    required this.controller ,
+    required this.node,
+    this.onChanged
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +28,8 @@ class OtpTextField extends StatelessWidget {
       textAlign: TextAlign.center,
       keyboardType: TextInputType.number,
       controller: controller,
+      focusNode: node,
+      onChanged: onChanged,
     );
   }
 
@@ -32,4 +41,5 @@ class OtpTextField extends StatelessWidget {
       )
     );
   }
+
 }

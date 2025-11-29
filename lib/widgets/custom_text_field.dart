@@ -34,7 +34,7 @@ class CustomTextFormField extends StatelessWidget {
     return TextFormField(
       decoration: InputDecoration(
         enabledBorder: builtOutlineBorder(borderSideColor),
-        focusedBorder: builtOutlineBorder(borderSideColor),
+        focusedBorder: builtOutlineBorder(AppColors.blue),
         errorBorder: builtOutlineBorder(Colors.red),
         focusedErrorBorder: builtOutlineBorder(Colors.red),
         prefixIcon: prefixIcon,
@@ -64,4 +64,14 @@ class CustomTextFormField extends StatelessWidget {
         )
     );
   }
+
+  static bool appearPassword(int counter){
+    if(counter%2 ==0){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
 }

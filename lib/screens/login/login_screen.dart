@@ -2,16 +2,27 @@ import 'package:eat2beat/utils/app_colors.dart';
 import 'package:eat2beat/utils/app_images.dart';
 import 'package:eat2beat/utils/app_routes.dart';
 import 'package:eat2beat/utils/app_styles.dart';
+import 'package:eat2beat/utils/app_validators.dart';
 import 'package:eat2beat/widgets/custom_button.dart';
 import 'package:eat2beat/widgets/custom_text_field.dart';
 import 'package:eat2beat/widgets/login_widget.dart';
 import 'package:flutter/material.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
    LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
    final formKey = GlobalKey<FormState>();
+
   TextEditingController emailController = TextEditingController();
+
   TextEditingController passwordController = TextEditingController();
+
+  int counter = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -47,31 +58,29 @@ class LoginScreen extends StatelessWidget {
                           keyBoardType: TextInputType.emailAddress,
                           controller: emailController,
                           validator: (value){
-                            if (value == null || value.trim().isEmpty) {
-                              return "Email required";
-                            }
-                            String pattern = r'^[^@]+@[^@]+\.[^@]+';
-                            if (!RegExp(pattern).hasMatch(value)) {
-                              return "Invalid email";
-                            }
-                            return null;
+                            return AppValidators.emailValidator(value);
                           },
                       ),
                       SizedBox(height: screenHeight*0.02,),
                       CustomTextFormField(
                           hintText: "Enter Your Password",
                           controller: passwordController,
-                          obscureText: true,
-                          suffixIcon: Icon(Icons.remove_red_eye),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return "Password required";
-                            }
-                            if (value.length < 6) {
-                              return "Password must be at least 6 characters";
-                            }
-                            return null;
-                          },
+                          obscureText: CustomTextFormField.appearPassword(counter),
+                          suffixIcon: InkWell(
+                              onTap: (){
+                                counter++;
+                                setState(() {
+
+                                });
+                                },
+                              child:
+                              CustomTextFormField.appearPassword(counter) == true ?
+                              Icon(Icons.visibility_off_outlined)
+                              : Icon(Icons.visibility_outlined)
+                          ),
+                          validator: (value){
+                            return AppValidators.passwordValidator(value);
+                          }
                       ),
                       SizedBox(height: screenHeight*0.01,),
                       Row(
@@ -166,4 +175,13 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
+
+   // bool appearPassword(int counter){
+   //   if(counter%2 ==0){
+   //     return true;
+   //   }
+   //   else{
+   //     return false;
+   //   }
+   // }
 }

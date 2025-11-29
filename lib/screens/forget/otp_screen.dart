@@ -1,19 +1,19 @@
-import 'package:eat2beat/widgets/otp_text_field.dart';
 import 'package:flutter/material.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_images.dart';
-import '../../utils/app_routes.dart';
 import '../../utils/app_styles.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/leading_widget.dart';
+import '../../widgets/otp_widget.dart';
 
-class OtpScreen extends StatelessWidget {
+class OtpScreen extends StatefulWidget {
   OtpScreen({super.key});
-  TextEditingController otpController1 = TextEditingController();
-  TextEditingController otpController2 = TextEditingController();
-  TextEditingController otpController3 = TextEditingController();
-  TextEditingController otpController4 = TextEditingController();
 
+  @override
+  State<OtpScreen> createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -40,22 +40,13 @@ class OtpScreen extends StatelessWidget {
                   Text("Enter the verification code we just sent on your email address.",
                     style: AppStyles.grey16w400,),
                   SizedBox(height: screenHeight*0.05,),
-                  Row(
-                    children: [
-                      Expanded(child: OtpTextField(controller: otpController1)),
-                      SizedBox(width: screenWidth*0.05,),
-                      Expanded(child: OtpTextField(controller: otpController2)),
-                      SizedBox(width: screenWidth*0.05,),
-                      Expanded(child: OtpTextField(controller: otpController3)),
-                      SizedBox(width: screenWidth*0.05,),
-                      Expanded(child: OtpTextField(controller: otpController4)),
-                    ],
-                  ),
+                  OtpWidget(correctCode: "1111",),
                   SizedBox(height: screenHeight*0.05,),
                   CustomButton(text: "Verify", onPressed: (){
-                    Navigator.pushNamed(context, AppRoutes.newPassRouteName);
+
                   }),
-                  Spacer(),
+
+            Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

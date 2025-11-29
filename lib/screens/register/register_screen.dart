@@ -1,4 +1,5 @@
 import 'package:eat2beat/utils/app_colors.dart';
+import 'package:eat2beat/utils/app_validators.dart';
 import 'package:flutter/material.dart';
 import '../../utils/app_images.dart';
 import '../../utils/app_routes.dart';
@@ -8,13 +9,26 @@ import '../../widgets/custom_text_field.dart';
 import '../../widgets/leading_widget.dart';
 import '../../widgets/login_widget.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   final formKey = GlobalKey<FormState>();
+
   TextEditingController nameController = TextEditingController();
+
   TextEditingController emailController = TextEditingController();
+
   TextEditingController passwordController = TextEditingController();
+
   TextEditingController confirmController = TextEditingController();
+
+  int counter1 = 0 ;
+  int counter2 = 0 ;
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +65,7 @@ class RegisterScreen extends StatelessWidget {
                           hintText: "Username",
                           controller: nameController,
                           validator: (value){
-                            if(value == null || value.trim().isEmpty){
-                              return "Please, Enter your name";
-                            }
-                              return null;
+                            return AppValidators.nameValidator(value);
                           },
                       ),
                       SizedBox(height: screenHeight*0.02,),
@@ -63,49 +74,49 @@ class RegisterScreen extends StatelessWidget {
                         controller: emailController,
                         keyBoardType: TextInputType.emailAddress,
                         validator: (value){
-                          if (value == null || value.trim().isEmpty) {
-                            return "Email required";
-                          }
-                          String pattern = r'^[^@]+@[^@]+\.[^@]+';
-                          if (!RegExp(pattern).hasMatch(value)) {
-                            return "Invalid email";
-                          }
-                          return null;
+                          return AppValidators.emailValidator(value);
                         },
                       ),
                       SizedBox(height: screenHeight*0.02,),
                       CustomTextFormField(
                           hintText: "Password",
-                          obscureText: true,
+                          obscureText: CustomTextFormField.appearPassword(counter1),
                           controller: passwordController,
-                          suffixIcon: Icon(Icons.remove_red_eye),
+                          suffixIcon: InkWell(
+                              onTap: (){
+                                counter1++;
+                                setState(() {
+
+                                });
+                              },
+                              child:
+                              CustomTextFormField.appearPassword(counter1) == true ?
+                              Icon(Icons.visibility_off_outlined)
+                              : Icon(Icons.visibility_outlined)
+                          ),
                           validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return "Password required";
-                            }
-                            if (value.length < 6) {
-                              return "Password must be at least 6 characters";
-                            }
-                            return null;
+                            return AppValidators.passwordValidator(value);
                           },
                       ),
                       SizedBox(height: screenHeight*0.02,),
                       CustomTextFormField(
                         hintText: "Confirm Password",
                         controller: confirmController,
-                        obscureText: true,
-                        suffixIcon: Icon(Icons.remove_red_eye),
+                        obscureText: CustomTextFormField.appearPassword(counter2),
+                        suffixIcon: InkWell(
+                            onTap: (){
+                              counter2++;
+                              setState(() {
+
+                              });
+                            },
+                            child:
+                            CustomTextFormField.appearPassword(counter2) == true ?
+                            Icon(Icons.visibility_off_outlined)
+                                : Icon(Icons.visibility_outlined)
+                        ),
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return "Re Password required";
-                          }
-                          if (value.length < 6) {
-                            return "Password must be at least 6 characters";
-                          }
-                          if(value != passwordController.text){
-                            return "Re-password doesn't match password";
-                          }
-                          return null;
+                          return AppValidators.confirmValidator(value, passwordController: passwordController);
                         },
                       ),
                       SizedBox(height: screenHeight*0.03,),
