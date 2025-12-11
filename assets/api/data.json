@@ -1,0 +1,47 @@
+[
+  {
+    "id": "1",
+    "name": "Pepperoni Cheese Pizza",
+    "image": "assets/images/pizza.png",
+    "price": 12.99,
+    "rating": 4.8,
+    "time": "20-30 min",
+    "description": "A delicious pepperoni pizza with extra cheese and fresh ingredients."
+  },
+  {
+    "id": "2",
+    "name": "Classic Beef Burger",
+    "image": "assets/images/burger.png",
+    "price": 9.50,
+    "rating": 4.5,
+    "time": "10-15 min",
+    "description": "Fresh beef patty with cheese, lettuce and tomatoes served warm."
+  },
+  {
+    "id": "3",
+    "name": "Veggie Supreme Pizza",
+    "image": "assets/images/veggie.png",
+    "price": 11.25,
+    "rating": 4.7,
+    "time": "25-35 min",
+    "description": "Mixed vegetables, olives, peppers and mushroom toppings."
+  },
+  {
+    "id": "4",
+    "name": "Chicken Shawarma Wrap",
+    "image": "assets/images/shawarma.png",
+    "price": 7.99,
+    "rating": 4.3,
+    "time": "5-10 min",
+    "description": "Sliced chicken with garlic sauce wrapped in fresh tortilla."
+  },
+  {
+    "id": "5",
+    "name": "French Fries Box",
+    "image": "assets/images/fries.png",
+    "price": 4.25,
+    "rating": 4.1,
+    "time": "5-8 min",
+    "description": "Crispy fried potatoes served hot and salted."
+  }
+]

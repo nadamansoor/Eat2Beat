@@ -1,4 +1,4 @@
-import 'package:eat2beat/views/home_view.dart';
+import 'package:eat2beat/views/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'onboarding_view1.dart';
 import 'onboarding_view2.dart';
@@ -18,7 +18,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _onSkipPressed() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(builder: (context) =>  HomePage()),
     );
   }
 
