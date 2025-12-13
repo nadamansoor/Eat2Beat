@@ -18,9 +18,9 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
    final formKey = GlobalKey<FormState>();
 
-  TextEditingController emailController = TextEditingController();
+  TextEditingController emailController = TextEditingController(text: "ahmed@gmail.com");
 
-  TextEditingController passwordController = TextEditingController();
+  TextEditingController passwordController = TextEditingController(text: "123456");
 
   int counter = 0;
 
@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           text: "Login",
                           onPressed: (){
                             if(formKey.currentState!.validate()){
-                              print("login successfully");
+                              Navigator.of(context).pushReplacementNamed(AppRoutes.homeRouteName);
                             }
                           }
                       ),

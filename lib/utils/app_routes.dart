@@ -7,4 +7,11 @@ class AppRoutes {
   static const otpRouteName = "otp";
   static const newPassRouteName = "new_pass";
   static const changePassRouteName = "changed";
+  static const homeScreenRouteName = "home_screen";
+  static const homeRouteName = "home";
+  static const offersRouteName = "offers";
+  static const impactRouteName = "impact";
+  static const donationRouteName = "donation";
+  static const cartRouteName = "cart";
+
 }

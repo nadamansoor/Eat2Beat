@@ -5,6 +5,7 @@ import '../utils/app_styles.dart';
 typedef OnValidator = String? Function(String?)?;
 class CustomTextFormField extends StatelessWidget {
   Color borderSideColor ;
+  Color? focusedBorderColor ;
   Widget? prefixIcon;
   Widget? suffixIcon;
   String hintText;
@@ -26,7 +27,8 @@ class CustomTextFormField extends StatelessWidget {
     this.validator,
     this.obscureText = false,
     this.keyBoardType = TextInputType.text,
-    this.maxLines
+    this.maxLines,
+    this.focusedBorderColor
   });
 
   @override
@@ -34,7 +36,7 @@ class CustomTextFormField extends StatelessWidget {
     return TextFormField(
       decoration: InputDecoration(
         enabledBorder: builtOutlineBorder(borderSideColor),
-        focusedBorder: builtOutlineBorder(AppColors.blue),
+        focusedBorder: builtOutlineBorder(focusedBorderColor ?? AppColors.blue),
         errorBorder: builtOutlineBorder(Colors.red),
         focusedErrorBorder: builtOutlineBorder(Colors.red),
         prefixIcon: prefixIcon,
