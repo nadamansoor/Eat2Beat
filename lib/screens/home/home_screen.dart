@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     var screenWidth = MediaQuery.of(context).size.width;             // 375
     var screenHeight = MediaQuery.of(context).size.height;           // 812
     return Scaffold(
+      //
       body: BottomBar(
         width: double.infinity,
         hideOnScroll: false,
@@ -41,8 +42,8 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(50),
           gradient: LinearGradient(
               colors: [
-                Color(0x00e8ecf4),
-                Color(0xffE8ECF4),
+                Color(0x1A000000),
+                Color(0xFFE8ECF4),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight
