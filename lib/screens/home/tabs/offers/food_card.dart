@@ -18,7 +18,7 @@ class FoodCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.02,
-        vertical: screenHeight * 0.01,
+        vertical: screenHeight * 0.02,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -67,9 +67,14 @@ class FoodCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Text('\$ ${item.price}'),
-              const Icon(Icons.circle, size: 4),
-              const Icon(Icons.watch_later_outlined, size: 18),
-              Text(item.time),
+
+             Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                 color: const Color.fromARGB(255, 175, 205, 255).withOpacity(0.8),
+                 borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(item.sale, style: const TextStyle(color: Colors.black))),    
             ],
           )
         ],
