@@ -1,5 +1,3 @@
-
-
 class AppImages {
 
   static const String appleLogo = "assets/images/apple_logo.png";
@@ -34,4 +32,6 @@ class AppImages {
   static const food10 = 'assets/imgoffers/food2.png';
   static const food11 = 'assets/imgoffers/food3.png';
   static const food12 = 'assets/imgoffers/food4.png';
+
+  static const restauranteIcon = 'assets/imgoffers/restauranteIcon.png';
 }
