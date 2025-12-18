@@ -1,3 +1,4 @@
+
 class FoodModel {
   final String name;
   final String image;
@@ -22,4 +23,5 @@ class FoodModel {
     required this.description,
     required this.time,
   });
+
 }

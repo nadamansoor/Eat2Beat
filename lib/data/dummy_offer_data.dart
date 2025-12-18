@@ -20,7 +20,7 @@ final List<BannerModel> banners = [
 final List<FoodModel> foodList = [
   FoodModel(    
       restruanteName :'Burger King',
-      restauranteIcon: AppImages.restauranteIcon,
+      restauranteIcon: AppImages.king,
       name: 'Healthy Taco Salad',
       size:'L',
       image: AppImages.food2,
@@ -32,7 +32,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Beef Burger',
       size:'M',
       image: AppImages.food1,
@@ -44,7 +44,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Chicken Wrap',
       size:'S',
       image: AppImages.food3,
@@ -56,7 +56,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Golden Box',
       size:'L',
       image: AppImages.food4,
@@ -68,7 +68,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Golden Box',
       size:'L',
       image: AppImages.food5,
@@ -80,7 +80,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Golden Box',
       size:'L',
       image: AppImages.food6,
@@ -92,7 +92,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Golden Box',
       size:'L',
       image: AppImages.food7,
@@ -104,7 +104,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Golden Box',
       size:'L',
       image: AppImages.food8,
@@ -116,7 +116,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Golden Box',
       size:'L',
       image: AppImages.food9,
@@ -128,7 +128,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Golden Box',
       size:'L',
       image: AppImages.food10,
@@ -140,7 +140,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Golden Box',
       size:'L',
       image: AppImages.food11,
@@ -153,7 +153,7 @@ final List<FoodModel> foodList = [
       ),
   FoodModel(
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.restauranteIcon,
+    restauranteIcon: AppImages.king,
       name: 'Golden Box',
       size:'L',
       image: AppImages.food12,

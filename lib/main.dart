@@ -4,7 +4,10 @@ import 'package:eat2beat/screens/forget/new_password_screen.dart';
 import 'package:eat2beat/screens/forget/otp_screen.dart';
 import 'package:eat2beat/screens/home/home_screen.dart';
 import 'package:eat2beat/screens/home/tabs/cart/cart_tab.dart';
+import 'package:eat2beat/screens/home/tabs/donation/choose_donate.dart';
+import 'package:eat2beat/screens/home/tabs/donation/details_donation.dart';
 import 'package:eat2beat/screens/home/tabs/donation/donation_tab.dart';
+import 'package:eat2beat/screens/home/tabs/home_tab/details_screen.dart';
 import 'package:eat2beat/screens/home/tabs/home_tab/home_tab.dart';
 import 'package:eat2beat/screens/home/tabs/impact/impact_tab.dart';
 import 'package:eat2beat/screens/home/tabs/offers/offers_tab.dart';
@@ -39,6 +42,9 @@ class MyApp extends StatelessWidget {
         AppRoutes.impactRouteName: (_) => ImpactTab(),
         AppRoutes.donationRouteName: (_) => DonationTab(),
         AppRoutes.cartRouteName: (_) => CartTab(),
+        AppRoutes.detailDonationRouteName: (_) => DetailsDonation(),
+        AppRoutes.chooseDonateRouteName: (_) => ChooseDonate(),
+        AppRoutes.detailsRouteName: (_) => DetailsScreen(),
       },
     );
   }

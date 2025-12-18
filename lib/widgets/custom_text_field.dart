@@ -15,6 +15,7 @@ class CustomTextFormField extends StatelessWidget {
   bool obscureText;
   TextInputType keyBoardType;
   int? maxLines;
+  double? radius;
 
   CustomTextFormField({
     super.key,
@@ -28,25 +29,26 @@ class CustomTextFormField extends StatelessWidget {
     this.obscureText = false,
     this.keyBoardType = TextInputType.text,
     this.maxLines,
-    this.focusedBorderColor
+    this.focusedBorderColor,
+    this.radius
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       decoration: InputDecoration(
-        enabledBorder: builtOutlineBorder(borderSideColor),
-        focusedBorder: builtOutlineBorder(focusedBorderColor ?? AppColors.blue),
-        errorBorder: builtOutlineBorder(Colors.red),
-        focusedErrorBorder: builtOutlineBorder(Colors.red),
-        prefixIcon: prefixIcon,
-        prefixIconColor: borderSideColor,
-        suffixIcon: suffixIcon,
-        suffixIconColor: borderSideColor,
-        hintText: hintText,
-        hintStyle: hintStyle,
-        fillColor: Colors.white,
-        filled: true
+          enabledBorder: builtOutlineBorder(borderSideColor),
+          focusedBorder: builtOutlineBorder(focusedBorderColor ?? AppColors.blue),
+          errorBorder: builtOutlineBorder(Colors.red),
+          focusedErrorBorder: builtOutlineBorder(Colors.red),
+          prefixIcon: prefixIcon,
+          prefixIconColor: borderSideColor,
+          suffixIcon: suffixIcon,
+          suffixIconColor: borderSideColor,
+          hintText: hintText,
+          hintStyle: hintStyle,
+          fillColor: Colors.white,
+          filled: true
       ),
       style: hintStyle,
       cursorColor: borderSideColor,
@@ -60,7 +62,7 @@ class CustomTextFormField extends StatelessWidget {
 
   OutlineInputBorder builtOutlineBorder(borderSideColor){
     return OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(radius ?? 8),
         borderSide: BorderSide(
           color: borderSideColor,
         )

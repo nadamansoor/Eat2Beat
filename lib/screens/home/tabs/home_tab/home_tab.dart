@@ -1,5 +1,8 @@
+import 'package:eat2beat/models/home_model.dart';
+import 'package:eat2beat/models/offers_model.dart';
 import 'package:eat2beat/utils/app_colors.dart';
 import 'package:eat2beat/utils/app_images.dart';
+import 'package:eat2beat/utils/app_routes.dart';
 import 'package:eat2beat/utils/app_styles.dart';
 import 'package:eat2beat/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +17,7 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> {
   TextEditingController searchController = TextEditingController();
   int selectedIndex = 0;
+
   List<String> categories = [
     "New",
     "Near2You",
@@ -75,10 +79,10 @@ class _HomeTabState extends State<HomeTab> {
                 children: [
                   SizedBox(height: screenHeight*0.12,),
                   CustomTextFormField(
-                      hintText: "Search",
-                      controller: searchController,
-                      prefixIcon: Icon(Icons.search , color: AppColors.black,),
-                      focusedBorderColor: AppColors.purple,
+                    hintText: "Search",
+                    controller: searchController,
+                    prefixIcon: Icon(Icons.search , color: AppColors.black,),
+                    focusedBorderColor: AppColors.purple,
                   ),
                   SizedBox(height: screenHeight*0.02,),
                   SizedBox(
@@ -101,14 +105,14 @@ class _HomeTabState extends State<HomeTab> {
                               ),
                               decoration: BoxDecoration(
                                 color: selectedIndex == index ? AppColors.purple
-                                : AppColors.lightPurple,
+                                    : AppColors.lightPurple,
                                 borderRadius: BorderRadius.circular(40),
 
                               ),
                               child: Text(categories[index],
-                                style: selectedIndex == index ? AppStyles.black16w500.copyWith(
-                                color: AppColors.light,
-                              ): AppStyles.black16w500),
+                                  style: selectedIndex == index ? AppStyles.black16w500.copyWith(
+                                    color: AppColors.light,
+                                  ): AppStyles.black16w500),
                             ),
                           );
                         },
@@ -119,24 +123,31 @@ class _HomeTabState extends State<HomeTab> {
                   ),
                   SizedBox(height: screenHeight*0.02,),
                   GridView.builder(
-                      scrollDirection: Axis.vertical,
-                      padding: EdgeInsets.zero,
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          //childAspectRatio: 0.5,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 12,
-                          mainAxisExtent: screenHeight*0.28,
-                      ),
-                      itemBuilder: (context, index) {
-                        return Container(
+                    scrollDirection: Axis.vertical,
+                    padding: EdgeInsets.zero,
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      //childAspectRatio: 0.5,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 12,
+                      mainAxisExtent: screenHeight*0.28,
+                    ),
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: (){
+                          Navigator.of(context).pushNamed(
+                              AppRoutes.detailsRouteName ,
+                              arguments: HomeFoodModel.mealDetails[index]
+                          );
+                        },
+                        child: Container(
                           width: screenWidth*0.43,
                           //height: screenHeight*0.26,
                           padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth*0.02,
-                              vertical: screenHeight*0.01,
+                            horizontal: screenWidth*0.02,
+                            vertical: screenHeight*0.01,
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.white,
@@ -150,14 +161,14 @@ class _HomeTabState extends State<HomeTab> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(AppImages.food ,
+                                    child: Image.asset(HomeFoodModel.mealDetails[index].image ,
                                       width: double.infinity,
-                                    fit: BoxFit.fill,),
+                                      fit: BoxFit.fill,),
                                   ),
                                   Container(
                                     decoration: BoxDecoration(
-                                      color: AppColors.white,
-                                      borderRadius: BorderRadius.circular(5)
+                                        color: AppColors.white,
+                                        borderRadius: BorderRadius.circular(5)
                                     ),
                                     //padding: EdgeInsets.all(2),
                                     margin: EdgeInsets.all(8),
@@ -171,7 +182,7 @@ class _HomeTabState extends State<HomeTab> {
                                           color: AppColors.yellow,),
                                         Padding(
                                           padding: EdgeInsets.only(right: 6.0),
-                                          child: Text("4.5",style: AppStyles.grey13w400),
+                                          child: Text("${HomeFoodModel.mealDetails[index].rate}",style: AppStyles.grey13w400),
                                         ),
                                       ],
                                     ),
@@ -179,31 +190,33 @@ class _HomeTabState extends State<HomeTab> {
                                 ],
                               ),
                               SizedBox(height: screenHeight*0.01,),
-                              Text("Healthy Taco Salad with fresh vegetable" ,
-                                  style: AppStyles.black13Bold,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                              Text(HomeFoodModel.mealDetails[index].description ,
+                                style: AppStyles.black13Bold,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(height: screenHeight*0.01,),
+                              Spacer(),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  Text("\$ 120", style: AppStyles.grey13w400,),
+                                  Text("\$ ${HomeFoodModel.mealDetails[index].price}", style: AppStyles.grey13w400,),
                                   ImageIcon(AssetImage(AppImages.dotIcon)),
                                   Icon(Icons.watch_later_outlined ,
                                     color: AppColors.grey,
                                     size: 20,
                                   ),
-                                  Text("20 Min", style: AppStyles.grey13w400,),
+                                  Text(HomeFoodModel.mealDetails[index].time, style: AppStyles.grey13w400,),
                                 ],
-                              )
+                              ),
                             ],
                           ),
-                        );
-                      },
-                    itemCount: 12,
+                        ),
+                      );
+                    },
+                    itemCount: HomeFoodModel.mealDetails.length,
 
                   ),
+                  SizedBox(height: screenHeight*0.08,),
                 ],
               ),
             ),

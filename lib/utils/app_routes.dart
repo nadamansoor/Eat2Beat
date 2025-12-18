@@ -13,5 +13,8 @@ class AppRoutes {
   static const impactRouteName = "impact";
   static const donationRouteName = "donation";
   static const cartRouteName = "cart";
+  static const detailDonationRouteName = "details_donation";
+  static const chooseDonateRouteName = "choose_donation";
+  static const detailsRouteName = "details";
 
 }

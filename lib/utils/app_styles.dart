@@ -4,14 +4,26 @@ import 'app_colors.dart';
 class AppStyles {
 
   static const TextStyle grey16w400 = TextStyle(
-    color: AppColors.grey,
-    fontSize: 16,
-    fontWeight: FontWeight.w400
+      color: AppColors.grey,
+      fontSize: 16,
+      fontWeight: FontWeight.w400
+  );
+
+  static const TextStyle grey16Bold = TextStyle(
+      color: AppColors.grey,
+      fontSize: 16,
+      fontWeight: FontWeight.bold
   );
 
   static const TextStyle grey13w400 = TextStyle(
       color: Color(0xff555555),
       fontSize: 13,
+      fontWeight: FontWeight.w400
+  );
+
+  static const TextStyle grey8w400 = TextStyle(
+      color: Color(0xff555555),
+      fontSize: 8,
       fontWeight: FontWeight.w400
   );
 
@@ -39,6 +51,12 @@ class AppStyles {
       fontWeight: FontWeight.bold
   );
 
+  static const TextStyle black20Bold = TextStyle(
+      color: Colors.black,
+      fontSize: 20,
+      fontWeight: FontWeight.bold
+  );
+
   static const TextStyle black13w400 = TextStyle(
       color: Colors.black,
       fontSize: 13,
@@ -55,5 +73,23 @@ class AppStyles {
       color: AppColors.blue,
       fontSize: 16,
       fontWeight: FontWeight.w500
+  );
+
+  static const TextStyle blue14w500 = TextStyle(
+      color: AppColors.blue,
+      fontSize: 14,
+      fontWeight: FontWeight.w500
+  );
+
+  static const TextStyle bold40Green800 = TextStyle(
+      color: AppColors.green800,
+      fontSize: 40,
+      fontWeight: FontWeight.bold
+  );
+
+  static const TextStyle sBold14Green800 = TextStyle(
+      color: AppColors.green800,
+      fontSize: 14,
+      fontWeight: FontWeight.w600
   );
 }

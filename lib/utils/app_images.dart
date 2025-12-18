@@ -7,6 +7,7 @@ class AppImages {
   static const String successMark = "assets/images/Successmark.png";
   static const String myPhoto = "assets/images/my_photo.jpg";
   static const String food = "assets/images/food.png";
+  static const String food_2 = "assets/images/food_2.png";
   static const String homeIcon = "assets/images/home_icon.png";
   static const String offerIcon = "assets/images/offer_icon.png";
   static const String impactIcon = "assets/images/impact_icon.png";
@@ -14,6 +15,14 @@ class AppImages {
   static const String cartIcon = "assets/images/cart_icon.png";
   static const String rateIcon = "assets/images/rate_icon.png";
   static const String dotIcon = "assets/images/dot_icon.png";
+  static const String mcLogo = "assets/images/mc_logo.png";
+  static const String tastuLogo = "assets/images/tastu_logo.png";
+  static const String kfcLogo = "assets/images/kfc_logo.png";
+  static const String subwayLogo = "assets/images/subway_logo.png";
+  static const String donatePhoto = "assets/images/donate_photo.png";
+  static const String lDonation = "assets/images/l_donation.png";
+  static const String king = "assets/images/burger_king.png";
+
 
   // offer (banner - food)
   static const burgerBanner = 'assets/imgoffers/banner1.png';
