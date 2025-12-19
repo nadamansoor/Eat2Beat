@@ -1,3 +1,4 @@
+import 'package:eat2beat/models/donation_model.dart';
 import 'package:eat2beat/screens/home/tabs/donation/statistics_donate.dart';
 import 'package:eat2beat/utils/app_colors.dart';
 import 'package:eat2beat/utils/app_images.dart';
@@ -7,10 +8,14 @@ import 'package:eat2beat/widgets/leading_widget.dart';
 import 'package:flutter/material.dart';
 
 class DetailsDonation extends StatelessWidget {
-  const DetailsDonation({super.key});
+  DetailsDonation({super.key});
+
+  late DonationModel model;
 
   @override
   Widget build(BuildContext context) {
+    model = ModalRoute.of(context)?.settings.arguments as DonationModel;
+
     double screenWidth = MediaQuery.of(context).size.width;           // 375
     double screenHeight = MediaQuery.of(context).size.height;         // 812
     return SafeArea(
@@ -56,7 +61,7 @@ class DetailsDonation extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Share Your Food, Share Your\nLove" ,
+                      Text(model.title ,
                         style: AppStyles.black20Bold,),
                       SizedBox(height: screenHeight * 0.02,),
                       Row(
@@ -77,21 +82,12 @@ class DetailsDonation extends StatelessWidget {
                           fontSize: 10
                         ),),
                       SizedBox(height: screenHeight * 0.06,),
-                      Text("Lorem ipsum dolor sit amet consectetur."
-                          " Ultricies ut augue\n amet vel hac. Ut orci adipiscing"
-                          " fusce lacus lectus rhoncus.\n Lorem ipsum dolor sit amet,"
-                          " consectetur adipiscing elit,sed\n do eiusmod tempor"
-                          " incididunt ut labore et dolore magna\n aliqua."
-                          " Ut enim ad minim veniam, " ,
+                      Text( model.desc ,
                       style: AppStyles.grey13w400,),
                       SizedBox(height: screenHeight * 0.02,),
                       Text("About Charity", style: AppStyles.black16Bold,),
                       SizedBox(height: screenHeight * 0.01,),
-                      Text("Lorem ipsum dolor sit amet consectetur."
-                          " Ultricies ut augue amet vel hac. Ut orci"
-                          " adipiscing fusce lacus lectus rhoncus."
-                          " Lorem ipsum dolor sit amet, consectetur"
-                          " adipiscing elit,   " ,
+                      Text( model.aboutCharity ,
                         style: AppStyles.grey13w400,),
                       SizedBox(height: screenHeight * 0.02,),
                       Text("Activities", style: AppStyles.black16Bold,),
@@ -103,7 +99,7 @@ class DetailsDonation extends StatelessWidget {
                               containerColor: AppColors.lightGreen,
                               textColor: AppColors.green800,
                               text: 'Number of Running Projects',
-                              number: 10,
+                              number: model.noRunProject,
                             ),
                           ),
                           SizedBox(width: screenWidth * 0.05,),
@@ -112,7 +108,7 @@ class DetailsDonation extends StatelessWidget {
                               containerColor: AppColors.green300,
                               textColor: AppColors.green800,
                               text: 'Number of Projects Donated',
-                              number: 20,
+                              number: model.noProjectDonated,
                             ),
                           ),
                         ],

@@ -16,9 +16,8 @@ class LeadingWidget extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return InkWell(
-      onTap: () {
-        action ?? Navigator.pop(context);
-      },
+      onTap: action ?? () => Navigator.pop(context)
+      ,
       child: Container(
         alignment: Alignment.center,
         height: screenHeight*0.04,

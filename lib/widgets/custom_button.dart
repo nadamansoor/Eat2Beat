@@ -13,6 +13,7 @@ class CustomButton extends StatelessWidget {
   TextStyle textStyle;
   MainAxisAlignment mainAxisAlignment;
   VoidCallback onPressed;
+  double? width;
 
   CustomButton({
     super.key,
@@ -24,6 +25,7 @@ class CustomButton extends StatelessWidget {
     this.iconExist = false,
     this.iconWidget,
     this.mainAxisAlignment = MainAxisAlignment.center,
+    this.width
   });
 
   @override
@@ -36,7 +38,7 @@ class CustomButton extends StatelessWidget {
 
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
-          fixedSize: Size(screenWidth, screenHeight*0.08,),
+          fixedSize: Size(width ?? screenWidth, screenHeight*0.08,),
 
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),

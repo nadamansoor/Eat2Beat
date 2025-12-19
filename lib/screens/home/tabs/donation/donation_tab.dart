@@ -1,3 +1,4 @@
+import 'package:eat2beat/models/donation_model.dart';
 import 'package:eat2beat/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 import '../../../../utils/app_colors.dart';
@@ -8,6 +9,8 @@ import '../../../../widgets/custom_text_field.dart';
 class DonationTab extends StatelessWidget {
   DonationTab({super.key});
   TextEditingController searchController = TextEditingController();
+
+  //DonationModel model;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +63,10 @@ class DonationTab extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: (){
-                            Navigator.of(context).pushNamed(AppRoutes.detailDonationRouteName);
+                            Navigator.of(context).pushNamed(
+                                AppRoutes.detailDonationRouteName,
+                                arguments: DonationModel.donationModel[index]
+                            );
                           },
                           child: Container(
                             width: screenWidth*0.43,
@@ -112,17 +118,20 @@ class DonationTab extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Text("Share Food, Share Love",
+                                    Text(DonationModel.donationModel[index].title,
                                       style: AppStyles.black13Bold,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
-                                )
+                                ),
+                                SizedBox(height: screenHeight*0.01,),
                               ],
                             ),
                           ),
                         );
                       },
-                      itemCount: 12,
+                      itemCount: DonationModel.donationModel.length,
                     ),
                     SizedBox(height: screenHeight*0.1,)
                   ],

@@ -76,11 +76,8 @@ class _ImpactTabState extends State<ImpactTab> {
                       style: AppStyles.black16w500,
                     ),
                     SizedBox(height: screenHeight * 0.02),
+
                     Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.12,
-                          vertical: screenHeight * 0.005
-                      ),
                       width: double.infinity,
                       height: screenHeight * 0.06,
                       decoration: BoxDecoration(
@@ -88,24 +85,40 @@ class _ImpactTabState extends State<ImpactTab> {
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          buildStatContainer(index: 0, duration: "Week"),
+                          Expanded(
+                              child: SizedBox(
+                                  child: Center(
+                                      child: buildStatContainer(
+                                          index: 0,
+                                          duration: "Week")))),
                           Container(
                             height: screenHeight * 0.025,
                             width: 2,
                             color: AppColors.purple50,
                           ),
-                          buildStatContainer(index: 1, duration: "Month"),
+                          Expanded(
+                              child: SizedBox(
+                                  child: Center(
+                                      child: buildStatContainer(
+                                          index: 1,
+                                          duration: "Month")
+                                  ))),
                           Container(
                             height: screenHeight * 0.025,
                             width: 2,
                             color: AppColors.purple50,
                           ),
-                          buildStatContainer(index: 2, duration: "Year"),
+                          Expanded(
+                              child: SizedBox(
+                                  child: Center(
+                                      child: buildStatContainer(
+                                          index: 2,
+                                          duration: "Year")))),
                         ],
                       ),
                     ),
+
                     SizedBox(height: screenHeight * 0.02),
                     Row(
                       children: [
@@ -114,7 +127,7 @@ class _ImpactTabState extends State<ImpactTab> {
                             containerColor: AppColors.lightGreen,
                             textColor: AppColors.green800,
                             text: 'Meals Saved',
-                            number: 120,
+                            number: 12,
                           ),
                         ),
                         SizedBox(width: screenWidth * 0.05,),
@@ -211,7 +224,10 @@ class _ImpactTabState extends State<ImpactTab> {
     );
   }
 
-  Widget buildStatContainer({required int index,required String duration}){
+  Widget buildStatContainer({
+    required int index,
+    required String duration,
+  }){
     return InkWell(
       onTap: (){
         selectedIndex = index ;
@@ -220,14 +236,18 @@ class _ImpactTabState extends State<ImpactTab> {
         });
       },
       child: selectedIndex == index ? Container(
+        margin: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.01,
+            vertical: screenHeight * 0.003
+        ),
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(24),
         ),
         alignment: Alignment.center,
         padding: EdgeInsets.symmetric(
-          horizontal: screenWidth * 0.1,
-          vertical: screenHeight * 0.008,
+          // horizontal: screenWidth * 0.1,
+          // vertical: screenHeight * 0.008,
         ),
         child: Text(duration, style: AppStyles.black13w400),
       )

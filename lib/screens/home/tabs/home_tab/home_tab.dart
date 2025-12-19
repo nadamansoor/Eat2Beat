@@ -1,5 +1,4 @@
 import 'package:eat2beat/models/home_model.dart';
-import 'package:eat2beat/models/offers_model.dart';
 import 'package:eat2beat/utils/app_colors.dart';
 import 'package:eat2beat/utils/app_images.dart';
 import 'package:eat2beat/utils/app_routes.dart';
