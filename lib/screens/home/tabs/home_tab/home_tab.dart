@@ -7,7 +7,7 @@ import 'package:eat2beat/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 
 class HomeTab extends StatefulWidget {
-  HomeTab({super.key});
+  const HomeTab({super.key});
 
   @override
   State<HomeTab> createState() => _HomeTabState();
@@ -15,7 +15,11 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   TextEditingController searchController = TextEditingController();
+
   int selectedIndex = 0;
+  bool isSearching = false;
+
+  late List<HomeFoodModel> searchResults;
 
   List<String> categories = [
     "New",
@@ -35,9 +39,26 @@ class _HomeTabState extends State<HomeTab> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    searchResults = [];
+  }
+
+  void onSearch(String value) {
+    setState(() {
+      isSearching = value.isNotEmpty;
+      searchResults = HomeFoodModel.mealDetails
+          .where((item) =>
+              item.description.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;           // 375
-    double screenHeight = MediaQuery.of(context).size.height;         // 812
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: AppColors.light,
@@ -48,12 +69,12 @@ class _HomeTabState extends State<HomeTab> {
             CircleAvatar(
               backgroundImage: AssetImage(AppImages.myPhoto),
             ),
-            SizedBox(width: screenWidth*0.04,),
+            SizedBox(width: screenWidth * 0.04),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Hello" , style: AppStyles.black13w400,),
-                Text("Ahmed Salah" , style: AppStyles.black16Bold,),
+                Text("Hello", style: AppStyles.black13w400),
+                Text("Ahmed Salah", style: AppStyles.black16Bold),
               ],
             )
           ],
@@ -61,7 +82,8 @@ class _HomeTabState extends State<HomeTab> {
         actions: [
           Padding(
             padding: EdgeInsets.only(right: screenWidth * 0.02),
-            child: Icon(Icons.notifications , color: AppColors.black, size: 25,),
+            child: const Icon(Icons.notifications,
+                color: AppColors.black, size: 25),
           )
         ],
       ),
@@ -70,152 +92,241 @@ class _HomeTabState extends State<HomeTab> {
           Image.asset(AppImages.pattern),
           Padding(
             padding: EdgeInsets.symmetric(
-                horizontal: screenWidth*0.04,
-                vertical: screenHeight*0.02
+              horizontal: screenWidth * 0.04,
+              vertical: screenHeight * 0.02,
             ),
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(height: screenHeight*0.12,),
+                  SizedBox(height: screenHeight * 0.12),
+
+                  /// 🔍 SEARCH FIELD
                   CustomTextFormField(
                     hintText: "Search",
                     controller: searchController,
-                    prefixIcon: Icon(Icons.search , color: AppColors.black,),
+                    onChanged: onSearch,
+                    prefixIcon: const Icon(Icons.search,
+                        color: AppColors.black),
+                    suffixIcon: isSearching
+                        ? IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              searchController.clear();
+                              onSearch('');
+                            },
+                          )
+                        : null,
                     focusedBorderColor: AppColors.purple,
                   ),
-                  SizedBox(height: screenHeight*0.02,),
-                  SizedBox(
-                    height: screenHeight*0.05,
-                    child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: (){
-                              selectedIndex = index;
-                              setState(() {
 
-                              });
-                              print("$selectedIndex");
-                            },
-                            child: Container(
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth*0.04,
-                              ),
-                              decoration: BoxDecoration(
-                                color: selectedIndex == index ? AppColors.purple
-                                    : AppColors.lightPurple,
-                                borderRadius: BorderRadius.circular(40),
+                  SizedBox(height: screenHeight * 0.02),
 
-                              ),
-                              child: Text(categories[index],
-                                  style: selectedIndex == index ? AppStyles.black16w500.copyWith(
-                                    color: AppColors.light,
-                                  ): AppStyles.black16w500),
-                            ),
-                          );
-                        },
-                        separatorBuilder: (context, index) =>
-                            SizedBox(width: screenWidth * 0.02,),
-                        itemCount: categories.length
-                    ),
-                  ),
-                  SizedBox(height: screenHeight*0.02,),
-                  GridView.builder(
-                    scrollDirection: Axis.vertical,
-                    padding: EdgeInsets.zero,
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      //childAspectRatio: 0.5,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 12,
-                      mainAxisExtent: screenHeight*0.28,
-                    ),
-                    itemBuilder: (context, index) {
-                      return InkWell(
-                        onTap: (){
-                          Navigator.of(context).pushNamed(
-                              AppRoutes.detailsRouteName ,
-                              arguments: HomeFoodModel.mealDetails[index]
-                          );
-                        },
-                        child: Container(
-                          width: screenWidth*0.43,
-                          //height: screenHeight*0.26,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth*0.02,
-                            vertical: screenHeight*0.01,
-                          ),
+                  /// 🔽 SEARCH RESULTS (ListView)
+                  if (isSearching)
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: searchResults.length,
+                      separatorBuilder: (_, __) =>
+                          SizedBox(height: screenHeight * 0.015),
+                      itemBuilder: (context, index) {
+                        final item = searchResults[index];
+                        return Container(
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: AppColors.white,
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          child: Row(
                             children: [
-                              Stack(
-                                alignment: Alignment.topLeft,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(HomeFoodModel.mealDetails[index].image ,
-                                      width: double.infinity,
-                                      fit: BoxFit.fill,),
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        color: AppColors.white,
-                                        borderRadius: BorderRadius.circular(5)
-                                    ),
-                                    //padding: EdgeInsets.all(2),
-                                    margin: EdgeInsets.all(8),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        ImageIcon(
-                                          AssetImage(AppImages.rateIcon),
-                                          color: AppColors.yellow,),
-                                        Padding(
-                                          padding: EdgeInsets.only(right: 6.0),
-                                          child: Text("${HomeFoodModel.mealDetails[index].rate}",style: AppStyles.grey13w400),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  item.image,
+                                  width: 90,
+                                  height: 90,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                              SizedBox(height: screenHeight*0.01,),
-                              Text(HomeFoodModel.mealDetails[index].description ,
-                                style: AppStyles.black13Bold,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                              SizedBox(width: screenWidth * 0.03),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.description,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppStyles.black16Bold,
+                                    ),
+                                    SizedBox(height: screenHeight * 0.01),
+                                    Text("\$ ${item.price}",
+                                        style: AppStyles.grey13w400),
+                                  ],
+                                ),
                               ),
-                              Spacer(),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Text("\$ ${HomeFoodModel.mealDetails[index].price}", style: AppStyles.grey13w400,),
-                                  ImageIcon(AssetImage(AppImages.dotIcon)),
-                                  Icon(Icons.watch_later_outlined ,
-                                    color: AppColors.grey,
-                                    size: 20,
-                                  ),
-                                  Text(HomeFoodModel.mealDetails[index].time, style: AppStyles.grey13w400,),
-                                ],
+                              Container(
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.lightPurple,
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.add,
+                                      color: AppColors.purple),
+                                  onPressed: () {},
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      );
-                    },
-                    itemCount: HomeFoodModel.mealDetails.length,
+                        );
+                      },
+                    ),
 
-                  ),
-                  SizedBox(height: screenHeight*0.08,),
+                  /// 🏷 CATEGORIES + GRID (تختفي أثناء السيرش)
+                  if (!isSearching) ...[
+                    SizedBox(
+                      height: screenHeight * 0.05,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: categories.length,
+                        separatorBuilder: (_, __) =>
+                            SizedBox(width: screenWidth * 0.02),
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                selectedIndex = index;
+                              });
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.04),
+                              decoration: BoxDecoration(
+                                color: selectedIndex == index
+                                    ? AppColors.purple
+                                    : AppColors.lightPurple,
+                                borderRadius: BorderRadius.circular(40),
+                              ),
+                              child: Text(
+                                categories[index],
+                                style: selectedIndex == index
+                                    ? AppStyles.black16w500
+                                        .copyWith(color: AppColors.light)
+                                    : AppStyles.black16w500,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    SizedBox(height: screenHeight * 0.02),
+
+                    /// 🍔 FOOD GRID
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: HomeFoodModel.mealDetails.length,
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 12,
+                        mainAxisExtent: screenHeight * 0.28,
+                      ),
+                      itemBuilder: (context, index) {
+                        final item =
+                            HomeFoodModel.mealDetails[index];
+                        return InkWell(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                              AppRoutes.detailsRouteName,
+                              arguments: item,
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.02,
+                              vertical: screenHeight * 0.01,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              children: [
+                                Stack(
+                                  alignment: Alignment.topLeft,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius:
+                                          BorderRadius.circular(8),
+                                      child: Image.asset(
+                                        item.image,
+                                        width: double.infinity,
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                    Container(
+                                      margin: const EdgeInsets.all(8),
+                                      padding:
+                                          const EdgeInsets.symmetric(horizontal: 6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.white,
+                                        borderRadius:
+                                            BorderRadius.circular(5),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ImageIcon(
+                                            AssetImage(AppImages.rateIcon),
+                                            color: AppColors.yellow,
+                                          ),
+                                          Text("${item.rate}",
+                                              style:
+                                                  AppStyles.grey13w400),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(height: screenHeight * 0.01),
+                                Text(
+                                  item.description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppStyles.black13Bold,
+                                ),
+                                const Spacer(),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text("\$ ${item.price}",
+                                        style:
+                                            AppStyles.grey13w400),
+                                    ImageIcon(
+                                        AssetImage(AppImages.dotIcon)),
+                                    const Icon(
+                                        Icons.watch_later_outlined,
+                                        size: 18),
+                                    Text(item.time,
+                                        style:
+                                            AppStyles.grey13w400),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+
+                  SizedBox(height: screenHeight * 0.08),
                 ],
               ),
             ),

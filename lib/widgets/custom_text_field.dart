@@ -16,6 +16,7 @@ class CustomTextFormField extends StatelessWidget {
   TextInputType keyBoardType;
   int? maxLines;
   double? radius;
+  final Function(String)? onChanged;
 
   CustomTextFormField({
     super.key,
@@ -30,7 +31,9 @@ class CustomTextFormField extends StatelessWidget {
     this.keyBoardType = TextInputType.text,
     this.maxLines,
     this.focusedBorderColor,
-    this.radius
+    this.radius,
+    this.onChanged,
+
   });
 
   @override
@@ -53,6 +56,7 @@ class CustomTextFormField extends StatelessWidget {
       style: hintStyle,
       cursorColor: borderSideColor,
       controller: controller,
+      onChanged: onChanged,
       validator: validator,
       obscureText: obscureText,
       keyboardType: keyBoardType,
