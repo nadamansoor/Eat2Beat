@@ -1,3 +1,4 @@
+import 'package:eat2beat/models/total_stat_model.dart';
 import 'package:eat2beat/screens/home/tabs/impact/rest_container.dart';
 import 'package:eat2beat/screens/home/tabs/impact/statistics_container.dart';
 import 'package:eat2beat/utils/app_colors.dart';
@@ -41,10 +42,14 @@ class _ImpactTabState extends State<ImpactTab> {
 
   late double screenHeight;
 
+  late TotalStatsModel statsModel ;
+
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width; // 375
     screenHeight = MediaQuery.of(context).size.height; // 812
+
+    var statsModel = TotalStatsModel.totalStats[selectedIndex];
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.light,
@@ -124,29 +129,32 @@ class _ImpactTabState extends State<ImpactTab> {
                       children: [
                         Expanded(
                           child: StatisticsContainer(
+                            index: selectedIndex,
                             containerColor: AppColors.lightGreen,
                             textColor: AppColors.green800,
                             text: 'Meals Saved',
-                            number: 12,
+                            number: statsModel.mealSaved,
                           ),
                         ),
                         SizedBox(width: screenWidth * 0.05,),
                         Expanded(
                           child: StatisticsContainer(
+                            index: selectedIndex,
                             containerColor: AppColors.purple50,
                             textColor: AppColors.purple800,
                             text: 'Donations Made',
-                            number: 67,
+                            number: statsModel.donationMade,
                           ),
                         ),
                       ],
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     StatisticsContainer(
+                      index: selectedIndex,
                       containerColor: AppColors.possibleYellow,
                       textColor: AppColors.grey800,
                       text: 'Your Orders',
-                      number: 05,
+                      number: statsModel.yourOrder,
                       width: screenWidth * 0.43,
                     ),
                     SizedBox(height: screenHeight * 0.02),
@@ -230,9 +238,8 @@ class _ImpactTabState extends State<ImpactTab> {
   }){
     return InkWell(
       onTap: (){
-        selectedIndex = index ;
         setState(() {
-
+          selectedIndex = index ;
         });
       },
       child: selectedIndex == index ? Container(
@@ -245,10 +252,6 @@ class _ImpactTabState extends State<ImpactTab> {
           borderRadius: BorderRadius.circular(24),
         ),
         alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(
-          // horizontal: screenWidth * 0.1,
-          // vertical: screenHeight * 0.008,
-        ),
         child: Text(duration, style: AppStyles.black13w400),
       )
           : Text(duration, style: AppStyles.black13w400),

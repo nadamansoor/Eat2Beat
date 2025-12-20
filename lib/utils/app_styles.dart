@@ -9,6 +9,12 @@ class AppStyles {
       fontWeight: FontWeight.w400
   );
 
+  static const TextStyle purple8Bold = TextStyle(
+      color: AppColors.purple,
+      fontSize: 8,
+      fontWeight: FontWeight.bold
+  );
+
   static const TextStyle grey16Bold = TextStyle(
       color: AppColors.grey,
       fontSize: 16,

@@ -1,6 +1,8 @@
 class DonationModel {
   String title;
   String desc;
+  String start;
+  double collectedDonations;
   String aboutCharity;
   int noRunProject;
   int noProjectDonated;
@@ -11,11 +13,15 @@ class DonationModel {
     required this.aboutCharity,
     required this.noRunProject,
     required this.noProjectDonated,
+    required this.collectedDonations,
+    required this.start,
   });
 
   static final List<DonationModel> donationModel = [
     DonationModel(
       title: "Share Food, Share Love",
+      collectedDonations: 120,
+      start: "20",
       desc:
       "Help families in need by donating surplus food.\n"
           "Your contribution supports daily meals for those\n"
@@ -29,6 +35,8 @@ class DonationModel {
 
     DonationModel(
       title: "Feed a Family Today",
+      collectedDonations: 150,
+      start: "10",
       desc:
       "Your donation helps provide nutritious meals\n"
           "to families struggling to meet daily needs.\n"
@@ -42,6 +50,8 @@ class DonationModel {
 
     DonationModel(
       title: "One Meal, One Smile",
+      collectedDonations: 160,
+      start: "40",
       desc:
       "A single meal can restore dignity and hope.\n"
           "Join us in delivering food to vulnerable\n"
@@ -55,6 +65,8 @@ class DonationModel {
 
     DonationModel(
       title: "Nourish Lives with Care",
+      collectedDonations: 200,
+      start: "13",
       desc:
       "Support programs that deliver healthy meals\n"
           "to children and elderly people in need.\n"
@@ -68,6 +80,8 @@ class DonationModel {
 
     DonationModel(
       title: "Food for Every Home",
+      collectedDonations: 90,
+      start: "30",
       desc:
       "Help ensure that no home sleeps hungry.\n"
           "Your donation strengthens food access\n"
@@ -81,6 +95,8 @@ class DonationModel {
 
     DonationModel(
       title: "Together Against Hunger",
+      collectedDonations: 145,
+      start: "16",
       desc:
       "Stand with us to fight hunger through\n"
           "organized food drives and meal programs.\n"
@@ -94,6 +110,8 @@ class DonationModel {
 
     DonationModel(
       title: "Hope Starts with a Meal",
+      collectedDonations: 178,
+      start: "15",
       desc:
       "Provide essential meals to individuals\n"
           "facing difficult circumstances.\n"
@@ -107,6 +125,8 @@ class DonationModel {
 
     DonationModel(
       title: "Feed Hearts, Feed Souls",
+      collectedDonations: 75,
+      start: "28",
       desc:
       "Support community kitchens serving\n"
           "fresh meals prepared with care.\n"
@@ -120,6 +140,8 @@ class DonationModel {
 
     DonationModel(
       title: "Give Food, Give Hope",
+      collectedDonations: 136,
+      start: "19",
       desc:
       "Your food donation helps restore hope\n"
           "and dignity to families in need.\n"
@@ -133,6 +155,8 @@ class DonationModel {
 
     DonationModel(
       title: "Care Through Sharing",
+      collectedDonations: 200,
+      start: "8",
       desc:
       "Sharing food is a powerful act of care.\n"
           "Join us in supporting sustainable food\n"
@@ -146,6 +170,8 @@ class DonationModel {
 
     DonationModel(
       title: "Food Brings Us Together",
+      collectedDonations: 300,
+      start: "3",
       desc:
       "Help create stronger communities by\n"
           "supporting shared meal initiatives.\n"
@@ -159,6 +185,8 @@ class DonationModel {
 
     DonationModel(
       title: "A Meal Can Change a Life",
+      collectedDonations: 50,
+      start: "22",
       desc:
       "Your donation provides more than food.\n"
           "It offers hope, care, and a better\n"

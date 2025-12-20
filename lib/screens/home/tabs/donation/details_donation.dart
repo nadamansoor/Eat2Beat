@@ -79,11 +79,28 @@ class DetailsDonation extends StatelessWidget {
                       ),
                       Text("Verified Account" ,
                         style: AppStyles.grey8w400.copyWith(
-                          fontSize: 10
+                            fontSize: 10
                         ),),
-                      SizedBox(height: screenHeight * 0.06,),
+                      SizedBox(height: screenHeight*0.02,),
+                      LinearProgressIndicator(
+                        backgroundColor: AppColors.lightPurple,
+                        value: (model.collectedDonations) / 300,
+                        color: Color(0xffb099fc),
+                        borderRadius: BorderRadius.circular(4),
+                        minHeight: 6,
+                      ),
+                      SizedBox(height: screenHeight*0.005,),
+                      Row(
+                        children: [
+                          const Text("Collected  ", style: AppStyles.grey8w400,),
+                          Text("\$ ${model.collectedDonations}", style: AppStyles.purple8Bold),
+                          const Spacer(),
+                          Text("${model.start} days to go  ", style: AppStyles.grey8w400,),
+                        ],
+                      ),
+                      SizedBox(height: screenHeight * 0.02,),
                       Text( model.desc ,
-                      style: AppStyles.grey13w400,),
+                        style: AppStyles.grey13w400,),
                       SizedBox(height: screenHeight * 0.02,),
                       Text("About Charity", style: AppStyles.black16Bold,),
                       SizedBox(height: screenHeight * 0.01,),

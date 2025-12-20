@@ -124,6 +124,7 @@ class _HomeTabState extends State<HomeTab> {
                   /// 🔽 SEARCH RESULTS (ListView)
                   if (isSearching)
                     ListView.separated(
+                      padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: searchResults.length,
@@ -226,6 +227,7 @@ class _HomeTabState extends State<HomeTab> {
 
                     /// 🍔 FOOD GRID
                     GridView.builder(
+                      padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: HomeFoodModel.mealDetails.length,

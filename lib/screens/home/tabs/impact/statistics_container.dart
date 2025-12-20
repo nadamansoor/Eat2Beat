@@ -7,12 +7,15 @@ class StatisticsContainer extends StatelessWidget {
   int number;
   String text;
   double? width;
+  int index;
+
   StatisticsContainer({
     super.key,
     required this.containerColor,
     required this.textColor,
     required this.text,
     required this.number,
+    required this.index,
     this.width
   });
 

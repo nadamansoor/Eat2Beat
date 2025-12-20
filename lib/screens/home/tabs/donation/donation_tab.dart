@@ -10,6 +10,7 @@ class DonationTab extends StatelessWidget {
   DonationTab({super.key});
   TextEditingController searchController = TextEditingController();
 
+
   //DonationModel model;
 
   @override
@@ -58,14 +59,15 @@ class DonationTab extends StatelessWidget {
                         //childAspectRatio: 0.5,
                         crossAxisSpacing: 8,
                         mainAxisSpacing: 12,
-                        mainAxisExtent: screenHeight*0.28,
+                        mainAxisExtent: screenHeight*0.3,
                       ),
                       itemBuilder: (context, index) {
+                        final model = DonationModel.donationModel[index];
                         return InkWell(
                           onTap: (){
                             Navigator.of(context).pushNamed(
                                 AppRoutes.detailDonationRouteName,
-                                arguments: DonationModel.donationModel[index]
+                                arguments: model
                             );
                           },
                           child: Container(
@@ -118,14 +120,30 @@ class DonationTab extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    Text(DonationModel.donationModel[index].title,
+                                    Text(model.title,
                                       style: AppStyles.black13Bold,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: screenHeight*0.01,),
+                                SizedBox(height: screenHeight*0.02,),
+                                LinearProgressIndicator(
+                                  backgroundColor: AppColors.lightPurple,
+                                  value: (model.collectedDonations) / 300,
+                                  color: Color(0xffb099fc),
+                                  borderRadius: BorderRadius.circular(4),
+                                  minHeight: 6,
+                                ),
+                                SizedBox(height: screenHeight*0.005,),
+                                Row(
+                                  children: [
+                                    const Text("Collected  ", style: AppStyles.grey8w400,),
+                                    Text("\$ ${model.collectedDonations}", style: AppStyles.purple8Bold),
+                                    const Spacer(),
+                                    Text("${model.start} days to go  ", style: AppStyles.grey8w400,),
+                                  ],
+                                )
                               ],
                             ),
                           ),
