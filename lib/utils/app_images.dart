@@ -22,7 +22,9 @@ class AppImages {
   static const String donatePhoto = "assets/images/donate_photo.png";
   static const String lDonation = "assets/images/l_donation.png";
   static const String king = "assets/images/burger_king.png";
-
+  static const String carrtIcon = "assets/images/carrtIcon.png";
+  static const String PatternCart = "assets/images/PatternCart.png";
+  static const String confirm = "assets/images/confirm.png";
 
   // offer (banner - food)
   static const burgerBanner = 'assets/imgoffers/banner1.png';
@@ -43,4 +45,5 @@ class AppImages {
   static const food12 = 'assets/imgoffers/food4.png';
 
   static const restauranteIcon = 'assets/imgoffers/restauranteIcon.png';
+
 }

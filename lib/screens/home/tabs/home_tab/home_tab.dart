@@ -100,7 +100,6 @@ class _HomeTabState extends State<HomeTab> {
                 children: [
                   SizedBox(height: screenHeight * 0.12),
 
-                  /// 🔍 SEARCH FIELD
                   CustomTextFormField(
                     hintText: "Search",
                     controller: searchController,
@@ -121,7 +120,6 @@ class _HomeTabState extends State<HomeTab> {
 
                   SizedBox(height: screenHeight * 0.02),
 
-                  /// 🔽 SEARCH RESULTS (ListView)
                   if (isSearching)
                     ListView.separated(
                       shrinkWrap: true,
@@ -183,7 +181,7 @@ class _HomeTabState extends State<HomeTab> {
                       },
                     ),
 
-                  /// 🏷 CATEGORIES + GRID (تختفي أثناء السيرش)
+               
                   if (!isSearching) ...[
                     SizedBox(
                       height: screenHeight * 0.05,
@@ -224,7 +222,7 @@ class _HomeTabState extends State<HomeTab> {
 
                     SizedBox(height: screenHeight * 0.02),
 
-                    /// 🍔 FOOD GRID
+                   
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),

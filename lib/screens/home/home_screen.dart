@@ -18,18 +18,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
-  List<Widget> tabs = [
+
+  final List<Widget> tabs = [
     HomeTab(),
     OffersTab(),
     ImpactTab(),
     DonationTab(),
-    CartTab(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    //var screenWidth = MediaQuery.of(context).size.width;             // 375
-    var screenHeight = MediaQuery.of(context).size.height;           // 812
+    var screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: BottomBar(
         width: double.infinity,
@@ -40,58 +40,51 @@ class _HomeScreenState extends State<HomeScreen> {
         fit: StackFit.expand,
         barDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50),
-          gradient: LinearGradient(
-              colors: [
-                Color(0x00e8ecf4),
-                Color(0xffE8ECF4),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight
+          gradient: const LinearGradient(
+            colors: [
+              Color(0x00e8ecf4),
+              Color(0xffE8ECF4),
+            ],
           ),
         ),
 
+   
         body: (context, controller) {
           return tabs[selectedIndex];
         },
+
+     
         child: ClipRRect(
           borderRadius: BorderRadius.circular(50),
           child: BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: 30,
-              sigmaY: 30,
-            ),
+            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                  vertical: screenHeight * 0.03
-              ),
-              child: DefaultTabController(
-                length: 5,
-                child: TabBar(
-                  indicator: BoxDecoration(),
-                  dividerColor: Colors.transparent,
-                  tabs: [
-                    buildNavBarItem(
-                      icon: AppImages.homeIcon,
-                      index: 0,
+              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.03),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+
+                  buildNavBarItem(AppImages.homeIcon, 0),
+                  buildNavBarItem(AppImages.offerIcon, 1),
+                  buildNavBarItem(AppImages.impactIcon, 2),
+                  buildNavBarItem(AppImages.donateIcon, 3),
+
+              //cart indep
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>  CartScreen(),
+                        ),
+                      );
+                    },
+                    child: ImageIcon(
+                      AssetImage(AppImages.cartIcon),
+                      color: AppColors.white,
                     ),
-                    buildNavBarItem(
-                      icon: AppImages.offerIcon,
-                      index: 1,
-                    ),
-                    buildNavBarItem(
-                      icon: AppImages.impactIcon,
-                      index: 2,
-                    ),
-                    buildNavBarItem(
-                      icon: AppImages.donateIcon,
-                      index: 3,
-                    ),
-                    buildNavBarItem(
-                      icon: AppImages.cartIcon,
-                      index: 4,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -100,15 +93,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  InkWell buildNavBarItem({required String icon, required int index}) {
+  Widget buildNavBarItem(String icon, int index) {
     return InkWell(
       onTap: () {
-        selectedIndex = index;
-        setState(() {});
+        setState(() {
+          selectedIndex = index;
+        });
       },
-      child: ImageIcon(AssetImage(icon),
-        color: selectedIndex == index ? AppColors.purple
-            : AppColors.white,),
+      child: ImageIcon(
+        AssetImage(icon),
+        color: selectedIndex == index
+            ? AppColors.purple
+            : AppColors.white,
+      ),
     );
   }
 }

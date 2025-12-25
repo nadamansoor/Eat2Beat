@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         AppRoutes.offersRouteName: (_) => OffersTab(),
         AppRoutes.impactRouteName: (_) => ImpactTab(),
         AppRoutes.donationRouteName: (_) => DonationTab(),
-        AppRoutes.cartRouteName: (_) => CartTab(),
+        AppRoutes.cartRouteName: (_) => CartScreen(),
         AppRoutes.detailDonationRouteName: (_) => DetailsDonation(),
         AppRoutes.chooseDonateRouteName: (_) => ChooseDonate(),
         AppRoutes.detailsRouteName: (_) => DetailsScreen(),
