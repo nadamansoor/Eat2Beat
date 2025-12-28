@@ -1,4 +1,3 @@
-// CheckoutScreen.dart
 import 'package:eat2beat/screens/home/tabs/cart/order_confirmation_screen.dart';
 import 'package:eat2beat/utils/app_colors.dart';
 import 'package:eat2beat/utils/app_images.dart';

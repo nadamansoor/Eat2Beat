@@ -66,9 +66,17 @@ class _HomeTabState extends State<HomeTab> {
         backgroundColor: Colors.transparent,
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundImage: AssetImage(AppImages.myPhoto),
-            ),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).pushNamed(
+                    AppRoutes.profileRouteName, // اسكرينة البروفايل
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundImage: AssetImage(AppImages.myPhoto),
+                ),
+              ),            
             SizedBox(width: screenWidth * 0.04),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

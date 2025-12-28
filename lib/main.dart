@@ -11,6 +11,7 @@ import 'package:eat2beat/screens/home/tabs/home_tab/details_screen.dart';
 import 'package:eat2beat/screens/home/tabs/home_tab/home_tab.dart';
 import 'package:eat2beat/screens/home/tabs/impact/impact_tab.dart';
 import 'package:eat2beat/screens/home/tabs/offers/offers_tab.dart';
+import 'package:eat2beat/screens/home/tabs/profile/profile_screen.dart';
 import 'package:eat2beat/screens/login/login_screen.dart';
 import 'package:eat2beat/screens/register/register_screen.dart';
 import 'package:eat2beat/utils/app_routes.dart';
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
         AppRoutes.detailDonationRouteName: (_) => DetailsDonation(),
         AppRoutes.chooseDonateRouteName: (_) => ChooseDonate(),
         AppRoutes.detailsRouteName: (_) => DetailsScreen(),
+        AppRoutes.profileRouteName: (context) => const ProfileScreen(),
       },
     );
   }
