@@ -243,7 +243,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 
  
-Widget _buildCouponSection() {
+  Widget _buildCouponSection() {
   return Container(
     width: double.infinity,
     padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
@@ -402,4 +402,8 @@ Widget _buildProceedButton() {
     ),
   );
 }
+
+
+
+
 }
