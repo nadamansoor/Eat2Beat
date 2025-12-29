@@ -26,6 +26,7 @@ class AppImages {
   static const String PatternCart = "assets/images/PatternCart.png";
   static const String confirm = "assets/images/confirm.png";
   static const String myPhotoNada = "assets/images/myn.png";
+  static const String moneyImg = "assets/images/moneyImg.png";
 
   // offer (banner - food)
   static const burgerBanner = 'assets/imgoffers/banner1.png';

@@ -1,5 +1,6 @@
 import 'package:eat2beat/screens/home/tabs/profile/Account_Screen.dart';
 import 'package:eat2beat/screens/home/tabs/profile/addresses_screen.dart';
+import 'package:eat2beat/screens/home/tabs/profile/points_screen.dart';
 import 'package:eat2beat/screens/home/tabs/profile/settings_screen.dart';
 import 'package:eat2beat/screens/home/tabs/profile/widgets/menu_Item.dart';
 import 'package:eat2beat/screens/home/tabs/profile/widgets/profile_header.dart';
@@ -85,6 +86,14 @@ class ProfileScreen extends StatelessWidget {
                         buildMenuItem(
                           icon: Icons.star_border,
                           title: "My Points",
+                          onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>  PointsScreen(),
+                                ),
+                              );
+                            },
                         ),
                         buildMenuItem(
                           icon: Icons.settings_outlined,
