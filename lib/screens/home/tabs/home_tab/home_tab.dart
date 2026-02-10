@@ -66,9 +66,17 @@ class _HomeTabState extends State<HomeTab> {
         backgroundColor: Colors.transparent,
         title: Row(
           children: [
-            CircleAvatar(
-              backgroundImage: AssetImage(AppImages.myPhoto),
-            ),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).pushNamed(
+                    AppRoutes.profileRouteName, // اسكرينة البروفايل
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundImage: AssetImage(AppImages.myPhoto),
+                ),
+              ),            
             SizedBox(width: screenWidth * 0.04),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +108,6 @@ class _HomeTabState extends State<HomeTab> {
                 children: [
                   SizedBox(height: screenHeight * 0.12),
 
-                  /// 🔍 SEARCH FIELD
                   CustomTextFormField(
                     hintText: "Search",
                     controller: searchController,
@@ -121,7 +128,6 @@ class _HomeTabState extends State<HomeTab> {
 
                   SizedBox(height: screenHeight * 0.02),
 
-                  /// 🔽 SEARCH RESULTS (ListView)
                   if (isSearching)
                     ListView.separated(
                       padding: EdgeInsets.zero,
@@ -184,7 +190,7 @@ class _HomeTabState extends State<HomeTab> {
                       },
                     ),
 
-                  /// 🏷 CATEGORIES + GRID (تختفي أثناء السيرش)
+               
                   if (!isSearching) ...[
                     SizedBox(
                       height: screenHeight * 0.05,
@@ -225,7 +231,7 @@ class _HomeTabState extends State<HomeTab> {
 
                     SizedBox(height: screenHeight * 0.02),
 
-                    /// 🍔 FOOD GRID
+                   
                     GridView.builder(
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
