@@ -1,21 +1,27 @@
-import 'package:eat2beat/screens/forget/change_password_screen.dart';
-import 'package:eat2beat/screens/forget/forget_pass_screen.dart';
-import 'package:eat2beat/screens/forget/new_password_screen.dart';
-import 'package:eat2beat/screens/forget/otp_screen.dart';
-import 'package:eat2beat/screens/home/home_screen.dart';
-import 'package:eat2beat/screens/home/tabs/cart/cart_tab.dart';
-import 'package:eat2beat/screens/home/tabs/donation/choose_donate.dart';
-import 'package:eat2beat/screens/home/tabs/donation/details_donation.dart';
-import 'package:eat2beat/screens/home/tabs/donation/donation_tab.dart';
-import 'package:eat2beat/screens/home/tabs/home_tab/details_screen.dart';
-import 'package:eat2beat/screens/home/tabs/home_tab/home_tab.dart';
-import 'package:eat2beat/screens/home/tabs/impact/impact_tab.dart';
-import 'package:eat2beat/screens/home/tabs/offers/offers_tab.dart';
-import 'package:eat2beat/screens/home/tabs/profile/profile_screen.dart';
-import 'package:eat2beat/screens/login/login_screen.dart';
-import 'package:eat2beat/screens/register/register_screen.dart';
-import 'package:eat2beat/utils/app_routes.dart';
+import 'package:eat2beat/core/utils/app_colors.dart';
+import 'package:eat2beat/features/auth/presentation/forget/change_password_screen.dart';
+import 'package:eat2beat/features/auth/presentation/forget/forget_pass_screen.dart';
+import 'package:eat2beat/features/auth/presentation/forget/new_password_screen.dart';
+import 'package:eat2beat/features/auth/presentation/forget/otp_screen.dart';
+import 'package:eat2beat/features/on_boarding/presentation/views/on_boarding_view.dart';
+
+import 'package:eat2beat/features/screens/home/home_screen.dart';
+import 'package:eat2beat/features/screens/home/tabs/cart/cart_tab.dart';
+import 'package:eat2beat/features/screens/home/tabs/donation/choose_donate.dart';
+import 'package:eat2beat/features/screens/home/tabs/donation/details_donation.dart';
+import 'package:eat2beat/features/screens/home/tabs/donation/donation_tab.dart';
+import 'package:eat2beat/features/screens/home/tabs/home_tab/details_screen.dart';
+import 'package:eat2beat/features/screens/home/tabs/home_tab/home_tab.dart';
+import 'package:eat2beat/features/screens/home/tabs/impact/impact_tab.dart';
+import 'package:eat2beat/features/screens/home/tabs/offers/offers_tab.dart';
+import 'package:eat2beat/features/screens/home/tabs/profile/profile_screen.dart';
+import 'package:eat2beat/features/auth/presentation/login/login_screen.dart';
+import 'package:eat2beat/features/auth/presentation/register/register_screen.dart';
+import 'package:eat2beat/core/utils/app_routes.dart';
+import 'package:eat2beat/features/splash/presenation/views/spalsh_view.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,9 +34,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        fontFamily: 'Cairo',
+        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.purple),
+      ),
+      localizationsDelegates: [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: S.delegate.supportedLocales,
+            locale: const Locale('en'),
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.homeScreenRouteName,
+      initialRoute: AppRoutes.SplashRouteName,
       routes: {
+        AppRoutes.SplashRouteName: (_) => SplashView(),
+        AppRoutes.OnboardingRouteName: (_) => OnBoardingView(),
         AppRoutes.loginRouteName: (_) => LoginScreen(),
         AppRoutes.registerRouteName: (_) => RegisterScreen(),
         AppRoutes.forgetRouteName: (_) => ForgetPassScreen(),

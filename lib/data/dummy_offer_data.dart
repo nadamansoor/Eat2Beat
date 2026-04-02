@@ -1,19 +1,19 @@
-import 'package:eat2beat/models/banner_model.dart';
-import 'package:eat2beat/models/offers_model.dart';
-import 'package:eat2beat/utils/app_images.dart';
+import 'package:eat2beat/features/models/banner_model.dart';
+import 'package:eat2beat/features/models/offers_model.dart';
+import 'package:eat2beat/core/utils/app_images.dart';
 
 final List<BannerModel> banners = [
   BannerModel(
     title: '35% OFF on\nBurgers at\nOMG!',
-    image: AppImages.burgerBanner,
+    image: Assets.imagesBurgerbanner,
   ),
   BannerModel(
     title: '20% OFF on\nPizza Today',
-    image: AppImages.pizzaBanner,
+    image: Assets.imagesPizzabanner,
   ),
   BannerModel(
     title: 'Buy 1 Get 1\nFree Desserts',
-    image: AppImages.dessertBanner,
+    image: Assets.imagesCakebanner,
   ),
 ];
 
@@ -21,10 +21,10 @@ final List<FoodModel> foodList = [
   FoodModel( 
       id: '1',
       restruanteName :'Burger King',
-      restauranteIcon: AppImages.king,
+      restauranteIcon: Assets.imagesBurgerKing,
       name: 'Healthy Taco Salad',
       size:'L',
-      image: AppImages.food2,
+      image: Assets.imagesFood2,
       price: 120,
       sale: '10% OFF',
       rate: 4.5,
@@ -35,10 +35,10 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '2',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Beef Burger',
       size:'M',
-      image: AppImages.food1,
+      image: Assets.imagesFood2,
       price: 90,
       sale: '70% OFF',
       quantity: 1,
@@ -49,10 +49,10 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '3',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Chicken Wrap',
       size:'S',
-      image: AppImages.food3,
+      image: Assets.imagesFood2,
       price: 70,
       sale: '30% OFF',
       quantity: 1,
@@ -63,10 +63,10 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '4',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Golden Box',
       size:'L',
-      image: AppImages.food4,
+      image: Assets.imagesFood2,
       quantity: 1,
       price: 140,
       sale: '20% OFF',
@@ -77,10 +77,10 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '5',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Golden Box',
       size:'L',
-      image: AppImages.food5,
+      image: Assets.imagesFood2,
       price: 140,
       sale: '50% OFF',
       quantity: 1,
@@ -91,10 +91,10 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '6',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Golden Box',
       size:'L',
-      image: AppImages.food6,
+      image: Assets.imagesFood2,
       price: 140,
       sale: '40% OFF',
       quantity: 1,
@@ -105,10 +105,10 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '7',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Golden Box',
       size:'L',
-      image: AppImages.food7,
+      image: Assets.imagesFood2,
       price: 140,
       quantity: 1,
       sale: '10% OFF',
@@ -119,10 +119,10 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '8',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Golden Box',
       size:'L',
-      image: AppImages.food8,
+      image: Assets.imagesFood2,
       quantity: 1,
       price: 140,
       sale: '10% OFF',
@@ -133,10 +133,10 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '9',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Golden Box',
       size:'L',
-      image: AppImages.food9,
+      image: Assets.imagesFood2,
       price: 140,
       quantity: 1,
       sale: '70% OFF',
@@ -147,10 +147,10 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '10',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Golden Box',
       size:'L',
-      image: AppImages.food10,
+      image: Assets.imagesFood,
       price: 140,
       quantity: 1,
       sale: '10% OFF',
@@ -161,11 +161,11 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '11',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Golden Box',
       size:'L',
       quantity: 1,
-      image: AppImages.food11,
+      image: Assets.imagesFood2,
       price: 140,
       sale: '40% OFF',
       rate: 4.8,
@@ -176,11 +176,11 @@ final List<FoodModel> foodList = [
   FoodModel(
     id: '12',
     restruanteName :'Burger King',
-    restauranteIcon: AppImages.king,
+    restauranteIcon: Assets.imagesBurgerKing,
       name: 'Golden Box',
       quantity: 1,
       size:'L',
-      image: AppImages.food12,
+      image: Assets.imagesFood2,
       price: 140,
       sale: '10% OFF',
       rate: 4.8,
