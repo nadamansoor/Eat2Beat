@@ -1,66 +1,52 @@
-
+import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
-import '../utils/app_colors.dart';
-import '../utils/app_styles.dart';
-
 class CustomButton extends StatelessWidget {
-  String text;
-  Color backgroundColor;
-  Color borderColor;
-  bool iconExist;
-  Widget? iconWidget;
-  TextStyle textStyle;
-  MainAxisAlignment mainAxisAlignment;
-  VoidCallback onPressed;
-  double? width;
+  final String text;
+  final VoidCallback onPressed;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final double? width;
+  final double? height;
+  final double? borderRadius;
+  final bool isLoading;
 
-  CustomButton({
+  const CustomButton({
     super.key,
     required this.text,
     required this.onPressed,
-    this.backgroundColor = AppColors.purple,
-    this.borderColor = AppColors.purple,
-    this.textStyle = AppStyles.white20Regular,
-    this.iconExist = false,
-    this.iconWidget,
-    this.mainAxisAlignment = MainAxisAlignment.center,
-    this.width
+    this.backgroundColor,
+    this.textColor,
+    this.width,
+    this.height,
+    this.borderRadius,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    var screenHeight = MediaQuery.of(context).size.height;
-    var screenWidth = MediaQuery.of(context).size.width;
-
-    return ElevatedButton(
-        onPressed: onPressed,
-
+    return SizedBox(
+      width: width ?? double.infinity,
+      height: height ?? 56,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          fixedSize: Size(width ?? screenWidth, screenHeight*0.08,),
-
+          backgroundColor: backgroundColor ?? AppColors.purple,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(
-                  color: borderColor
-              )
+            borderRadius: BorderRadius.circular(borderRadius ?? 16),
           ),
         ),
-        child: iconExist ?
-        Row(
-          mainAxisAlignment: mainAxisAlignment,
-          children: [
-            iconWidget!,
-            SizedBox(width: screenWidth*0.02,),
-            Text(
-              text , style: textStyle,
-            )
-          ],
-        )
-            :Text(
-          text , style: textStyle,
-        )
+        child: isLoading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Text(
+                text,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: textColor ?? Colors.white,
+                ),
+              ),
+      ),
     );
   }
 }

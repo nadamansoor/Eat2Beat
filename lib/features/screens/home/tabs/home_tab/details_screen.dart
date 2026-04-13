@@ -210,10 +210,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 Expanded(
                   child: CustomButton(
                       text: "Add To Cart",
-                      textStyle: AppStyles.black16Bold.copyWith(
-                        color: AppColors.purple,
-                      ),
-                      borderColor: AppColors.purple,
                       backgroundColor: AppColors.lightPurple,
                       onPressed: (){}
                   ),
@@ -224,9 +220,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 Expanded(
                   child: CustomButton(
                       text: "Order Now",
-                      textStyle: AppStyles.black16Bold.copyWith(
-                        color: AppColors.white,
-                      ),
                       backgroundColor: AppColors.purple,
                       onPressed: (){}
                   ),

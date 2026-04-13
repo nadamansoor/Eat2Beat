@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">eat2beat</string>
+    <string name="facebook_app_id">1323254603000145</string>
+    <string name="fb_login_protocol_scheme">fb1234</string>
+    <string name="facebook_client_token">36c02e6be754c0f4ef95f985c24f83f5</string>
+</resources>

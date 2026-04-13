@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "23005301367",
+    "project_id": "eat2beat-dcd40",
+    "storage_bucket": "eat2beat-dcd40.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:23005301367:android:74a945568260240d3f1472",
+        "android_client_info": {
+          "package_name": "com.example.eat2beat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANEaeltJP3kQul_ZdPdJPfD1wjXpeLZa8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

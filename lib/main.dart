@@ -1,10 +1,15 @@
+import 'package:bloc/bloc.dart';
+import 'package:eat2beat/core/services/Custom_bloc_observer.dart';
+import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
-import 'package:eat2beat/features/auth/presentation/forget/change_password_screen.dart';
-import 'package:eat2beat/features/auth/presentation/forget/forget_pass_screen.dart';
-import 'package:eat2beat/features/auth/presentation/forget/new_password_screen.dart';
-import 'package:eat2beat/features/auth/presentation/forget/otp_screen.dart';
+import 'package:eat2beat/features/auth/presentation/views/forget/change_password_screen.dart';
+import 'package:eat2beat/features/auth/presentation/views/forget/forget_pass_screen.dart';
+import 'package:eat2beat/features/auth/presentation/views/forget/new_password_screen.dart';
+import 'package:eat2beat/features/auth/presentation/views/forget/otp_screen.dart';
+import 'package:eat2beat/features/auth/presentation/views/sign_in_view.dart';
+import 'package:eat2beat/features/auth/presentation/views/sign_up_view.dart';
+import 'package:eat2beat/features/auth/presentation/views/widgets/signin_view_body.dart';
 import 'package:eat2beat/features/on_boarding/presentation/views/on_boarding_view.dart';
-
 import 'package:eat2beat/features/screens/home/home_screen.dart';
 import 'package:eat2beat/features/screens/home/tabs/cart/cart_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/donation/choose_donate.dart';
@@ -15,15 +20,22 @@ import 'package:eat2beat/features/screens/home/tabs/home_tab/home_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/impact/impact_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/offers/offers_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/profile/profile_screen.dart';
-import 'package:eat2beat/features/auth/presentation/login/login_screen.dart';
-import 'package:eat2beat/features/auth/presentation/register/register_screen.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/features/splash/presenation/views/spalsh_view.dart';
+import 'package:eat2beat/firebase_options.dart';
 import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Bloc.observer = CustomBlocObserver();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  // await Prefs.init();
+  setupGetIt();
   runApp(const MyApp());
 }
 
@@ -51,8 +63,9 @@ class MyApp extends StatelessWidget {
       routes: {
         AppRoutes.SplashRouteName: (_) => SplashView(),
         AppRoutes.OnboardingRouteName: (_) => OnBoardingView(),
-        AppRoutes.loginRouteName: (_) => LoginScreen(),
-        AppRoutes.registerRouteName: (_) => RegisterScreen(),
+        AppRoutes.loginRouteName: (_) => SignInView(),
+        SignUpView.routeName: (context) =>  SignUpView(),
+        AppRoutes.registerRouteName: (_) => SignUpView(),
         AppRoutes.forgetRouteName: (_) => ForgetPassScreen(),
         AppRoutes.otpRouteName: (_) => OtpScreen(),
         AppRoutes.newPassRouteName: (_) => NewPasswordScreen(),
