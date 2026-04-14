@@ -26,7 +26,23 @@ String name = '';
  late bool isTermsAccepted = false ;
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return  Stack(
+  children: [
+    Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: 300,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/Pattern.png"),
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+      ),
+    ),SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0,),
         child: Form(
@@ -34,13 +50,27 @@ String name = '';
           autovalidateMode: autovalidateMode,
           child: Column(
             children: [
+              SizedBox(height: 120),
+                    Center(
+                      child: Text(
+                        'Hello! Register to get\nstarted',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFF191919),
+                          fontSize: 28,
+                          fontFamily: 'Urbanist',
+                          fontWeight: FontWeight.w700,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
               SizedBox(height: 24,),
               // name 
               CustomFormTextField(
                 onSaved: (value){
                   name = value!;
                 },
-                hintText: 'الاسم كامل', 
+                hintText: 'Username', 
                 textInputType: TextInputType.name),
           
               SizedBox(height: 16,),
@@ -50,7 +80,7 @@ String name = '';
                  onSaved: (value){
                   email = value!;
                 },
-                hintText: 'البريد الإلكتروني',
+                hintText: 'Email',
                  textInputType: TextInputType.emailAddress),
           
               SizedBox(height: 16,),  
@@ -72,7 +102,7 @@ String name = '';
               ),
               SizedBox(height: 30,),
               CustomButton(
-                text: 'إنشاء حساب جديد ',
+                text: 'Register',
                 onPressed:(){
                   if(FormKey.currentState!.validate()){
                     FormKey.currentState!.save();
@@ -81,7 +111,7 @@ String name = '';
                           email, password, name
                           );
                       }else{
-                        BuildErrorBar(context, 'يجب عليك الموافقة علي الشروط و الاحكام');
+                        BuildErrorBar(context, 'you must accept the terms and conditions');
                       }
                   }else{
                     setState(() {
@@ -90,13 +120,15 @@ String name = '';
                   }
                 }
                 ),
-
+              SizedBox(height: MediaQuery.of(context).size.height * 0.27),
               SizedBox(height: 26,),
               HaveAcount(),
             ],
           ),
         ),
       ),
+    ),
+  ],
     );
   }
 }

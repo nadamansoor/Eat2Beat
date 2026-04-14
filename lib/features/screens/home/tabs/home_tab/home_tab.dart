@@ -22,20 +22,9 @@ class _HomeTabState extends State<HomeTab> {
   late List<HomeFoodModel> searchResults;
 
   List<String> categories = [
-    "New",
-    "Near2You",
-    "Popular",
-    "Top Rated",
-    "Trending",
-    "Offers",
-    "Pizza",
-    "Burgers",
-    "Seafood",
-    "Desserts",
-    "Coffee",
-    "Healthy",
-    "Asian",
-    "Egyptian Food",
+    "New", "Near2You", "Popular", "Top Rated", "Trending", "Offers",
+    "Pizza", "Burgers", "Seafood", "Desserts", "Coffee", "Healthy",
+    "Asian", "Egyptian Food",
   ];
 
   @override
@@ -59,46 +48,11 @@ class _HomeTabState extends State<HomeTab> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: AppColors.light,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Row(
-          children: [
-              InkWell(
-                onTap: () {
-                  Navigator.of(context).pushNamed(
-                    AppRoutes.profileRouteName, // اسكرينة البروفايل
-                  );
-                },
-                child: CircleAvatar(
-                  radius: 22,
-                  backgroundImage: AssetImage(Assets.imagesMyPhoto),
-                ),
-              ),            
-            SizedBox(width: screenWidth * 0.04),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Hello", style: AppStyles.black13w400),
-                Text("Ahmed Salah", style: AppStyles.black16Bold),
-              ],
-            )
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: screenWidth * 0.02),
-            child: const Icon(Icons.notifications,
-                color: AppColors.black, size: 25),
-          )
-        ],
-      ),
-      body: Stack(
-        children: [
-          Image.asset(Assets.imagesPattern),
-          Padding(
+    return Stack(
+      children: [
+        Image.asset(Assets.imagesPattern),
+        SafeArea(
+          child: Padding(
             padding: EdgeInsets.symmetric(
               horizontal: screenWidth * 0.04,
               vertical: screenHeight * 0.02,
@@ -106,14 +60,42 @@ class _HomeTabState extends State<HomeTab> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(height: screenHeight * 0.12),
+                  // AppBar manually
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          Navigator.of(context).pushNamed(
+                            AppRoutes.profileRouteName,
+                          );
+                        },
+                        child: CircleAvatar(
+                          radius: 22,
+                          backgroundImage: AssetImage(Assets.imagesMyPhoto),
+                        ),
+                      ),
+                      SizedBox(width: screenWidth * 0.04),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Hello", style: AppStyles.black13w400),
+                            Text("Ahmed Salah", style: AppStyles.black16Bold),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.notifications,
+                          color: AppColors.black, size: 25),
+                    ],
+                  ),
+
+                  SizedBox(height: screenHeight * 0.02),
 
                   CustomTextFormField(
                     hintText: "Search",
                     controller: searchController,
                     onChanged: onSearch,
-                    prefixIcon: const Icon(Icons.search,
-                        color: AppColors.black),
+                    prefixIcon: const Icon(Icons.search, color: AppColors.black),
                     suffixIcon: isSearching
                         ? IconButton(
                             icon: const Icon(Icons.close),
@@ -157,8 +139,7 @@ class _HomeTabState extends State<HomeTab> {
                               SizedBox(width: screenWidth * 0.03),
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       item.description,
@@ -189,7 +170,6 @@ class _HomeTabState extends State<HomeTab> {
                       },
                     ),
 
-               
                   if (!isSearching) ...[
                     SizedBox(
                       height: screenHeight * 0.05,
@@ -230,21 +210,18 @@ class _HomeTabState extends State<HomeTab> {
 
                     SizedBox(height: screenHeight * 0.02),
 
-                   
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: HomeFoodModel.mealDetails.length,
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 8,
                         mainAxisSpacing: 12,
                         mainAxisExtent: screenHeight * 0.28,
                       ),
                       itemBuilder: (context, index) {
-                        final item =
-                            HomeFoodModel.mealDetails[index];
+                        final item = HomeFoodModel.mealDetails[index];
                         return InkWell(
                           onTap: () {
                             Navigator.of(context).pushNamed(
@@ -267,8 +244,7 @@ class _HomeTabState extends State<HomeTab> {
                                   alignment: Alignment.topLeft,
                                   children: [
                                     ClipRRect(
-                                      borderRadius:
-                                          BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(8),
                                       child: Image.asset(
                                         item.image,
                                         width: double.infinity,
@@ -277,12 +253,11 @@ class _HomeTabState extends State<HomeTab> {
                                     ),
                                     Container(
                                       margin: const EdgeInsets.all(8),
-                                      padding:
-                                          const EdgeInsets.symmetric(horizontal: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6),
                                       decoration: BoxDecoration(
                                         color: AppColors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(5),
+                                        borderRadius: BorderRadius.circular(5),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -292,8 +267,7 @@ class _HomeTabState extends State<HomeTab> {
                                             color: AppColors.yellow,
                                           ),
                                           Text("${item.rate}",
-                                              style:
-                                                  AppStyles.grey13w400),
+                                              style: AppStyles.grey13w400),
                                         ],
                                       ),
                                     )
@@ -312,16 +286,13 @@ class _HomeTabState extends State<HomeTab> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     Text("\$ ${item.price}",
-                                        style:
-                                            AppStyles.grey13w400),
+                                        style: AppStyles.grey13w400),
                                     ImageIcon(
                                         AssetImage(Assets.imagesDotIcon)),
-                                    const Icon(
-                                        Icons.watch_later_outlined,
+                                    const Icon(Icons.watch_later_outlined,
                                         size: 18),
                                     Text(item.time,
-                                        style:
-                                            AppStyles.grey13w400),
+                                        style: AppStyles.grey13w400),
                                   ],
                                 ),
                               ],
@@ -337,8 +308,8 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
-}
+} 

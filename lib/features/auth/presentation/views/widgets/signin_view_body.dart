@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
+import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/widgets/custom_button.dart';
 import 'package:eat2beat/core/widgets/custom_password.dart';
@@ -82,18 +83,23 @@ class _signinViewBodyState extends State<signinViewBody> {
                       onSaved: (value) { password = value!; },
                     ),
                     SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Forgot Password?',
-                          textAlign: TextAlign.center,
-                          style: AppStyles.black13Bold.copyWith(
-                            color: AppColors.purple50,
-                          ),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, AppRoutes.forgetRouteName);
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        textAlign: TextAlign.center,
+                        style: AppStyles.black13Bold.copyWith(
+                          color: AppColors.purple50,
                         ),
-                      ],
+                      ),
                     ),
+                  ],
+                ),
                     SizedBox(height: 33),
                     CustomButton(
                       onPressed: () {
@@ -108,7 +114,9 @@ class _signinViewBodyState extends State<signinViewBody> {
                       text: 'Login',
                     ),
                     SizedBox(height: 33),
-                    OrDivider(),
+                    OrDivider(
+                      hintText: 'Or Login with',
+                    ),
                     SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

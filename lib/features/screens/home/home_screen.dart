@@ -31,60 +31,61 @@ class _HomeScreenState extends State<HomeScreen> {
     var screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      body: BottomBar(
-        width: double.infinity,
-        hideOnScroll: false,
-        iconHeight: 50,
-        barColor: Colors.transparent,
-        offset: 10,
-        fit: StackFit.expand,
-        barDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          gradient: const LinearGradient(
-            colors: [
-              Color(0x00e8ecf4),
-              Color(0xffE8ECF4),
-            ],
+      body: SafeArea(
+        bottom: false,
+        child: BottomBar(
+          width: double.infinity,
+          hideOnScroll: false,
+          iconHeight: 50,
+          barColor: Colors.white.withOpacity(0.15),
+          offset: 0,
+          fit: StackFit.expand,
+          barDecoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50),
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xffE8ECF4),
+                Color(0xffE8ECF4),
+              ],
+            ),
           ),
-        ),
 
-   
-        body: (context, controller) {
-          return tabs[selectedIndex];
-        },
+          body: (context, controller) {
+            return tabs[selectedIndex];
+          },
 
-     
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(50),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.03),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.03),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
 
-                  buildNavBarItem(Assets.imagesHomeIcon, 0),
-                  buildNavBarItem(Assets.imagesOfferIcon, 1),
-                  buildNavBarItem(Assets.imagesImpactIcon, 2),
-                  buildNavBarItem(Assets.imagesDonationIcon, 3),
+                    buildNavBarItem(Assets.imagesHomeIcon, 0),
+                    buildNavBarItem(Assets.imagesOfferIcon, 1),
+                    buildNavBarItem(Assets.imagesImpactIcon, 2),
+                    buildNavBarItem(Assets.imagesDonationIcon, 3),
 
-              //cart indep
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>  CartScreen(),
-                        ),
-                      );
-                    },
-                    child: ImageIcon(
-                      AssetImage(Assets.imagesCarrtIcon),
-                      color: AppColors.white,
+                    // cart indep
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CartScreen(),
+                          ),
+                        );
+                      },
+                      child: ImageIcon(
+                        AssetImage(Assets.imagesCarrtIcon),
+                        color: AppColors.white,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

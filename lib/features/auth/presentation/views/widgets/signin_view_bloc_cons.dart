@@ -1,4 +1,5 @@
 import 'package:eat2beat/core/helper/error_bar.dart';
+import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/widgets/custom_prograss_hud.dart';
 import 'package:eat2beat/features/auth/presentation/cubits/cubitsignin/signin_cubit.dart';
 import 'package:eat2beat/features/auth/presentation/views/widgets/signin_view_body.dart';
@@ -14,7 +15,10 @@ class SigninViewConsumer extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<SigninCubit, SigninState>(
       listener: (context, state) {
-        if (state is SigninSuccess) {}
+        if (state is SigninSuccess) {
+          Navigator.pushNamedAndRemoveUntil(
+              context, AppRoutes.homeRouteName, (route) => false);
+        }
         if (state is SigninError) {
           BuildErrorBar(context, state.message);
         }

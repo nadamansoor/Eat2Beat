@@ -27,7 +27,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
             color: Color(0xFF8C8C8C),):Icon(Icons.visibility_outlined),
           ),
 
-          hintText: 'Enter your Password',            
+          hintText: 'Password',            
           textInputType: TextInputType.visiblePassword,
         );
   }

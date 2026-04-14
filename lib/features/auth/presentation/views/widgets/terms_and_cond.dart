@@ -31,14 +31,14 @@ class TermsandConditionsState extends State<TermsandConditions> {
         TextSpan(
           children: [
             TextSpan(
-              text: 'من خلال إنشاء حساب، فإنك توافق على ',
+              text: 'by signing up, you agree to our',
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
               ),
             ),
             TextSpan(
-              text: 'الشروط',
+              text: ' conditions ',
               style: TextStyle(
                 color: Colors.green,
                 fontSize: 14,
@@ -46,14 +46,14 @@ class TermsandConditionsState extends State<TermsandConditions> {
               ),
             ),
             TextSpan(
-              text: ' و',
+              text: ' and ',
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
               ),
             ),
             TextSpan(
-              text: 'الأحكام الخاصة بنا',
+              text: 'privacy policy of the app',
               style: TextStyle(
                 color: Colors.green,
                 fontSize: 14,
@@ -62,7 +62,7 @@ class TermsandConditionsState extends State<TermsandConditions> {
             ),
           ],
         ),
-        textDirection: TextDirection.rtl, // مهم عشان العربي
+       // textDirection: TextDirection.rtl, // مهم عشان العربي
       ),
     ),
       ],
