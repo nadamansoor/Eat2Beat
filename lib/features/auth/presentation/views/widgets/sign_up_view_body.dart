@@ -20,115 +20,161 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
   final GlobalKey<FormState> FormKey = GlobalKey<FormState>();
   AutovalidateMode autovalidateMode = AutovalidateMode.disabled;
 
- String email = '';
-String password = '';
-String name = '';
- late bool isTermsAccepted = false ;
+  String email = '';
+  String password = '';
+  String name = '';
+  String selectedRole = 'User'; // ✅ القيمة الافتراضية
+  late bool isTermsAccepted = false;
+
   @override
   Widget build(BuildContext context) {
-    return  Stack(
-  children: [
-    Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        height: 300,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/Pattern.png"),
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            height: 300,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/Pattern.png"),
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
+            ),
           ),
         ),
-      ),
-    ),SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0,),
-        child: Form(
-          key: FormKey,
-          autovalidateMode: autovalidateMode,
-          child: Column(
-            children: [
-              SizedBox(height: 120),
-                    Center(
-                      child: Text(
-                        'Hello! Register to get\nstarted',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF191919),
-                          fontSize: 28,
-                          fontFamily: 'Urbanist',
-                          fontWeight: FontWeight.w700,
-                          height: 1.3,
-                        ),
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Form(
+              key: FormKey,
+              autovalidateMode: autovalidateMode,
+              child: Column(
+                children: [
+                  SizedBox(height: 120),
+                  Center(
+                    child: Text(
+                      'Hello! Register to get\nstarted',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFF191919),
+                        fontSize: 28,
+                        fontFamily: 'Urbanist',
+                        fontWeight: FontWeight.w700,
+                        height: 1.3,
                       ),
                     ),
-              SizedBox(height: 24,),
-              // name 
-              CustomFormTextField(
-                onSaved: (value){
-                  name = value!;
-                },
-                hintText: 'Username', 
-                textInputType: TextInputType.name),
-          
-              SizedBox(height: 16,),
-          
-              // email
-              CustomFormTextField(
-                 onSaved: (value){
-                  email = value!;
-                },
-                hintText: 'Email',
-                 textInputType: TextInputType.emailAddress),
-          
-              SizedBox(height: 16,),  
-          
-              // password
-              CustomPasswordField(
-                 onSaved: (value){
-                      password = value!;
-                      },
-              ),
-            
-              SizedBox(height: 16,),
-          
-              TermsandConditions(
-                onChanged: (value) {                 
-                    isTermsAccepted = value;
-                  
-                },
-              ),
-              SizedBox(height: 30,),
-              CustomButton(
-                text: 'Register',
-                onPressed:(){
-                  if(FormKey.currentState!.validate()){
-                    FormKey.currentState!.save();
-                    if (isTermsAccepted) {
-                        context.read<SignupCubit>().createUserWithEmailAndPassword(
-                          email, password, name
+                  ),
+                  SizedBox(height: 24),
+                  CustomFormTextField(
+                    onSaved: (value) { name = value!; },
+                    hintText: 'Username',
+                    textInputType: TextInputType.name,
+                  ),
+                  SizedBox(height: 16),
+                  CustomFormTextField(
+                    onSaved: (value) { email = value!; },
+                    hintText: 'Email',
+                    textInputType: TextInputType.emailAddress,
+                  ),
+                  SizedBox(height: 16),
+                  CustomPasswordField(
+                    onSaved: (value) { password = value!; },
+                  ),
+
+                  SizedBox(height: 16),
+
+                  // ✅ Role Selector
+                  Row(
+                    children: ['User', 'Admin'].map((role) {
+                      final isSelected = selectedRole == role;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => selectedRole = role),
+                          child: Container(
+                            margin: EdgeInsets.only(
+                              right: role == 'User' ? 8 : 0,
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF7B61FF)
+                                  : const Color(0xFFF0EEFF),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFF7B61FF),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  role == 'User'
+                                      ? Icons.person_outline
+                                      : Icons.admin_panel_settings_outlined,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : const Color(0xFF7B61FF),
+                                  size: 20,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  role,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : const Color(0xFF7B61FF),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+
+                  SizedBox(height: 16),
+
+                  TermsandConditions(
+                    onChanged: (value) { isTermsAccepted = value; },
+                  ),
+                  SizedBox(height: 30),
+                  CustomButton(
+                    text: 'Register',
+                    onPressed: () {
+                      if (FormKey.currentState!.validate()) {
+                        FormKey.currentState!.save();
+                        if (isTermsAccepted) {
+                          context.read<SignupCubit>().createUserWithEmailAndPassword(
+                            email, password, name,selectedRole,
+                            // ✅ مرر الـ role لو الـ cubit بيدعمه
+                            // role: selectedRole,
                           );
-                      }else{
-                        BuildErrorBar(context, 'you must accept the terms and conditions');
+                        } else {
+                          BuildErrorBar(context, 'you must accept the terms and conditions');
+                        }
+                      } else {
+                        setState(() {
+                          autovalidateMode = AutovalidateMode.always;
+                        });
                       }
-                  }else{
-                    setState(() {
-                      autovalidateMode = AutovalidateMode.always;
-                    });
-                  }
-                }
-                ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.27),
-              SizedBox(height: 26,),
-              HaveAcount(),
-            ],
+                    },
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                  SizedBox(height: 26),
+                  HaveAcount(),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
-    ),
-  ],
+      ],
     );
   }
 }

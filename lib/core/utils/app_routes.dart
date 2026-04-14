@@ -18,5 +18,6 @@ class AppRoutes {
   static const chooseDonateRouteName = "choose_donation";
   static const detailsRouteName = "details";
   static const profileRouteName = "profile";
+  static const adminRouteName = "admin";
 
 }

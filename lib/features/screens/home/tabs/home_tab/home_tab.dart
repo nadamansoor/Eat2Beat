@@ -80,7 +80,7 @@ class _HomeTabState extends State<HomeTab> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text("Hello", style: AppStyles.black13w400),
-                            Text("Ahmed Salah", style: AppStyles.black16Bold),
+                            Text("Nada Mansour", style: AppStyles.black16Bold),
                           ],
                         ),
                       ),
