@@ -44,38 +44,43 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyANEaeltJP3kQul_ZdPdJPfD1wjXpeLZa8',
-    appId: '1:23005301367:android:74a945568260240d3f1472',
-    messagingSenderId: '23005301367',
-    projectId: 'eat2beat-dcd40',
-    storageBucket: 'eat2beat-dcd40.firebasestorage.app',
+    apiKey: 'AIzaSyDrfaC-Pur3u-opeqAqxCnQDDGZ5nwQo9E',
+    appId: '1:340625622680:android:1ee8d87b7de054bb08b2ed',
+    messagingSenderId: '340625622680',
+    projectId: 'eat2beat-5adcf',
+    storageBucket: 'eat2beat-5adcf.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAohVeA2_idF9pZsHcQcaheJxW39sMHWPI',
-    appId: '1:23005301367:ios:bfc35f740427bdd63f1472',
-    messagingSenderId: '23005301367',
-    projectId: 'eat2beat-dcd40',
-    storageBucket: 'eat2beat-dcd40.firebasestorage.app',
+    apiKey: 'AIzaSyDasvFv2v_CbhbAX1slk7L4bnUYyOfhaCU',
+    appId: '1:340625622680:ios:b1031827496f98ba08b2ed',
+    messagingSenderId: '340625622680',
+    projectId: 'eat2beat-5adcf',
+    storageBucket: 'eat2beat-5adcf.firebasestorage.app',
+    androidClientId: '340625622680-9of24k38nag49a2kcbsk3gek2v1239tb.apps.googleusercontent.com',
+    iosClientId: '340625622680-i9fe92gdibmntjt5uf1ihlq60uugt6lp.apps.googleusercontent.com',
     iosBundleId: 'com.example.eat2beat',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAohVeA2_idF9pZsHcQcaheJxW39sMHWPI',
-    appId: '1:23005301367:ios:bfc35f740427bdd63f1472',
-    messagingSenderId: '23005301367',
-    projectId: 'eat2beat-dcd40',
-    storageBucket: 'eat2beat-dcd40.firebasestorage.app',
+    apiKey: 'AIzaSyDasvFv2v_CbhbAX1slk7L4bnUYyOfhaCU',
+    appId: '1:340625622680:ios:b1031827496f98ba08b2ed',
+    messagingSenderId: '340625622680',
+    projectId: 'eat2beat-5adcf',
+    storageBucket: 'eat2beat-5adcf.firebasestorage.app',
+    androidClientId: '340625622680-9of24k38nag49a2kcbsk3gek2v1239tb.apps.googleusercontent.com',
+    iosClientId: '340625622680-i9fe92gdibmntjt5uf1ihlq60uugt6lp.apps.googleusercontent.com',
     iosBundleId: 'com.example.eat2beat',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBAz4nlFMJFeq3qCilhuOZhgq-bVSwhPNI',
-    appId: '1:23005301367:web:1b3d9e3c2d07965b3f1472',
-    messagingSenderId: '23005301367',
-    projectId: 'eat2beat-dcd40',
-    authDomain: 'eat2beat-dcd40.firebaseapp.com',
-    storageBucket: 'eat2beat-dcd40.firebasestorage.app',
-    measurementId: 'G-D4WX68JN0F',
+    apiKey: 'AIzaSyBvvmheUMW7GWyllXIHQJ6AerwrPHzZXgs',
+    appId: '1:340625622680:web:069def80a447b6ca08b2ed',
+    messagingSenderId: '340625622680',
+    projectId: 'eat2beat-5adcf',
+    authDomain: 'eat2beat-5adcf.firebaseapp.com',
+    storageBucket: 'eat2beat-5adcf.firebasestorage.app',
+    measurementId: 'G-K74RR9N4DD',
   );
+
 }

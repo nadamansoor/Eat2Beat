@@ -1,26 +1,51 @@
 {
   "project_info": {
-    "project_number": "23005301367",
-    "project_id": "eat2beat-dcd40",
-    "storage_bucket": "eat2beat-dcd40.firebasestorage.app"
+    "project_number": "340625622680",
+    "project_id": "eat2beat-5adcf",
+    "storage_bucket": "eat2beat-5adcf.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:23005301367:android:74a945568260240d3f1472",
+        "mobilesdk_app_id": "1:340625622680:android:1ee8d87b7de054bb08b2ed",
         "android_client_info": {
           "package_name": "com.example.eat2beat"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "340625622680-9of24k38nag49a2kcbsk3gek2v1239tb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.eat2beat",
+            "certificate_hash": "d79db8555688a6fa9008dbaad26fbd5d21713062"
+          }
+        },
+        {
+          "client_id": "340625622680-iopi7l9lee1l7hvnk53155c3f4cjoai4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyANEaeltJP3kQul_ZdPdJPfD1wjXpeLZa8"
+          "current_key": "AIzaSyDrfaC-Pur3u-opeqAqxCnQDDGZ5nwQo9E"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "340625622680-4gi6qtdcaeu3jb4hvojmuotbp2u5s61l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "340625622680-i9fe92gdibmntjt5uf1ihlq60uugt6lp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.eat2beat"
+              }
+            }
+          ]
         }
       }
     }
