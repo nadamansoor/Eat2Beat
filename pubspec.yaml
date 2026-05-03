@@ -51,6 +51,7 @@ dependencies:
   dartz: ^0.10.1
   flutter_bloc: ^9.1.1
   firebase_core: ^4.7.0
+  provider: ^6.1.5+1
   
 
 dev_dependencies:

@@ -2,6 +2,22 @@
 class Assets {
   Assets._();
   
+  /// Assets for imagesActiveAnaytics
+  /// assets/images/active_anaytics.png
+  static const String imagesActiveAnaytics = "assets/images/active_anaytics.png";
+
+  /// Assets for imagesActiveMeal
+  /// assets/images/active_meal.png
+  static const String imagesActiveMeal = "assets/images/active_meal.png";
+
+  /// Assets for imagesActiveOrders
+  /// assets/images/active_orders.png
+  static const String imagesActiveOrders = "assets/images/active_orders.png";
+
+  /// Assets for imagesActiveUpload
+  /// assets/images/active_upload.png
+  static const String imagesActiveUpload = "assets/images/active_upload.png";
+
   /// Assets for imagesAppleLogo
   /// assets/images/apple_logo.png
   static const String imagesAppleLogo = "assets/images/apple_logo.png";
@@ -93,6 +109,22 @@ class Assets {
   /// Assets for imagesImpactIcon
   /// assets/images/impact_icon.png
   static const String imagesImpactIcon = "assets/images/impact_icon.png";
+
+  /// Assets for imagesInactiveAnaytics
+  /// assets/images/inactive_anaytics.png
+  static const String imagesInactiveAnaytics = "assets/images/inactive_anaytics.png";
+
+  /// Assets for imagesInactiveMeal
+  /// assets/images/inactive_meal.png
+  static const String imagesInactiveMeal = "assets/images/inactive_meal.png";
+
+  /// Assets for imagesInactiveOrdrs
+  /// assets/images/inactive_ordrs.png
+  static const String imagesInactiveOrdrs = "assets/images/inactive_ordrs.png";
+
+  /// Assets for imagesInactiveUpload
+  /// assets/images/inactive_upload.png
+  static const String imagesInactiveUpload = "assets/images/inactive_upload.png";
 
   /// Assets for imagesKfcLogo
   /// assets/images/kfc_logo.png

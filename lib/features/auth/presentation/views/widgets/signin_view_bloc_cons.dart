@@ -16,8 +16,9 @@ class SigninViewConsumer extends StatelessWidget {
     return BlocConsumer<SigninCubit, SigninState>(
       listener: (context, state) {
         if (state is SigninSuccess) {
+          
           Navigator.pushNamedAndRemoveUntil(
-              context, AppRoutes.homeRouteName, (route) => false);
+              context, AppRoutes.adminRouteName, (route) => false);
         }
         if (state is SigninError) {
           BuildErrorBar(context, state.message);

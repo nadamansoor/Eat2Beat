@@ -1,7 +1,6 @@
 
 import 'package:eat2beat/core/helper/error_bar.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
-import 'package:eat2beat/features/admin/admin.dart';
 import 'package:eat2beat/features/auth/presentation/cubits/cubit_signup/cubit/signup_cubit.dart';
 import 'package:eat2beat/features/auth/presentation/views/widgets/sign_up_view_body.dart';
 import 'package:flutter/material.dart';

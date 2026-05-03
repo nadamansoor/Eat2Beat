@@ -9,7 +9,7 @@ class OnBoardingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     return const Scaffold(
       backgroundColor: Color(0xFFF9F7FF),
