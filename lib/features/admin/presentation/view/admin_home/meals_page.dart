@@ -97,8 +97,6 @@ class _MealsPageState extends State<MealsPage> {
     }).toList();
   }
 
-  int get _totalActive =>
-      _meals.where((e) => e.status == ApprovalStatus.approved).length;
 
   @override
   Widget build(BuildContext context) {

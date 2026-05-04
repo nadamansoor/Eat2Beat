@@ -1,4 +1,6 @@
 import 'package:eat2beat/core/utils/app_colors.dart';
+import 'package:eat2beat/features/admin/presentation/view/notifications/notifi.dart';
+import 'package:eat2beat/features/admin/presentation/view/profile_settings/profile_settings_page.dart';
 import 'package:eat2beat/features/admin/presentation/view/widgets/search_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -67,7 +69,14 @@ class CustomAdminAppbar extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    _buildAvatar(),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileSettingsPage(),
+                        ),
+                      ),
+                      child: _buildAvatar(),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -97,8 +106,12 @@ class CustomAdminAppbar extends StatelessWidget {
                     ),
                     // 🔔 Notification button
                     GestureDetector(
-                      onTap: onNotificationTap,
-                      child: Container(
+                      onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsPage(),
+                            ),
+                          ),
+                        child: Container(
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
@@ -139,7 +152,7 @@ class CustomAdminAppbar extends StatelessWidget {
             : Container(
                 color: const Color(0xFFDBEAFE),
                 child: const Icon(
-                  Icons.person,
+                  Icons.store_rounded,
                   color: Color(0xFF3B82F6),
                   size: 28,
                 ),

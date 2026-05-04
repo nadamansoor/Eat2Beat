@@ -1,24 +1,13 @@
+import 'package:eat2beat/features/admin/presentation/view/admin_home/const.dart';
 import 'package:eat2beat/features/admin/presentation/view/analytics/domain/entities/analytics_entity.dart';
 import 'package:flutter/material.dart';
-
-// ─── Design tokens ────────────────────────────────────────────────────
-const _kBg         = Color(0xFF0F0E1A);
-const _kSurface    = Color(0xFF1A1830);
-const _kSurface2   = Color(0xFF221F38);
-const _kPrimary    = Color(0xFF7C6FFF);
-const _kAccent     = Color(0xFFFFC542);
-const _kGreen      = Color(0xFF2ECC71);
-const _kRed        = Color(0xFFFF5E5E);
-const _kTextMain   = Color(0xFFEEECFF);
-const _kTextSub    = Color(0xFF8B87B8);
-const _kBorder     = Color(0xFF2E2B4A);
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 Color demandColor(DemandLevel d) {
   switch (d) {
-    case DemandLevel.high:   return _kRed;
-    case DemandLevel.medium: return _kAccent;
-    case DemandLevel.low:    return _kGreen;
+    case DemandLevel.high:   return kRed;
+    case DemandLevel.medium: return kAccent;
+    case DemandLevel.low:    return kGreen;
   }
 }
 
@@ -46,14 +35,19 @@ class AnalyticsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 12,
+        left: 20,
+        right: 20,
+        bottom: 12,
+      ),
       child: Row(
         children: [
           Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: _kPrimary,
+              color: kPrimary,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.restaurant_menu_rounded,
@@ -69,7 +63,7 @@ class AnalyticsHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: _kTextMain,
+                    color: kTextMain,
                   ),
                   textDirection: TextDirection.rtl,
                 ),
@@ -78,44 +72,19 @@ class AnalyticsHeader extends StatelessWidget {
                     Container(
                       width: 7, height: 7,
                       decoration: const BoxDecoration(
-                        color: _kGreen, shape: BoxShape.circle),
+                        color: kGreen, shape: BoxShape.circle),
                     ),
                     const SizedBox(width: 5),
                     Text(
                       'قوة إقع الطلب الذكي — تلقاني 100',
                       style: const TextStyle(
-                          fontSize: 11, color: _kTextSub),
+                          fontSize: 11, color: kTextSub),
                       textDirection: TextDirection.rtl,
                     ),
                   ],
                 ),
               ],
             ),
-          ),
-          Stack(
-            children: [
-              GestureDetector(
-                onTap: onNotification,
-                child: Container(
-                  width: 42, height: 42,
-                  decoration: BoxDecoration(
-                    color: _kSurface2,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _kBorder),
-                  ),
-                  child: const Icon(Icons.notifications_none_rounded,
-                      color: _kTextMain, size: 20),
-                ),
-              ),
-              Positioned(
-                top: 8, right: 8,
-                child: Container(
-                  width: 8, height: 8,
-                  decoration: const BoxDecoration(
-                      color: _kRed, shape: BoxShape.circle),
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -140,9 +109,9 @@ class RestaurantSelectorBar extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: kSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: kBorder),
       ),
       child: Row(
         children: [
@@ -151,16 +120,16 @@ class RestaurantSelectorBar extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               decoration: BoxDecoration(
-                color: _kPrimary.withOpacity(0.15),
+                color: kPrimary.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: const [
-                  Icon(Icons.refresh_rounded, color: _kPrimary, size: 16),
+                  Icon(Icons.refresh_rounded, color: kPrimary, size: 16),
                   SizedBox(width: 6),
                   Text('تحديث',
                       style: TextStyle(
-                          color: _kPrimary,
+                          color: kPrimary,
                           fontSize: 12,
                           fontWeight: FontWeight.w600)),
                 ],
@@ -169,7 +138,7 @@ class RestaurantSelectorBar extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           const Icon(Icons.keyboard_arrow_down_rounded,
-              color: _kTextSub, size: 18),
+              color: kTextSub, size: 18),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
@@ -177,18 +146,18 @@ class RestaurantSelectorBar extends StatelessWidget {
               textAlign: TextAlign.end,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                  color: _kTextSub, fontSize: 12),
+                  color: kTextSub, fontSize: 12),
             ),
           ),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: _kSurface2,
+              color: kSurface2,
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.grid_view_rounded,
-                color: _kPrimary, size: 16),
+                color: kPrimary, size: 16),
           ),
         ],
       ),
@@ -217,9 +186,9 @@ class DateInfoBar extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: kSurface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: kBorder),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -228,30 +197,30 @@ class DateInfoBar extends StatelessWidget {
             icon: Icons.calendar_today_rounded,
             label: 'التاريخ',
             value: dateLabel,
-            iconColor: _kPrimary,
+            iconColor: kPrimary,
           ),
           _divider(),
           _InfoChip(
             icon: Icons.calendar_month_rounded,
             label: 'اليوم',
             value: dayName,
-            iconColor: _kAccent,
+            iconColor: kAccent,
           ),
           _divider(),
           _InfoChip(
             icon: Icons.nights_stay_rounded,
             label: 'نوع اليوم',
             value: dayType,
-            valueColor: _kGreen,
-            iconColor: _kGreen,
+            valueColor: kGreen,
+            iconColor: kGreen,
           ),
           _divider(),
           _InfoChip(
             icon: Icons.beach_access_rounded,
             label: 'إجازة رسمية',
             value: isOfficialHoliday ? 'نعم' : 'لا',
-            valueColor: isOfficialHoliday ? _kRed : _kTextSub,
-            iconColor: _kTextSub,
+            valueColor: isOfficialHoliday ? kRed : kTextSub,
+            iconColor: kTextSub,
           ),
         ],
       ),
@@ -259,7 +228,7 @@ class DateInfoBar extends StatelessWidget {
   }
 
   Widget _divider() => Container(
-      width: 1, height: 32, color: _kBorder);
+      width: 1, height: 32, color: kBorder);
 }
 
 class _InfoChip extends StatelessWidget {
@@ -284,13 +253,13 @@ class _InfoChip extends StatelessWidget {
         Icon(icon, color: iconColor, size: 16),
         const SizedBox(height: 4),
         Text(label,
-            style: const TextStyle(fontSize: 9, color: _kTextSub)),
+            style: const TextStyle(fontSize: 9, color: kTextSub)),
         const SizedBox(height: 2),
         Text(value,
             style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: valueColor ?? _kTextMain)),
+                color: valueColor ?? kTextMain)),
       ],
     );
   }
@@ -321,10 +290,10 @@ class SectionTitle extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
-                color: (iconColor ?? _kPrimary).withOpacity(0.15),
+                color: (iconColor ?? kPrimary).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: iconColor ?? _kPrimary, size: 18),
+              child: Icon(icon, color: iconColor ?? kPrimary, size: 18),
             ),
             const SizedBox(width: 10),
           ],
@@ -336,11 +305,11 @@ class SectionTitle extends StatelessWidget {
                     style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: _kTextMain)),
+                        color: kTextMain)),
                 if (subtitle != null)
                   Text(subtitle!,
                       style: const TextStyle(
-                          fontSize: 11, color: _kTextSub)),
+                          fontSize: 11, color: kTextSub)),
               ],
             ),
           ),
@@ -374,9 +343,9 @@ class StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: kSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,7 +363,7 @@ class StatCard extends StatelessWidget {
               ),
               Text(
                 sublabel,
-                style: const TextStyle(fontSize: 10, color: _kTextSub),
+                style: const TextStyle(fontSize: 10, color: kTextSub),
               ),
             ],
           ),
@@ -411,7 +380,7 @@ class StatCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 11, color: _kTextSub),
+            style: const TextStyle(fontSize: 11, color: kTextSub),
           ),
         ],
       ),
@@ -431,9 +400,9 @@ class DemandBadgeCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: kSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +420,7 @@ class DemandBadgeCard extends StatelessWidget {
               ),
               Text('التصنيف التلقاني',
                   style:
-                      const TextStyle(fontSize: 10, color: _kTextSub)),
+                      const TextStyle(fontSize: 10, color: kTextSub)),
             ],
           ),
           const SizedBox(height: 12),
@@ -473,7 +442,7 @@ class DemandBadgeCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text('مستوى الطلب',
-              style: TextStyle(fontSize: 11, color: _kTextSub)),
+              style: TextStyle(fontSize: 11, color: kTextSub)),
         ],
       ),
     );
@@ -495,7 +464,7 @@ class DemandAlertBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: kSurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withOpacity(0.4)),
       ),
@@ -507,10 +476,10 @@ class DemandAlertBanner extends StatelessWidget {
             children: [
               Text(dateLabel,
                   style:
-                      const TextStyle(fontSize: 11, color: _kTextSub)),
+                      const TextStyle(fontSize: 11, color: kTextSub)),
               const SizedBox(width: 6),
               const Icon(Icons.calendar_today_rounded,
-                  color: _kTextSub, size: 13),
+                  color: kTextSub, size: 13),
               const Spacer(),
               Container(
                 width: 8, height: 8,
@@ -532,7 +501,7 @@ class DemandAlertBanner extends StatelessWidget {
             'إقبال معقول متوقع. حافظ على التجهيز الاعتيادي وناهد من كفاءة الفريق في وقت الذروة.',
             textAlign: TextAlign.right,
             style: TextStyle(
-                fontSize: 12, color: _kTextSub, height: 1.5),
+                fontSize: 12, color: kTextSub, height: 1.5),
             textDirection: TextDirection.rtl,
           ),
           const SizedBox(height: 12),
@@ -541,14 +510,14 @@ class DemandAlertBanner extends StatelessWidget {
             reverse: true,
             child: Row(
               children: [
-                _ActionBtn('تجهز اعتيادي', _kPrimary),
+                _ActionBtn('تجهز اعتيادي', kPrimary),
                 const SizedBox(width: 8),
-                _ActionBtn('راقب التدفق', _kAccent),
+                _ActionBtn('راقب التدفق', kAccent),
                 const SizedBox(width: 8),
-                _ActionBtn('جهز فريق احتياطي', _kGreen),
+                _ActionBtn('جهز فريق احتياطي', kGreen),
                 const SizedBox(width: 8),
-                _ActionBtn('تابع الطلبات', _kSurface2,
-                    textColor: _kTextMain),
+                _ActionBtn('تابع الطلبات', kSurface2,
+                    textColor: kTextMain),
               ],
             ),
           ),
@@ -600,11 +569,11 @@ class DayForecastCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       decoration: BoxDecoration(
         color: day.isToday
-            ? _kPrimary.withOpacity(0.2)
-            : _kSurface,
+            ? kPrimary.withOpacity(0.2)
+            : kSurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: day.isToday ? _kPrimary : _kBorder,
+          color: day.isToday ? kPrimary : kBorder,
           width: day.isToday ? 1.5 : 1,
         ),
       ),
@@ -614,7 +583,7 @@ class DayForecastCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: _kPrimary,
+                color: kPrimary,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: const Text('اليوم',
@@ -625,17 +594,17 @@ class DayForecastCard extends StatelessWidget {
               style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: day.isToday ? _kPrimary : _kTextSub)),
+                  color: day.isToday ? kPrimary : kTextSub)),
           const SizedBox(height: 2),
           Text(day.dateLabel,
-              style: const TextStyle(fontSize: 9, color: _kTextSub)),
+              style: const TextStyle(fontSize: 9, color: kTextSub)),
           const SizedBox(height: 10),
           Text(
             '${day.visitors}',
             style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: day.isToday ? _kTextMain : _kTextMain),
+                color: day.isToday ? kTextMain : kTextMain),
           ),
           const SizedBox(height: 8),
           Container(
@@ -672,7 +641,7 @@ class HistoricalBarRow extends StatelessWidget {
             child: Text(
               day.dateLabel,
               textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 11, color: _kTextSub),
+              style: const TextStyle(fontSize: 11, color: kTextSub),
               textDirection: TextDirection.rtl,
             ),
           ),
@@ -683,9 +652,9 @@ class HistoricalBarRow extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: ratio,
                 minHeight: 10,
-                backgroundColor: _kSurface2,
+                backgroundColor: kSurface2,
                 valueColor: AlwaysStoppedAnimation(
-                  Color.lerp(_kPrimary, const Color(0xFFB060FF), ratio) ?? _kPrimary,
+                  Color.lerp(kPrimary, const Color(0xFFB060FF), ratio) ?? kPrimary,
                 ),
               ),
             ),
@@ -696,7 +665,7 @@ class HistoricalBarRow extends StatelessWidget {
             style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: _kTextMain),
+                color: kTextMain),
           ),
         ],
       ),
@@ -729,17 +698,17 @@ class SummaryCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: kSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: kBorder),
       ),
       child: Column(
         children: [
-          _Row('المطعم', restaurantId, _kPrimary),
-          _Row('رقم اليوم', dayNumber, _kAccent),
-          _Row('lag_7', '$lag7 راتر', _kTextMain),
-          _Row('rolling_mean_7', '${rollingMean7.toStringAsFixed(1)} راتر', _kTextMain),
-          _Row('زوار المتوقعون', '$visitorsToday راتر', _kTextMain),
+          _Row('المطعم', restaurantId, kPrimary),
+          _Row('رقم اليوم', dayNumber, kAccent),
+          _Row('lag_7', '$lag7 راتر', kTextMain),
+          _Row('rolling_mean_7', '${rollingMean7.toStringAsFixed(1)} راتر', kTextMain),
+          _Row('زوار المتوقعون', '$visitorsToday راتر', kTextMain),
           _Row('مستوى الطلب', demandLabel(demandLevel),
               demandColor(demandLevel)),
         ],
@@ -768,7 +737,7 @@ class _Row extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   color: valueColor)),
           Text(label,
-              style: const TextStyle(fontSize: 12, color: _kTextSub)),
+              style: const TextStyle(fontSize: 12, color: kTextSub)),
         ],
       ),
     );
@@ -843,7 +812,7 @@ class _AnalyticsSkeletonState extends State<AnalyticsSkeleton>
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: _kSurface2,
+        color: kSurface2,
         borderRadius: BorderRadius.circular(radius),
       ),
     );
@@ -866,11 +835,11 @@ class AnalyticsErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.wifi_off_rounded, color: _kRed, size: 48),
+            const Icon(Icons.wifi_off_rounded, color: kRed, size: 48),
             const SizedBox(height: 16),
             Text(message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: _kTextSub, fontSize: 13)),
+                style: const TextStyle(color: kTextSub, fontSize: 13)),
             const SizedBox(height: 20),
             GestureDetector(
               onTap: onRetry,
@@ -878,7 +847,7 @@ class AnalyticsErrorView extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
-                  color: _kPrimary,
+                  color: kPrimary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Text('إعادة المحاولة',

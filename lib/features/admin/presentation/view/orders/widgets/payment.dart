@@ -1,6 +1,4 @@
-
-// ─── Payment Row ──────────────────────────────────────────────────────
-import 'package:eat2beat/features/admin/presentation/view/orders/const.dart';
+import 'package:eat2beat/features/admin/presentation/view/admin_home/const.dart';
 import 'package:flutter/material.dart';
 
 class PaymentRow extends StatelessWidget {
@@ -62,4 +60,3 @@ class PaymentRow extends StatelessWidget {
     );
   }
 }
-
