@@ -1,4 +1,4 @@
-import 'package:eat2beat/features/admin/domain/entities/bottom_navi_bar.dart';
+import 'package:eat2beat/features/admin/presentation/view/widgets/bottom_navi_bar.dart';
 import 'package:eat2beat/features/admin/presentation/view/widgets/navi_item.dart';
 import 'package:flutter/material.dart';
 

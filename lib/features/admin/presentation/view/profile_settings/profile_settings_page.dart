@@ -1,4 +1,10 @@
-import 'package:eat2beat/features/admin/presentation/view/profile_settings/widgets/profile_widgets.dart';
+import 'package:eat2beat/features/admin/presentation/view/profile_settings/widgets/profile_avatar.dart';
+import 'package:eat2beat/features/admin/presentation/view/profile_settings/widgets/profile_logout_btn.dart';
+import 'package:eat2beat/features/admin/presentation/view/profile_settings/widgets/profile_save_btn.dart';
+import 'package:eat2beat/features/admin/presentation/view/profile_settings/widgets/profile_setting_card.dart';
+import 'package:eat2beat/features/admin/presentation/view/profile_settings/widgets/profile_setting_toggle.dart';
+import 'package:eat2beat/features/admin/presentation/view/profile_settings/widgets/profile_settings_text_field.dart';
+import 'package:eat2beat/features/admin/presentation/view/profile_settings/widgets/profile_tap_row.dart' show SettingsTapRow;
 import 'package:flutter/material.dart';
 
 class ProfileSettingsPage extends StatefulWidget {
@@ -11,13 +17,13 @@ class ProfileSettingsPage extends StatefulWidget {
 class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   // Controllers
   final _nameController =
-      TextEditingController(text: 'مطعم ندى للمأكولات البحرية');
+      TextEditingController(text: 'Restaurant Name');
   final _emailController =
-      TextEditingController(text: 'restaurant5@eat2beat.com');
+      TextEditingController(text: 'restaurant@eat2beat.com');
   final _phoneController =
       TextEditingController(text: '+20 100 000 0000');
   final _addressController =
-      TextEditingController(text: '123 شارع التحرير، القاهرة');
+      TextEditingController(text: 'Cairo, Egypt');
   final _passwordController = TextEditingController();
 
   // Toggles
@@ -25,8 +31,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   bool _notificationsEnabled = true;
 
   // Working hours
-  String _openTime = '09:00 ص';
-  String _closeTime = '11:00 م';
+  String _openTime = '09:00 AM';
+  String _closeTime = '11:00 PM';
 
   bool _isSaving = false;
 
@@ -48,7 +54,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('تم حفظ التغييرات'),
+          content: const Text('Updated successfully'),
           backgroundColor: const Color(0xFF6C63FF),
           behavior: SnackBarBehavior.floating,
           shape:
@@ -71,7 +77,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
-          'إعدادات البروفيل',
+          'Profile Settings',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -102,32 +108,32 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
             // ── Basic Info ─────────────────────────────────────────
             SettingsSectionCard(
-              title: 'المعلومات الأساسية',
+              title: 'Essential Info',
               children: [
                 SettingsFieldRow(
                   icon: Icons.store_rounded,
-                  label: 'اسم المطعم',
-                  hint: 'اسم المطعم',
+                  label: 'Restaurant name',
+                  hint: 'Restaurant Name',
                   controller: _nameController,
                 ),
                 SettingsFieldRow(
                   icon: Icons.email_outlined,
-                  label: 'البريد الإلكتروني',
+                  label: 'Email',
                   hint: 'example@email.com',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 SettingsFieldRow(
                   icon: Icons.phone_outlined,
-                  label: 'رقم الهاتف',
+                  label: 'Phone',
                   hint: '+20 100 000 0000',
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                 ),
                 SettingsFieldRow(
                   icon: Icons.location_on_outlined,
-                  label: 'العنوان',
-                  hint: 'عنوان المطعم',
+                  label: 'Address',
+                  hint: 'Restaurant Address',
                   controller: _addressController,
                 ),
               ],
@@ -135,12 +141,12 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
             // ── Operating Settings ─────────────────────────────────
             SettingsSectionCard(
-              title: 'إعدادات التشغيل',
+              title: 'Operating Settings',
               children: [
                 SettingsToggleRow(
                   icon: Icons.storefront_rounded,
-                  label: 'حالة المطعم',
-                  subtitle: _isOpen ? 'مفتوح الآن' : 'مغلق',
+                  label: 'Restaurant Status',
+                  subtitle: _isOpen ? 'Open Now' : 'Closed',
                   value: _isOpen,
                   iconColor: _isOpen
                       ? const Color(0xFF10B981)
@@ -149,7 +155,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 ),
                 SettingsTapRow(
                   icon: Icons.schedule_rounded,
-                  label: 'وقت الفتح',
+                  label: 'Opening Time',
                   value: _openTime,
                   onTap: () async {
                     final picked = await showTimePicker(
@@ -163,7 +169,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 ),
                 SettingsTapRow(
                   icon: Icons.schedule_rounded,
-                  label: 'وقت الإغلاق',
+                  label: 'Closing Time',
                   value: _closeTime,
                   iconColor: const Color(0xFFEF4444),
                   onTap: () async {
@@ -181,11 +187,11 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
 
             // ── Account Settings ───────────────────────────────────
             SettingsSectionCard(
-              title: 'إعدادات الحساب',
+              title: 'Account Settings',
               children: [
                 SettingsFieldRow(
                   icon: Icons.lock_outline_rounded,
-                  label: 'كلمة السر الجديدة',
+                  label: 'New Password',
                   hint: '••••••••',
                   controller: _passwordController,
                   obscureText: true,
@@ -193,8 +199,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 ),
                 SettingsToggleRow(
                   icon: Icons.notifications_outlined,
-                  label: 'الإشعارات',
-                  subtitle: 'استقبال إشعارات الطلبات',
+                  label: 'Notifications',
+                  subtitle: 'On',
                   value: _notificationsEnabled,
                   iconColor: const Color(0xFF6C63FF),
                   onChanged: (v) =>
@@ -202,8 +208,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 ),
                 SettingsTapRow(
                   icon: Icons.language_rounded,
-                  label: 'اللغة',
-                  value: 'العربية',
+                  label: 'Language',
+                  value: 'English',
                   iconColor: const Color(0xFF3B82F6),
                   onTap: () {
                     // TODO: language picker

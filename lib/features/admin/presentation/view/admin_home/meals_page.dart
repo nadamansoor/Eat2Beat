@@ -1,6 +1,6 @@
-import 'package:eat2beat/features/admin/domain/entities/food_item.dart';
 import 'package:eat2beat/features/admin/presentation/view/admin_home/widgets/custom_app_bar.dart';
 import 'package:eat2beat/features/admin/presentation/view/admin_home/widgets/food_item_card.dart';
+import 'package:eat2beat/features/admin/presentation/view/admin_home/entities/food_item.dart';
 import 'package:flutter/material.dart';
 
 

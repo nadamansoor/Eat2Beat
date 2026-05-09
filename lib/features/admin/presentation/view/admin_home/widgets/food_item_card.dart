@@ -1,6 +1,6 @@
-import 'package:eat2beat/features/admin/domain/entities/food_item.dart';
 import 'package:eat2beat/features/admin/presentation/view/admin_home/widgets/status_badge.dart';
 import 'package:eat2beat/features/admin/presentation/view/admin_upload/const.dart';
+import 'package:eat2beat/features/admin/presentation/view/admin_home/entities/food_item.dart';
 import 'package:flutter/material.dart';
 
 class FoodItemCard extends StatelessWidget {

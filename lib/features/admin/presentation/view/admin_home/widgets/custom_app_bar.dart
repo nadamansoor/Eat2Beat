@@ -1,9 +1,11 @@
 import 'package:eat2beat/core/utils/app_colors.dart';
+import 'package:eat2beat/features/admin/presentation/view/notifications/cubits/notifications_cubit.dart';
 import 'package:eat2beat/features/admin/presentation/view/notifications/notifi.dart';
 import 'package:eat2beat/features/admin/presentation/view/profile_settings/profile_settings_page.dart';
 import 'package:eat2beat/features/admin/presentation/view/widgets/search_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // ─── Enums ────────────────────────────────────────────────────────────
 enum FoodCategory { all, vegan, protein }
@@ -51,7 +53,7 @@ class CustomAdminAppbar extends StatelessWidget {
         collapseMode: CollapseMode.none,
         background: Container(
           decoration: BoxDecoration(
-            color:  AppColors.purple50,
+            color: AppColors.purple50,
             border: Border(
               bottom: BorderSide(color: Colors.grey.shade200, width: 1),
             ),
@@ -70,11 +72,12 @@ class CustomAdminAppbar extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ProfileSettingsPage(),
-                        ),
-                      ),
+                      onTap:
+                          () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const ProfileSettingsPage(),
+                            ),
+                          ),
                       child: _buildAvatar(),
                     ),
                     const SizedBox(width: 12),
@@ -104,14 +107,19 @@ class CustomAdminAppbar extends StatelessWidget {
                         ],
                       ),
                     ),
-                    // 🔔 Notification button
+                    //Notification button
                     GestureDetector(
-                      onTap: () => Navigator.of(context).push(
+                      onTap:
+                          () => Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) => const NotificationsPage(),
+                              builder:
+                                  (_) => BlocProvider(
+                                    create: (context) => NotificationsCubit(),
+                                    child: const NotificationsPage(),
+                                  ),
                             ),
                           ),
-                        child: Container(
+                      child: Container(
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
@@ -147,16 +155,17 @@ class CustomAdminAppbar extends StatelessWidget {
         border: Border.all(color: const Color(0xFF3B82F6), width: 2),
       ),
       child: ClipOval(
-        child: avatarImagePath != null
-            ? Image.asset(avatarImagePath!, fit: BoxFit.cover)
-            : Container(
-                color: const Color(0xFFDBEAFE),
-                child: const Icon(
-                  Icons.store_rounded,
-                  color: Color(0xFF3B82F6),
-                  size: 28,
+        child:
+            avatarImagePath != null
+                ? Image.asset(avatarImagePath!, fit: BoxFit.cover)
+                : Container(
+                  color: const Color(0xFFDBEAFE),
+                  child: const Icon(
+                    Icons.store_rounded,
+                    color: Color(0xFF3B82F6),
+                    size: 28,
+                  ),
                 ),
-              ),
       ),
     );
   }
