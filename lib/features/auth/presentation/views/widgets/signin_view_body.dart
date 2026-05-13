@@ -25,6 +25,7 @@ class signinViewBody extends StatefulWidget {
 class _signinViewBodyState extends State<signinViewBody> {
    AutovalidateMode autovalidateMode = AutovalidateMode.disabled;
   late String email , password;
+  String selectedRole = 'user'; // default role
 
   final GlobalKey<FormState> FormKey = GlobalKey<FormState>();
   @override
@@ -83,6 +84,58 @@ class _signinViewBodyState extends State<signinViewBody> {
                       onSaved: (value) { password = value!; },
                     ),
                     SizedBox(height: 16),
+                  Row(
+                    children: ['user', 'restaurant'].map((role) {
+                      final isSelected = selectedRole == role;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => selectedRole = role),
+                          child: Container(
+                            margin: EdgeInsets.only(
+                              right: role == 'user' ? 8 : 0,
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF7B61FF)
+                                  : const Color(0xFFF0EEFF),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFF7B61FF),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  role == 'user'
+                                      ? Icons.person_outline
+                                      : Icons.admin_panel_settings_outlined,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : const Color(0xFF7B61FF),
+                                  size: 20,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  role == 'user' ? 'User' : 'Restaurant',
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : const Color(0xFF7B61FF),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                    SizedBox(height: 16),
               Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -105,7 +158,7 @@ class _signinViewBodyState extends State<signinViewBody> {
                       onPressed: () {
                         if (FormKey.currentState!.validate()) {
                           FormKey.currentState!.save();
-                          context.read<SigninCubit>().SignIn(email, password);
+                          context.read<SigninCubit>().SignIn(email, password, selectedRole);
                         } else {
                           autovalidateMode = AutovalidateMode.always;
                           setState(() {});
@@ -131,7 +184,13 @@ class _signinViewBodyState extends State<signinViewBody> {
                         const SizedBox(width: 16),
                         SocialLoginBtn(
                           onPressed: () {
-                            context.read<SigninCubit>().signInWithGoogle();
+                            if (selectedRole != 'user') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Google Login is available for User role only')),
+                              );
+                              return;
+                            }
+                            context.read<SigninCubit>().signInWithGoogle(selectedRole);
                           },
                           image: Assets.imagesGoogleIc,
                           title: '',

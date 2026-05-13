@@ -19,5 +19,6 @@ class AppRoutes {
   static const detailsRouteName = "details";
   static const profileRouteName = "profile";
   static const adminRouteName = "admin";
+  static const pendingRestaurantRouteName = "pending_restaurant";
 
 }

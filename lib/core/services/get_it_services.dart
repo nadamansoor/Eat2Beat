@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/api_service.dart';
 import 'package:eat2beat/core/services/firebase_auth_service.dart';
 import 'package:eat2beat/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
@@ -11,5 +12,7 @@ final getIt = GetIt.instance;
     AuthRepoImpl(
         firebaseAuthService: getIt<FirebaseAuthService>(),
   ));
+  getIt.registerSingleton<ApiService>(ApiService());
+
   
  }

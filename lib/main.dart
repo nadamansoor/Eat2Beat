@@ -7,9 +7,10 @@ import 'package:eat2beat/features/auth/presentation/views/forget/change_password
 import 'package:eat2beat/features/auth/presentation/views/forget/forget_pass_screen.dart';
 import 'package:eat2beat/features/auth/presentation/views/forget/new_password_screen.dart';
 import 'package:eat2beat/features/auth/presentation/views/forget/otp_screen.dart';
+import 'package:eat2beat/features/auth/presentation/views/pending_restaurant_screen.dart';
 import 'package:eat2beat/features/auth/presentation/views/sign_in_view.dart';
 import 'package:eat2beat/features/auth/presentation/views/sign_up_view.dart';
-import 'package:eat2beat/features/auth/presentation/views/widgets/signin_view_body.dart';
+
 import 'package:eat2beat/features/on_boarding/presentation/views/on_boarding_view.dart';
 import 'package:eat2beat/features/screens/home/home_screen.dart';
 import 'package:eat2beat/features/screens/home/tabs/cart/cart_tab.dart';
@@ -82,6 +83,7 @@ class MyApp extends StatelessWidget {
         AppRoutes.detailsRouteName: (_) => DetailsScreen(),
         AppRoutes.profileRouteName: (context) => const ProfileScreen(),
         AppRoutes.adminRouteName: (_) => adminRouteName(),
+        AppRoutes.pendingRestaurantRouteName: (_) => const PendingRestaurantScreen(),
       },
     );
   }

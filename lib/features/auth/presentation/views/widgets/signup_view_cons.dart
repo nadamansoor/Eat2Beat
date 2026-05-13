@@ -20,8 +20,7 @@ class signupviewBlocConsumer extends StatelessWidget {
         return BlocConsumer<SignupCubit, SignupState>(
           listener: (context, state) {
             if (state is SignupSuccess) {
-              // Navigator.pop(context);
-                if (state.role == 'Admin') {
+                if (state.role == 'admin') {
                   Navigator.pushReplacementNamed(context, AppRoutes.adminRouteName);
                 } else {
                   Navigator.pushReplacementNamed(context, AppRoutes.homeRouteName);

@@ -14,6 +14,8 @@ final class SignupSuccess extends SignupState {
   SignupSuccess({required this.userEntity, required this.role});
 }
 
+final class SignupPendingRestaurant extends SignupState {}
+
 final class SignupError extends SignupState {
   final String message;
   SignupError({required this.message});

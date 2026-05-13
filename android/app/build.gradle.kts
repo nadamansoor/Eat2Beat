@@ -23,6 +23,7 @@ android {
     }
 
     defaultConfig {
+        multiDexEnabled = true
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.eat2beat"
         // You can update the following values to match your application needs.
@@ -47,4 +48,5 @@ flutter {
 }
 dependencies {
     implementation("com.facebook.android:facebook-login:latest.release")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

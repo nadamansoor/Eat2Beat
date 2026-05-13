@@ -23,8 +23,15 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
   String email = '';
   String password = '';
   String name = '';
-  String selectedRole = 'User'; // ✅ القيمة الافتراضية
+  String selectedRole = 'user'; // ✅ القيمة الافتراضية
   late bool isTermsAccepted = false;
+
+  // Restaurant-specific fields
+  String restaurantName = '';
+  String ownerFullName = '';
+  String phone = '';
+  String address = '';
+  String nationalId = '';
 
   @override
   Widget build(BuildContext context) {
@@ -69,80 +76,104 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                   ),
                   SizedBox(height: 24),
                   CustomFormTextField(
-                    onSaved: (value) { name = value!; },
+                    onSaved: (value) {
+                      name = value!;
+                    },
                     hintText: 'Username',
                     textInputType: TextInputType.name,
                   ),
                   SizedBox(height: 16),
                   CustomFormTextField(
-                    onSaved: (value) { email = value!; },
+                    onSaved: (value) {
+                      email = value!;
+                    },
                     hintText: 'Email',
                     textInputType: TextInputType.emailAddress,
                   ),
                   SizedBox(height: 16),
                   CustomPasswordField(
-                    onSaved: (value) { password = value!; },
+                    onSaved: (value) {
+                      password = value!;
+                    },
                   ),
 
-                  SizedBox(height: 16),
+                  SizedBox(height: 12),
+
+                  // ✅ Restaurant-specific fields (animated)
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child:
+                        selectedRole == 'restaurant'
+                            ? _buildRestaurantFields()
+                            : const SizedBox.shrink(),
+                  ),
 
                   // ✅ Role Selector
                   Row(
-                    children: ['User', 'Admin'].map((role) {
-                      final isSelected = selectedRole == role;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => selectedRole = role),
-                          child: Container(
-                            margin: EdgeInsets.only(
-                              right: role == 'User' ? 8 : 0,
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFF7B61FF)
-                                  : const Color(0xFFF0EEFF),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFF7B61FF),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  role == 'User'
-                                      ? Icons.person_outline
-                                      : Icons.admin_panel_settings_outlined,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : const Color(0xFF7B61FF),
-                                  size: 20,
+                    children:
+                        ['user', 'restaurant'].map((role) {
+                          final isSelected = selectedRole == role;
+                          return Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => selectedRole = role),
+                              child: Container(
+                                margin: EdgeInsets.only(
+                                  right: role == 'user' ? 8 : 0,
                                 ),
-                                SizedBox(width: 8),
-                                Text(
-                                  role,
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : const Color(0xFF7B61FF),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      isSelected
+                                          ? const Color(0xFF7B61FF)
+                                          : const Color(0xFFF0EEFF),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFF7B61FF),
+                                    width: 1.5,
                                   ),
                                 ),
-                              ],
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      role == 'user'
+                                          ? Icons.person_outline
+                                          : Icons.admin_panel_settings_outlined,
+                                      color:
+                                          isSelected
+                                              ? Colors.white
+                                              : const Color(0xFF7B61FF),
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      role == 'user' ? 'User' : 'Restaurant',
+                                      style: TextStyle(
+                                        color:
+                                            isSelected
+                                                ? Colors.white
+                                                : const Color(0xFF7B61FF),
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                   ),
 
                   SizedBox(height: 16),
 
                   TermsandConditions(
-                    onChanged: (value) { isTermsAccepted = value; },
+                    onChanged: (value) {
+                      isTermsAccepted = value;
+                    },
                   ),
                   SizedBox(height: 30),
                   CustomButton(
@@ -151,13 +182,34 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                       if (FormKey.currentState!.validate()) {
                         FormKey.currentState!.save();
                         if (isTermsAccepted) {
-                          context.read<SignupCubit>().createUserWithEmailAndPassword(
-                            email, password, name,selectedRole,
-                            // ✅ مرر الـ role لو الـ cubit بيدعمه
-                            // role: selectedRole,
-                          );
+                          if (selectedRole == 'restaurant') {
+                            // ✅ Restaurant signup with extra fields
+                            context.read<SignupCubit>().createRestaurantAccount(
+                              email: email,
+                              password: password,
+                              userName: name,
+                              restaurantName: restaurantName,
+                              ownerFullName: ownerFullName,
+                              phone: phone,
+                              address: address,
+                              nationalId: nationalId,
+                            );
+                          } else {
+                            // ✅ Normal user signup — unchanged
+                            context
+                                .read<SignupCubit>()
+                                .createUserWithEmailAndPassword(
+                                  email,
+                                  password,
+                                  name,
+                                  selectedRole,
+                                );
+                          }
                         } else {
-                          BuildErrorBar(context, 'you must accept the terms and conditions');
+                          BuildErrorBar(
+                            context,
+                            'you must accept the terms and conditions',
+                          );
                         }
                       } else {
                         setState(() {
@@ -174,6 +226,55 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  /// Builds the extra restaurant verification fields
+  Widget _buildRestaurantFields() {
+    return Column(
+      children: [
+        //SizedBox(height: 16),
+        CustomFormTextField(
+          onSaved: (value) {
+            restaurantName = value!;
+          },
+          hintText: 'Restaurant Name',
+          textInputType: TextInputType.name,
+        ),
+        SizedBox(height: 12),
+        CustomFormTextField(
+          onSaved: (value) {
+            ownerFullName = value!;
+          },
+          hintText: 'Owner Full Name',
+          textInputType: TextInputType.name,
+        ),
+        SizedBox(height: 12),
+        CustomFormTextField(
+          onSaved: (value) {
+            phone = value!;
+          },
+          hintText: 'Phone Number',
+          textInputType: TextInputType.phone,
+        ),
+        SizedBox(height: 12),
+        CustomFormTextField(
+          onSaved: (value) {
+            address = value!;
+          },
+          hintText: 'Restaurant Address',
+          textInputType: TextInputType.streetAddress,
+        ),
+        SizedBox(height: 12),
+        CustomFormTextField(
+          onSaved: (value) {
+            nationalId = value!;
+          },
+          hintText: 'National ID ',
+          textInputType: TextInputType.text,
+        ),
+        SizedBox(height: 20),
       ],
     );
   }

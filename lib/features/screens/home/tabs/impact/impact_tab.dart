@@ -6,7 +6,7 @@ import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:flutter/material.dart';
 
 class ImpactTab extends StatefulWidget {
-  ImpactTab({super.key});
+  const ImpactTab({super.key});
 
   @override
   State<ImpactTab> createState() => _ImpactTabState();
@@ -21,7 +21,7 @@ class _ImpactTabState extends State<ImpactTab> {
     Assets.imagesMcLogo,
     Assets.imagesTastuLogo,
     Assets.imagesKfcLogo,
-    Assets.imagesSubwayLogo
+    Assets.imagesSubwayLogo,
   ];
 
   List<String> restNames = [
@@ -37,7 +37,7 @@ class _ImpactTabState extends State<ImpactTab> {
 
   int selectedIndex = 0;
 
-  late double screenWidth ;
+  late double screenWidth;
 
   late double screenHeight;
 
@@ -64,7 +64,10 @@ class _ImpactTabState extends State<ImpactTab> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset(Assets.imagesImpactIcon, color: AppColors.black),
+                        Image.asset(
+                          Assets.imagesImpactIcon,
+                          color: AppColors.black,
+                        ),
                         SizedBox(width: screenWidth * 0.04),
                         Text("Impact", style: AppStyles.black24Bold),
                       ],
@@ -72,7 +75,7 @@ class _ImpactTabState extends State<ImpactTab> {
                     SizedBox(height: screenHeight * 0.03),
                     Text(
                       "When you save a meal, you save more than food ,"
-                          "thanks for making an impact.",
+                      "thanks for making an impact.",
                       style: AppStyles.black16w500,
                     ),
                     SizedBox(height: screenHeight * 0.02),
@@ -87,34 +90,45 @@ class _ImpactTabState extends State<ImpactTab> {
                       child: Row(
                         children: [
                           Expanded(
-                              child: SizedBox(
-                                  child: Center(
-                                      child: buildStatContainer(
-                                          index: 0,
-                                          duration: "Week")))),
+                            child: SizedBox(
+                              child: Center(
+                                child: buildStatContainer(
+                                  index: 0,
+                                  duration: "Week",
+                                ),
+                              ),
+                            ),
+                          ),
                           Container(
                             height: screenHeight * 0.025,
                             width: 2,
                             color: AppColors.purple50,
                           ),
                           Expanded(
-                              child: SizedBox(
-                                  child: Center(
-                                      child: buildStatContainer(
-                                          index: 1,
-                                          duration: "Month")
-                                  ))),
+                            child: SizedBox(
+                              child: Center(
+                                child: buildStatContainer(
+                                  index: 1,
+                                  duration: "Month",
+                                ),
+                              ),
+                            ),
+                          ),
                           Container(
                             height: screenHeight * 0.025,
                             width: 2,
                             color: AppColors.purple50,
                           ),
                           Expanded(
-                              child: SizedBox(
-                                  child: Center(
-                                      child: buildStatContainer(
-                                          index: 2,
-                                          duration: "Year")))),
+                            child: SizedBox(
+                              child: Center(
+                                child: buildStatContainer(
+                                  index: 2,
+                                  duration: "Year",
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -130,7 +144,7 @@ class _ImpactTabState extends State<ImpactTab> {
                             number: 12,
                           ),
                         ),
-                        SizedBox(width: screenWidth * 0.05,),
+                        SizedBox(width: screenWidth * 0.05),
                         Expanded(
                           child: StatisticsContainer(
                             containerColor: AppColors.purple50,
@@ -152,13 +166,13 @@ class _ImpactTabState extends State<ImpactTab> {
                     SizedBox(height: screenHeight * 0.02),
                     Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.04,
-                          vertical: screenHeight * 0.005
+                        horizontal: screenWidth * 0.04,
+                        vertical: screenHeight * 0.005,
                       ),
                       height: screenHeight * 0.12,
                       decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(10)
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -166,50 +180,59 @@ class _ImpactTabState extends State<ImpactTab> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("Reviews", style: AppStyles.black16Bold,),
+                              Text("Reviews", style: AppStyles.black16Bold),
                               InkWell(
-                                onTap: (){},
-                                child: Text("See All" , style: AppStyles.blue14w500,),
-                              )
+                                onTap: () {},
+                                child: Text(
+                                  "See All",
+                                  style: AppStyles.blue14w500,
+                                ),
+                              ),
                             ],
                           ),
                           Row(
                             children: [
-                              Image.asset(Assets.imagesRateIcon,
-                                height: 18, width: 17, fit: BoxFit.fill,),
-                              SizedBox(width: screenWidth*0.02,),
-                              Text("4.9" , style: AppStyles.grey16Bold,),
-                              SizedBox(width: screenWidth*0.05,),
-                              Text("Total 100 Reviews" ,
-                                style: AppStyles.black13w400,),
+                              Image.asset(
+                                Assets.imagesRateIcon,
+                                height: 18,
+                                width: 17,
+                                fit: BoxFit.fill,
+                              ),
+                              SizedBox(width: screenWidth * 0.02),
+                              Text("4.9", style: AppStyles.grey16Bold),
+                              SizedBox(width: screenWidth * 0.05),
+                              Text(
+                                "Total 100 Reviews",
+                                style: AppStyles.black13w400,
+                              ),
                             ],
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: screenHeight*0.02,),
+                    SizedBox(height: screenHeight * 0.02),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text("Top Restaurants ", style: AppStyles.black16Bold,),
+                        Text("Top Restaurants ", style: AppStyles.black16Bold),
                       ],
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     SizedBox(
                       height: screenHeight * 0.1,
                       child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, index) {
-                            return RestContainer(
-                              width: screenWidth * 0.128,
-                              restName: restNames[index],
-                              logoPath: logoPaths[index],
-                            );
-                          },
-                          separatorBuilder: (context, index) {
-                            return SizedBox(width: screenWidth * 0.1,);
-                          },
-                          itemCount: 8
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          return RestContainer(
+                            width: screenWidth * 0.128,
+                            restName: restNames[index],
+                            logoPath: logoPaths[index],
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return SizedBox(width: screenWidth * 0.1);
+                        },
+                        itemCount: 8,
                       ),
                     ),
 
@@ -224,34 +247,31 @@ class _ImpactTabState extends State<ImpactTab> {
     );
   }
 
-  Widget buildStatContainer({
-    required int index,
-    required String duration,
-  }){
+  Widget buildStatContainer({required int index, required String duration}) {
     return InkWell(
-      onTap: (){
-        selectedIndex = index ;
-        setState(() {
-
-        });
+      onTap: () {
+        selectedIndex = index;
+        setState(() {});
       },
-      child: selectedIndex == index ? Container(
-        margin: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.01,
-            vertical: screenHeight * 0.003
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(
-          // horizontal: screenWidth * 0.1,
-          // vertical: screenHeight * 0.008,
-        ),
-        child: Text(duration, style: AppStyles.black13w400),
-      )
-          : Text(duration, style: AppStyles.black13w400),
+      child:
+          selectedIndex == index
+              ? Container(
+                margin: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.01,
+                  vertical: screenHeight * 0.003,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                alignment: Alignment.center,
+                padding: EdgeInsets.symmetric(
+                  // horizontal: screenWidth * 0.1,
+                  // vertical: screenHeight * 0.008,
+                ),
+                child: Text(duration, style: AppStyles.black13w400),
+              )
+              : Text(duration, style: AppStyles.black13w400),
     );
   }
 }

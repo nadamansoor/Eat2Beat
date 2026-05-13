@@ -83,4 +83,19 @@ class AuthRepoImpl extends AuthRepo{
                   );
               }
             }
+
+            @override
+            Future<String?> getIdToken() async {
+              return await firebaseAuthService.getIdToken();
+            }
+
+            @override
+            Future<void> signOut() async {
+              await firebaseAuthService.signOut();
+            }
+
+            @override
+            Future<void> deleteCurrentUser() async {
+              await firebaseAuthService.deleteCurrentUser();
+            }
       }

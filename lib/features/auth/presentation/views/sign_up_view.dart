@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/api_service.dart';
 import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
 import 'package:eat2beat/features/auth/presentation/cubits/cubit_signup/cubit/signup_cubit.dart';
@@ -16,6 +17,7 @@ class SignUpView extends StatelessWidget {
       create: (context) => SignupCubit(
         // get it
         getIt<AuthRepo>(),
+        getIt<ApiService>(),
       ),
       child: Scaffold(
       //  appBar: BuildAppBar(context, title: ' حساب جديد'),

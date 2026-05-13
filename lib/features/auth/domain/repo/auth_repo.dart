@@ -9,4 +9,7 @@ abstract class AuthRepo {
       String email, String password);
   Future<Either<Failure, UserEntity>> signinWithGoogle();
   Future<Either<Failure, UserEntity>> signInWithFacebook();
+  Future<String?> getIdToken();
+  Future<void> signOut();
+  Future<void> deleteCurrentUser();
 }

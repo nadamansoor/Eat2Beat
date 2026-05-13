@@ -14,4 +14,4 @@
 //   static bool getBool(String key) {
 //     return _instance.getBool(key) ?? false;
 //   }
-// }
+// }

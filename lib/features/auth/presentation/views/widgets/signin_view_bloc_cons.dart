@@ -16,8 +16,16 @@ class SigninViewConsumer extends StatelessWidget {
     return BlocConsumer<SigninCubit, SigninState>(
       listener: (context, state) {
         if (state is SigninSuccess) {
+          String route = AppRoutes.homeRouteName;
+          if (state.role == 'admin') {
+            route = AppRoutes.adminRouteName;
+          }
           Navigator.pushNamedAndRemoveUntil(
-              context, AppRoutes.homeRouteName, (route) => false);
+              context, route, (route) => false);
+        }
+        if (state is SigninProfileNotFound) {
+          BuildErrorBar(context, state.message);
+          Navigator.pushNamed(context, AppRoutes.registerRouteName);
         }
         if (state is SigninError) {
           BuildErrorBar(context, state.message);

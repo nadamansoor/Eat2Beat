@@ -104,4 +104,17 @@ class FirebaseAuthService
   return (await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential)).user!;
 }
 
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
+    await FacebookAuth.instance.logOut();
+  }
+
+  Future<String?> getIdToken() async {
+    return await FirebaseAuth.instance.currentUser?.getIdToken();
+  }
+
+  Future<void> deleteCurrentUser() async {
+    await FirebaseAuth.instance.currentUser?.delete();
+  }
 }
