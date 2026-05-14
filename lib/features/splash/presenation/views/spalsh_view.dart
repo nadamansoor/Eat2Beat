@@ -1,6 +1,7 @@
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/features/on_boarding/presentation/views/on_boarding_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -19,6 +20,12 @@ class _SplashViewState extends State<SplashView>
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: [
+        SystemUiOverlay.top,
+      ],
+    );
 
     _controller = AnimationController(
       vsync: this,

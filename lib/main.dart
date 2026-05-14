@@ -2,7 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:eat2beat/core/services/Custom_bloc_observer.dart';
 import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
-import 'package:eat2beat/features/admin/admin.dart';
+import 'package:eat2beat/features/admin/presentation/view/admin.dart';
 import 'package:eat2beat/features/auth/presentation/views/forget/change_password_screen.dart';
 import 'package:eat2beat/features/auth/presentation/views/forget/forget_pass_screen.dart';
 import 'package:eat2beat/features/auth/presentation/views/forget/new_password_screen.dart';
@@ -36,6 +36,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
   // await Prefs.init();
   setupGetIt();
   runApp(const MyApp());
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      
       theme: ThemeData(
         fontFamily: 'Cairo',
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.purple),
@@ -82,7 +84,7 @@ class MyApp extends StatelessWidget {
         AppRoutes.chooseDonateRouteName: (_) => ChooseDonate(),
         AppRoutes.detailsRouteName: (_) => DetailsScreen(),
         AppRoutes.profileRouteName: (context) => const ProfileScreen(),
-        AppRoutes.adminRouteName: (_) => adminRouteName(),
+        AppRoutes.adminRouteName: (_) => const AdminRouteName(),
         AppRoutes.pendingRestaurantRouteName: (_) => const PendingRestaurantScreen(),
       },
     );

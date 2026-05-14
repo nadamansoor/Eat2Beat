@@ -1,6 +1,11 @@
 // This is a generated file; do not edit or check into version control.
+<<<<<<< HEAD
 FLUTTER_ROOT=C:\flutter
 FLUTTER_APPLICATION_PATH=C:\Users\HP-Folio\StudioProjects\Eat2Beat
+=======
+FLUTTER_ROOT=C:\Users\ALFAGR\OneDrive\Desktop\Depi\flutter
+FLUTTER_APPLICATION_PATH=C:\Users\ALFAGR\OneDrive\Desktop\Depi\UdemyProjects\eat2beat
+>>>>>>> cart
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0
