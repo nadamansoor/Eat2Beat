@@ -37,7 +37,9 @@ void main() async {
   
   // await Prefs.init();
   setupGetIt();
-  runApp(const MyApp());
+  runApp(
+    const MyApp()
+    );
 }
 
 class MyApp extends StatelessWidget {

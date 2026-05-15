@@ -6,12 +6,14 @@ import 'package:flutter/material.dart';
 class UploadTextField extends StatelessWidget {
   final String hint;
   final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
   final int maxLines;
 
   const UploadTextField({
     super.key,
     required this.hint,
     this.controller,
+    this.onChanged,
     this.maxLines = 1,
   });
 
@@ -26,6 +28,7 @@ class UploadTextField extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
+        onChanged: onChanged,
         maxLines: maxLines,
         style: const TextStyle(
           fontSize: 14,
