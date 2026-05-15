@@ -9,7 +9,7 @@ final class SignupLoading extends SignupState {}
 
 final class SignupSuccess extends SignupState {
   final UserEntity userEntity;
-  final String role; // ✅ ضيفنا الـ role
+  final String role;
 
   SignupSuccess({required this.userEntity, required this.role});
 }

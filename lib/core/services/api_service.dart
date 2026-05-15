@@ -13,17 +13,11 @@ class ApiService {
       '$_workerBaseUrl/profile/me?expected_role=${Uri.encodeComponent(expectedRole)}',
     );
 
-    print('➡️ CALLING PROFILE API');
-    print('EXPECTED ROLE SENT: $expectedRole');
-    print('URL: $uri');
-
     final response = await http.get(
       uri,
       headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
     );
 
-    print('STATUS: ${response.statusCode}');
-    print('BODY: ${response.body}');
     final responseText = response.body;
 
     if (response.statusCode == 200 && responseText.isNotEmpty) {
