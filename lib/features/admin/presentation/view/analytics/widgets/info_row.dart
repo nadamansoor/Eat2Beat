@@ -1,22 +1,26 @@
 import 'package:eat2beat/features/admin/presentation/view/analytics/color_const.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class DateInfoRow extends StatelessWidget {
   final DateTime date;
+  final String dayName;
+  final bool isWeekend;
+  final bool isHoliday;
 
-  const DateInfoRow({super.key, required this.date});
+  const DateInfoRow({
+    super.key,
+    required this.date,
+    required this.dayName,
+    required this.isWeekend,
+    required this.isHoliday,
+  });
 
   String _formatDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}';
 
-  String _dayName(DateTime d) => DateFormat('EEEE').format(d);
-
-  bool _isWorkday(DateTime d) => d.weekday <= 5;
-
   @override
   Widget build(BuildContext context) {
-    final isWork = _isWorkday(date);
+    final isWork = !isWeekend;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       decoration: BoxDecoration(
@@ -39,7 +43,7 @@ class DateInfoRow extends StatelessWidget {
             child: _InfoChip(
               icon: Icons.calendar_month_rounded,
               label: 'Day',
-              value: _dayName(date),
+              value: dayName,
               valueStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
             ),
           ),
@@ -59,10 +63,10 @@ class DateInfoRow extends StatelessWidget {
             child: _InfoChip(
               label: 'Signal',
               icon: Icons.auto_awesome_outlined,
-              value: 'Regular',
+              value: isHoliday ? 'Holiday' : 'Regular',
               valueBadge: true,
-              badgeColor: AppColors.greenLight,
-              badgeTextColor: AppColors.green,
+              badgeColor: isHoliday ? AppColors.redLight : AppColors.greenLight,
+              badgeTextColor: isHoliday ? AppColors.red : AppColors.green,
             ),
           ),
         ],

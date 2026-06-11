@@ -1,6 +1,7 @@
 import 'package:eat2beat/features/admin/presentation/view/analytics/color_const.dart';
 import 'package:eat2beat/features/admin/presentation/view/analytics/entities/dashboard_entity.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class HistoricalVisitsCard extends StatelessWidget {
   final List<HistoricalVisit> visits;
@@ -85,9 +86,9 @@ class _VisitRow extends StatelessWidget {
                     fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           ),
           SizedBox(
-            width: 44,
+            width: 50,
             child: Text(
-              'Apr ${visit.date.day}',
+              '${DateFormat('MMM').format(visit.date)} ${visit.date.day}',
               style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
             ),
           ),

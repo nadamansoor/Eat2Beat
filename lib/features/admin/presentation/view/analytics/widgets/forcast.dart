@@ -112,7 +112,7 @@ class _ForecastDayCard extends StatelessWidget {
             ),
           ),
           Text(
-            'Apr ${day.date.day}',
+            '${DateFormat('MMM').format(day.date)} ${day.date.day}',
             style: TextStyle(
               fontSize: 10,
               color: isSelected ? Colors.white60 : AppColors.textSecondary,

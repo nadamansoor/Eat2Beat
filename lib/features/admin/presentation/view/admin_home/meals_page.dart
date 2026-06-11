@@ -1,143 +1,228 @@
 import 'package:eat2beat/features/admin/presentation/view/admin_home/widgets/custom_app_bar.dart';
 import 'package:eat2beat/features/admin/presentation/view/admin_home/widgets/food_item_card.dart';
-import 'package:eat2beat/features/admin/presentation/view/admin_home/entities/food_item.dart';
+import 'package:eat2beat/features/admin/presentation/view/admin_home/edit_meal_page.dart';
+import 'package:eat2beat/features/admin/domain/entities/meal_entity.dart';
+import 'package:eat2beat/features/admin/presentation/cubits/meals_cubit/meals_cubit.dart';
+import 'package:eat2beat/features/admin/presentation/cubits/meals_cubit/meals_state.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MealsPage extends StatefulWidget {
-  const MealsPage({super.key});
+  final String restaurantName;
+
+  const MealsPage({super.key, required this.restaurantName});
 
   @override
   State<MealsPage> createState() => _MealsPageState();
 }
 
 class _MealsPageState extends State<MealsPage> {
-  int _approvalTab = 0;
   FoodCategory _category = FoodCategory.all;
   String _searchQuery = '';
 
-  final List<FoodItem> _meals = const [
-    FoodItem(
-      id: '1',
-      name: 'Caesar Salad Bowl',
+  List<MealEntity> _getFiltered(List<MealEntity> meals) {
+    return meals.where((item) {
+      if (_category == FoodCategory.vegan && item.category.toLowerCase() != 'vegan') return false;
+      if (_category == FoodCategory.protein && item.category.toLowerCase() != 'protein') return false;
       
-      calories: 430,
-      protein: 22,
-      imageAsset: 'assets/imgoffers/food1.png',
-      category: FoodCategory.vegan,
-      status: ApprovalStatus.approved,
-    ),
-    FoodItem(
-      id: '2',
-      name: 'Classic Beef Burger',
-      calories: 680,
-      protein: 38,
-      imageAsset: 'assets/imgoffers/food2.png',
-      category: FoodCategory.protein,
-      status: ApprovalStatus.approved,
-    ),
-    FoodItem(
-      id: '3',
-      name: 'Pasta Primavera',
-      calories: 520,
-      protein: 18,
-      imageAsset: 'assets/imgoffers/food3.png',
-      category: FoodCategory.vegan,
-      status: ApprovalStatus.pending,
-    ),
-    FoodItem(
-      id: '4',
-      name: 'Grilled Chicken Wrap',
-      
-      calories: 480,
-      protein: 42,
-      imageAsset: 'assets/imgoffers/food4.png',
-      category: FoodCategory.protein,
-      status: ApprovalStatus.approved,
-    ),
-    FoodItem(
-      id: '5',
-      name: 'Lentil Stew',
-      calories: 310,
-      protein: 16,
-      imageAsset: 'assets/imgoffers/food1.png',
-      category: FoodCategory.vegan,
-      status: ApprovalStatus.rejected,
-    ),
-        FoodItem(
-      id: '5',
-      name: 'Lentil Stew',
-      calories: 310,
-      protein: 16,
-      imageAsset: 'assets/imgoffers/food1.png',
-      category: FoodCategory.vegan,
-      status: ApprovalStatus.rejected,
-    ),
-        FoodItem(
-      id: '3',
-      name: 'Pasta Primavera',
-      calories: 520,
-      protein: 18,
-      imageAsset: 'assets/imgoffers/food3.png',
-      category: FoodCategory.vegan,
-      status: ApprovalStatus.pending,
-    ),
-  ];
-
-  List<FoodItem> get _filtered {
-    return _meals.where((item) {
-      if (_approvalTab == 1 && item.status != ApprovalStatus.pending) return false;
-      if (_approvalTab == 2 && item.status != ApprovalStatus.rejected) return false;
-      if (_category != FoodCategory.all && item.category != _category) return false;
       if (_searchQuery.isNotEmpty &&
-          !item.name.toLowerCase().contains(_searchQuery.toLowerCase()) ) {
+          !item.name.toLowerCase().contains(_searchQuery.toLowerCase())) {
         return false;
       }
       return true;
     }).toList();
   }
 
+  Future<void> _showDeleteConfirmDialog(BuildContext context, MealsCubit cubit, String mealId) async {
+    return showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Delete Meal?'),
+          content: const Text('Are you sure you want to delete this meal? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                cubit.deleteMeal(mealId);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _navigateToEdit(BuildContext context, MealsCubit cubit, MealEntity meal) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditMealPage(meal: meal),
+      ),
+    );
+    if (result == true) {
+      cubit.loadMeals();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.watch<MealsCubit>();
+    final state = cubit.state;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      body: CustomScrollView(
-        slivers: [
-          // ── AppBar (بيستخدم السيرش الموجود عندك جوّاه)
-          CustomAdminAppbar(
-            userName: 'Admin',       // ← غيريها بالاسم الحقيقي
-            greeting: 'Approved Meals',
-            onNotificationTap: () {},
-          ),
+      body: BlocListener<MealsCubit, MealsState>(
+        listener: (context, state) {
+          if (state is MealDeleteError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+        },
+        child: RefreshIndicator(
+          onRefresh: () => cubit.loadMeals(),
+          color: const Color(0xFF2ECC87),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // Custom App Bar displaying real Restaurant name
+              CustomAdminAppbar(
+                userName: widget.restaurantName,
+                greeting: 'Restaurant Menu Dashboard',
+                avatarImagePath: state is MealsLoaded ? state.restaurantImageUrl : null,
+                onNotificationTap: () {},
+              ),
 
-          // ── Empty state
-          if (_filtered.isEmpty)
-            const SliverFillRemaining(
-              child: Center(
-                child: Text(
-                  'No meals found',
-                  style: TextStyle(fontSize: 14, color: Color(0xFF9499A5)),
+              // Sliver category quick filter tabs
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: FoodCategory.values.map((cat) {
+                      final isSelected = _category == cat;
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _category = cat;
+                          });
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? const Color(0xFF2ECC87) : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected ? const Color(0xFF2ECC87) : const Color(0xFFEEF0F4),
+                            ),
+                          ),
+                          child: Text(
+                            cat.name[0].toUpperCase() + cat.name.substring(1),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected ? Colors.white : const Color(0xFF1A1D23),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
-            ),
 
-          // ── Meals list
-          if (_filtered.isNotEmpty)
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (_, i) => FoodItemCard(
-                  item: _filtered[i],
-                  onTap: () {
-                    // TODO: navigate to meal detail
+              if (state is MealsLoading || state is MealsInitial)
+                const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2ECC87)),
+                    ),
+                  ),
+                )
+              else if (state is MealsError)
+                SliverFillRemaining(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline_rounded, size: 48, color: Colors.orangeAccent),
+                          const SizedBox(height: 12),
+                          Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 14, color: Color(0xFF9499A5)),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => cubit.loadMeals(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2ECC87),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              else if (state is MealsLoaded) ...[
+                Builder(
+                  builder: (context) {
+                    final meals = state.meals;
+                    final deletingMealId = state is MealDeleting ? state.mealId : null;
+                    final filteredMeals = _getFiltered(meals);
+
+                    if (filteredMeals.isEmpty) {
+                      return const SliverFillRemaining(
+                        child: Center(
+                          child: Text(
+                            'No meals found',
+                            style: TextStyle(fontSize: 14, color: Color(0xFF9499A5)),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (_, i) {
+                          final meal = filteredMeals[i];
+                          return FoodItemCard(
+                            item: meal,
+                            isDeleting: deletingMealId == meal.id,
+                            onEdit: () => _navigateToEdit(context, cubit, meal),
+                            onDelete: () => _showDeleteConfirmDialog(context, cubit, meal.id),
+                            onTap: () {},
+                          );
+                        },
+                        childCount: filteredMeals.length,
+                      ),
+                    );
                   },
                 ),
-                childCount: _filtered.length,
-              ),
-            ),
+              ],
 
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        ],
+              const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -45,6 +45,9 @@ class DashboardData {
   final List<ForecastDay> weekForecast;
   final List<HistoricalVisit> historicalVisits;
   final int dayNumber;
+  final String dayName;
+  final bool isWeekend;
+  final bool isHoliday;
 
   const DashboardData({
     required this.restaurantId,
@@ -56,5 +59,8 @@ class DashboardData {
     required this.weekForecast,
     required this.historicalVisits,
     required this.dayNumber,
+    required this.dayName,
+    required this.isWeekend,
+    required this.isHoliday,
   });
 }

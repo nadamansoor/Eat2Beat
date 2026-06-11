@@ -1,21 +1,66 @@
+import 'package:eat2beat/core/services/api_service.dart';
+import 'package:eat2beat/features/admin/domain/usecases/get_demand_dashboard_usecase.dart';
 import 'package:eat2beat/features/admin/presentation/view/analytics/cubits/dashboard_state.dart';
-import 'package:eat2beat/features/admin/presentation/view/analytics/data/mockup_data.dart';
+import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
-  DashboardCubit() : super(DashboardInitial());
+  final AuthRepo authRepo;
+  final GetDemandDashboardUseCase getDemandDashboardUseCase;
+  final ApiService apiService;
+  String? _lastRestaurantId;
 
-  Future<void> loadDashboard() async {
+  DashboardCubit({
+    required this.authRepo,
+    required this.getDemandDashboardUseCase,
+    required this.apiService,
+  }) : super(DashboardInitial());
+
+  Future<void> loadDashboard({String? restaurantId, int days = 7}) async {
+    _lastRestaurantId = restaurantId;
     emit(DashboardLoading());
-    await Future.delayed(const Duration(milliseconds: 300));
     try {
-      emit(DashboardLoaded(data: MockupData.sampleDashboard));
+      final token = await authRepo.getIdToken();
+      if (token == null) {
+        emit(DashboardError('Authentication failed. Please sign in again.'));
+        return;
+      }
+
+      String targetId = restaurantId ?? '';
+      if (targetId.isEmpty) {
+        try {
+          targetId = await apiService.getRestaurantId(token);
+        } catch (_) {
+          targetId = FirebaseAuth.instance.currentUser?.uid ?? '';
+          if (targetId.isEmpty) {
+            emit(DashboardError('Failed to resolve restaurant ID.'));
+            return;
+          }
+        }
+      }
+      _lastRestaurantId = targetId;
+
+      final result = await getDemandDashboardUseCase(
+        token: token,
+        restaurantId: targetId,
+        days: days,
+      );
+
+      result.fold(
+        (failure) => emit(DashboardError(failure.message)),
+        (data) => emit(DashboardLoaded(data: data)),
+      );
     } catch (e) {
       emit(DashboardError(e.toString()));
     }
   }
 
-  void refresh() => loadDashboard();
+  void refresh() {
+    if (_lastRestaurantId != null) {
+      loadDashboard(restaurantId: _lastRestaurantId!);
+    }
+  }
 
   void selectForecastDay(int index) {
     final current = state;

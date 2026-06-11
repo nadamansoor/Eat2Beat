@@ -9,6 +9,12 @@ import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/info
 import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/metric_cards.dart';
 import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/restu_selector.dart';
 import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/today_demand.dart';
+import 'package:eat2beat/features/admin/presentation/cubits/profile_cubit/profile_cubit.dart';
+import 'package:eat2beat/features/admin/presentation/cubits/profile_cubit/profile_state.dart';
+import 'package:eat2beat/features/admin/domain/usecases/get_demand_dashboard_usecase.dart';
+import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
+import 'package:eat2beat/core/services/get_it_services.dart';
+import 'package:eat2beat/core/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,8 +23,21 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final profileCubit = context.read<ProfileCubit>();
+    String? restaurantId;
+    if (profileCubit.state is ProfileLoaded) {
+      final profileData = (profileCubit.state as ProfileLoaded).profileData;
+      restaurantId = profileData['restaurant_id']?.toString() ??
+                     profileData['id']?.toString() ??
+                     profileData['uid']?.toString();
+    }
+
     return BlocProvider(
-      create: (_) => DashboardCubit()..loadDashboard(),
+      create: (_) => DashboardCubit(
+        authRepo: getIt<AuthRepo>(),
+        getDemandDashboardUseCase: getIt<GetDemandDashboardUseCase>(),
+        apiService: getIt<ApiService>(),
+      )..loadDashboard(restaurantId: restaurantId),
       child: const _DashboardView(),
     );
   }
@@ -83,7 +102,12 @@ class _DashboardView extends StatelessWidget {
                         const SizedBox(height: 14),
 
                         // ── Date Info ──
-                        DateInfoRow(date: data.currentDate),
+                        DateInfoRow(
+                          date: data.currentDate,
+                          dayName: data.dayName,
+                          isWeekend: data.isWeekend,
+                          isHoliday: data.isHoliday,
+                        ),
                         const SizedBox(height: 14),
 
                         // ── Metric Cards ──
