@@ -87,58 +87,60 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                   SizedBox(height: 16),
 
                   // ✅ Role Selector
-                  Row(
-                    children: ['User', 'Admin'].map((role) {
-                      final isSelected = selectedRole == role;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => selectedRole = role),
-                          child: Container(
-                            margin: EdgeInsets.only(
-                              right: role == 'User' ? 8 : 0,
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFF7B61FF)
-                                  : const Color(0xFFF0EEFF),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFF7B61FF),
-                                width: 1.5,
+                    Row(
+                      children: ['User', 'Admin', 'Charity'].map((role) {
+                        final isSelected = selectedRole == role;
+
+                        return Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => selectedRole = role),
+                            child: Container(
+                              margin: EdgeInsets.only(
+                                right: role != 'Charity' ? 8 : 0,
                               ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  role == 'User'
-                                      ? Icons.person_outline
-                                      : Icons.admin_panel_settings_outlined,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : const Color(0xFF7B61FF),
-                                  size: 20,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFF7B61FF)
+                                    : const Color(0xFFF0EEFF),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFF7B61FF),
+                                  width: 1.5,
                                 ),
-                                SizedBox(width: 8),
-                                Text(
-                                  role,
-                                  style: TextStyle(
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    role == 'User'
+                                        ? Icons.person_outline
+                                        : role == 'Admin'
+                                            ? Icons.admin_panel_settings_outlined
+                                            : Icons.volunteer_activism_outlined,
                                     color: isSelected
                                         ? Colors.white
                                         : const Color(0xFF7B61FF),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
+                                    size: 20,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    role,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFF7B61FF),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-
+                        );
+                      }).toList(),
+                    ),
                   SizedBox(height: 16),
 
                   TermsandConditions(

@@ -19,5 +19,7 @@ class AppRoutes {
   static const detailsRouteName = "details";
   static const profileRouteName = "profile";
   static const adminRouteName = "admin";
-
+  static const charityRouteName = 'dashboard';
+  static const charityProfile = '/charity-profile';
+  
 }

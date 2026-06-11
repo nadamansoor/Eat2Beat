@@ -21,9 +21,20 @@ class signupviewBlocConsumer extends StatelessWidget {
             if (state is SignupSuccess) {
               // Navigator.pop(context);
                 if (state.role == 'Admin') {
-                  Navigator.pushReplacementNamed(context, AppRoutes.adminRouteName);
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.adminRouteName,
+                  );
+                } else if (state.role == 'Charity') {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.charityRouteName,
+                  );
                 } else {
-                  Navigator.pushReplacementNamed(context, AppRoutes.homeRouteName);
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.homeScreenRouteName,
+                  );
                 }
             }
             if (state is SignupError) {

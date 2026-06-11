@@ -9,6 +9,8 @@ import 'package:eat2beat/features/auth/presentation/views/forget/new_password_sc
 import 'package:eat2beat/features/auth/presentation/views/forget/otp_screen.dart';
 import 'package:eat2beat/features/auth/presentation/views/sign_in_view.dart';
 import 'package:eat2beat/features/auth/presentation/views/sign_up_view.dart';
+import 'package:eat2beat/features/charity/charity.dart';
+import 'package:eat2beat/features/charity/charity_dashboard/widgets/profile_screen.dart';
 import 'package:eat2beat/features/on_boarding/presentation/views/on_boarding_view.dart';
 import 'package:eat2beat/features/screens/home/home_screen.dart';
 import 'package:eat2beat/features/screens/home/tabs/cart/cart_tab.dart';
@@ -85,6 +87,10 @@ class MyApp extends StatelessWidget {
         AppRoutes.detailsRouteName: (_) => DetailsScreen(),
         AppRoutes.profileRouteName: (context) => const ProfileScreen(),
         AppRoutes.adminRouteName: (_) => AdminRouteName(),
+        AppRoutes.charityRouteName: (context) => CharityDashboardScreen(),
+        AppRoutes.charityProfile: (context) => CharityProfileScreen(),
+        
+        
       },
     );
   }
