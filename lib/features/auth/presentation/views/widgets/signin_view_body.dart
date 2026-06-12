@@ -211,7 +211,10 @@ class _signinViewBodyState extends State<signinViewBody> {
             ),
           ),
           dontHaveAcount(),
-          SizedBox(height: 24),
+          SafeArea(
+            top: false,
+            child: SizedBox(height: 24),
+          ),
         ],
       ),
     ),

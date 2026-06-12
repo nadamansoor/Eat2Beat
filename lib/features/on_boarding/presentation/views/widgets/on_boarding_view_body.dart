@@ -85,46 +85,49 @@ class _OnBoardingViewBodyState extends State<OnBoardingViewBody> {
           left: 0,
           right: 0,
           bottom: 0,
-          child: Container(
-            color: const Color(0xFFF9F7FF),
-            padding: const EdgeInsets.only(bottom: 25, top: 10),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: _onSkipPressed,
-                    child: const Text(
-                      "Skip",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
+          child: SafeArea(
+            top: false,
+            child: Container(
+              color: const Color(0xFFF9F7FF),
+              padding: const EdgeInsets.only(bottom: 25, top: 10),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: _onSkipPressed,
+                      child: const Text(
+                        "Skip",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      _dot(0 == _currentPage),
-                      const SizedBox(width: 6),
-                      _dot(1 == _currentPage),
-                      const SizedBox(width: 6),
-                      _dot(2 == _currentPage),
-                    ],
-                  ),
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: const Color(0xFF8468ff),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                      onPressed: _onNextPressed,
+                    Row(
+                      children: [
+                        _dot(0 == _currentPage),
+                        const SizedBox(width: 6),
+                        _dot(1 == _currentPage),
+                        const SizedBox(width: 6),
+                        _dot(2 == _currentPage),
+                      ],
                     ),
-                  ),
-                ],
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: const Color(0xFF8468ff),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        onPressed: _onNextPressed,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

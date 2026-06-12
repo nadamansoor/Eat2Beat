@@ -18,10 +18,11 @@ class DetailsDonation extends StatelessWidget {
 
     double screenWidth = MediaQuery.of(context).size.width;           // 375
     double screenHeight = MediaQuery.of(context).size.height;         // 812
-    return SafeArea(
-      child: Scaffold(
-          backgroundColor: AppColors.light,
-          body: SingleChildScrollView(
+    return Scaffold(
+        backgroundColor: AppColors.light,
+        body: SafeArea(
+          bottom: false,
+          child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -119,8 +120,8 @@ class DetailsDonation extends StatelessWidget {
                 )
               ],
             ),
-          )
-      ),
+          ),
+        ),
     );
   }
 }

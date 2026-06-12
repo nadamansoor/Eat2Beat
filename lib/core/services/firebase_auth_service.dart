@@ -27,13 +27,13 @@ class FirebaseAuthService {
         );
       } else {
         throw CustomExceptions(
-          message: 'An error occurred, please try again later.',
+          message: e.message ?? 'An error occurred, please try again later.',
         );
       }
     } catch (e) {
       log('Exception in createUserWithEmailAndPassword: ${e.toString()}');
       throw CustomExceptions(
-        message: 'An error occurred, please try again later.',
+        message: e.toString(),
       );
     }
   }
@@ -62,14 +62,13 @@ class FirebaseAuthService {
         );
       } else {
         throw CustomExceptions(
-          message: 'An error occurred, please try again later.',
+          message: e.message ?? 'An error occurred, please try again later.',
         );
       }
     } catch (e) {
-      log('Exception in createUserWithEmailAndPassword: ${e.toString()}');
-
+      log('Exception in signInWithEmailAndPassword: ${e.toString()}');
       throw CustomExceptions(
-        message: 'An error occurred, please try again later.',
+        message: e.toString(),
       );
     }
   }

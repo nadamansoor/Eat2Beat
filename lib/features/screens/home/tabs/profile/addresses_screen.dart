@@ -47,10 +47,11 @@ class _AddressesScreenState extends State<AddressesScreen> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppColors.light,
-        body: Stack(
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
           children: [
             /// Background
             Positioned.fill(
@@ -103,8 +104,8 @@ class _AddressesScreenState extends State<AddressesScreen> {
         ),
       ),
           ],
+          ),
         ),
-      ),
     );
   }
 }

@@ -7,6 +7,10 @@ import 'package:eat2beat/features/screens/home/tabs/profile/widgets/profile_head
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/widgets/circleIcon.dart';
+import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
+import 'package:eat2beat/core/services/get_it_services.dart';
+import 'package:eat2beat/core/services/user_profile_notifier.dart';
+import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -17,10 +21,11 @@ class ProfileScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppColors.light,
-        body: Stack(
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
           children: [
             /// Background Pattern
             Positioned.fill(
@@ -116,6 +121,19 @@ class ProfileScreen extends StatelessWidget {
                           icon: Icons.logout,
                           title: "Log out",
                           iconColor: Colors.red,
+                          onTap: () async {
+                            final navigator = Navigator.of(context);
+                            try {
+                              await getIt<AuthRepo>().signOut();
+                            } catch (e) {
+                              // Ignore sign out errors
+                            }
+                            navigator.pushNamedAndRemoveUntil(
+                              AppRoutes.loginRouteName,
+                              (route) => false,
+                            );
+                            await UserProfileNotifier().clearProfile();
+                          },
                         ),
                       ],
                     ),
@@ -124,8 +142,8 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
-      ),
     );
   }
 }

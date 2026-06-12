@@ -24,10 +24,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.light,
-        body: Stack(
+    return Scaffold(
+      backgroundColor: AppColors.light,
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
           children: [
             /// Background
             Positioned.fill(
@@ -103,20 +104,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   SizedBox(height: 16),
 
                   buildLanguageItem(
-                        language: "Arabic",
-                        selectedLanguage: selectedLanguage,
-                        onTap: () {
-                          setState(() => selectedLanguage = "Arabic");
-                        },
-                      ),
+                    language: "Arabic",
+                    selectedLanguage: selectedLanguage,
+                    onTap: () {
+                      setState(() => selectedLanguage = "Arabic");
+                    },
+                  ),
                   SizedBox(height: 12),
                   buildLanguageItem(
-                        language: "English",
-                        selectedLanguage: selectedLanguage,
-                        onTap: () {
-                          setState(() => selectedLanguage = "English");
-                        },
-                      ),
+                    language: "English",
+                    selectedLanguage: selectedLanguage,
+                    onTap: () {
+                      setState(() => selectedLanguage = "English");
+                    },
+                  ),
                 ],
               ),
             ),
@@ -125,7 +126,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-
-
- 
 }

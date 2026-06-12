@@ -33,10 +33,11 @@ class PointsScreen extends StatelessWidget {
      final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
    
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppColors.light,
-        body: Stack(
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
           children: [
             /// Background
             Positioned.fill(
@@ -135,9 +136,8 @@ class PointsScreen extends StatelessWidget {
         ),
       ),
           ],
-        
+          ),
         ),
-      ),
     );
   }
 }

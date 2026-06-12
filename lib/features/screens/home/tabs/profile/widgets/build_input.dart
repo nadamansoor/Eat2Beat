@@ -7,6 +7,7 @@ Widget buildInput({
     required String title,
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
+    String? hintText,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
@@ -23,6 +24,8 @@ Widget buildInput({
             keyboardType: keyboardType,
             style: AppStyles.black16Bold,
             decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: AppStyles.grey13w400,
               filled: true,
               fillColor: Colors.white,
               contentPadding:

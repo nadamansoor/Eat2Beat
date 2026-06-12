@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'package:eat2beat/features/screens/home/tabs/profile/widgets/build_input.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/widgets/circleIcon.dart';
+import 'package:eat2beat/core/services/user_profile_notifier.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -13,24 +16,43 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  final TextEditingController nameController =
-      TextEditingController(text: "Nada Mansour");
-  final TextEditingController emailController =
-      TextEditingController(text: "nadamansour1566@gmail.com");
-  final TextEditingController phone1Controller =
-      TextEditingController(text: "01558591638");
-  final TextEditingController phone2Controller =
-      TextEditingController(text: "01111111111");
+  late final TextEditingController nameController;
+  late final TextEditingController emailController;
+  late final TextEditingController phone1Controller;
+  late final TextEditingController phone2Controller;
+  String? _selectedImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = UserProfileNotifier();
+    nameController = TextEditingController(text: profile.name);
+    emailController = TextEditingController(text: profile.email);
+    phone1Controller = TextEditingController(text: profile.phone);
+    phone2Controller = TextEditingController(text: profile.phone2);
+    _selectedImagePath = profile.profileImagePath;
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImagePath = pickedFile.path;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppColors.light,
-        body: Stack(
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
           children: [
             /// Background
             Positioned.fill(
@@ -54,9 +76,25 @@ class _AccountScreenState extends State<AccountScreen> {
                         icon: Icons.arrow_back_ios_new_rounded,
                         onTap: () => Navigator.pop(context),
                       ),
-                      Text(
-                        "Save",
-                        style: AppStyles.purple,
+                      GestureDetector(
+                        onTap: () async {
+                          await UserProfileNotifier().updateProfile(
+                            name: nameController.text,
+                            email: emailController.text,
+                            phone: phone1Controller.text,
+                            phone2: phone2Controller.text,
+                            profileImagePath: _selectedImagePath ?? "",
+                          );
+                          if (!context.mounted) return;
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Profile saved successfully!')),
+                          );
+                        },
+                        child: Text(
+                          "Save",
+                          style: AppStyles.purple,
+                        ),
                       ),
                     ],
                   ),
@@ -64,27 +102,40 @@ class _AccountScreenState extends State<AccountScreen> {
                   SizedBox(height: height * 0.04),
 
                   /// Profile Image
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CircleAvatar(
-                        radius: width * 0.15,
-                        backgroundImage: AssetImage(Assets.imagesMyPhoto),
-                      ),
-                      Positioned(
-                        bottom: 6,
-                        right: width * 0.18,
-                        child: CircleAvatar(
-                          radius: 18,
-                          backgroundColor: AppColors.purple800,
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: 16,
-                            color: Colors.white,
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: width * 0.15,
+                          backgroundColor: AppColors.purple50,
+                          backgroundImage: _selectedImagePath != null && _selectedImagePath!.isNotEmpty
+                              ? FileImage(File(_selectedImagePath!)) as ImageProvider
+                              : null,
+                          child: (_selectedImagePath == null || _selectedImagePath!.isEmpty)
+                              ? Icon(
+                                  Icons.person,
+                                  size: width * 0.15,
+                                  color: AppColors.purple,
+                                )
+                              : null,
+                        ),
+                        Positioned(
+                          bottom: 6,
+                          right: width * 0.18,
+                          child: CircleAvatar(
+                            radius: 18,
+                            backgroundColor: AppColors.purple800,
+                            child: const Icon(
+                              Icons.camera_alt,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
                   SizedBox(height: height * 0.05),
@@ -105,11 +156,13 @@ class _AccountScreenState extends State<AccountScreen> {
                           title: "Phone",
                           controller: phone1Controller,
                           keyboardType: TextInputType.phone,
+                          hintText: "01000000000",
                         ),
                         buildInput(
                           title: "Phone 2",
                           controller: phone2Controller,
                           keyboardType: TextInputType.phone,
+                          hintText: "01000000000",
                         ),
                       ],
                     ),
@@ -118,8 +171,8 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
             ),
           ],
+          ),
         ),
-      ),
     );
   }
 

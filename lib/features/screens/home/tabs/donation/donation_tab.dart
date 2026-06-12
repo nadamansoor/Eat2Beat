@@ -133,7 +133,7 @@ class DonationTab extends StatelessWidget {
                       },
                       itemCount: DonationModel.donationModel.length,
                     ),
-                    SizedBox(height: screenHeight*0.1,)
+                    SizedBox(height: screenHeight * 0.14,)
                   ],
                 ),
               ),

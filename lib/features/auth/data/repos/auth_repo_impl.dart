@@ -22,12 +22,17 @@ class AuthRepoImpl extends AuthRepo {
         email: email,
         password: password,
       );
-      return right(UserModel.fromFirebaseUser(user));
+      try {
+        await user.updateDisplayName(name);
+      } catch (e) {
+        log('Exception updating displayName: ${e.toString()}');
+      }
+      return right(UserModel.fromFirebaseUser(user, fallbackName: name));
     } on CustomExceptions catch (e) {
       return left(ServerFailure(e.message));
     } catch (e) {
       log('Exception in createUserWithEmailAndPassword: ${e.toString()}');
-      return left(ServerFailure('An error occurred, please try again later.'));
+      return left(ServerFailure(e.toString()));
     }
   }
 
@@ -46,7 +51,7 @@ class AuthRepoImpl extends AuthRepo {
       return left(ServerFailure(e.message));
     } catch (e) {
       log('Exception in signInWithEmailAndPassword: ${e.toString()}');
-      return left(ServerFailure('An error occurred, please try again later.'));
+      return left(ServerFailure(e.toString()));
     }
   }
 

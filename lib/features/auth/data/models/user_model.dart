@@ -3,11 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class UserModel extends UserEntity{
   UserModel({required super.name, required super.email, required super.UId});
-  factory UserModel.fromFirebaseUser(User user)
+  factory UserModel.fromFirebaseUser(User user, {String? fallbackName})
   {
     return UserModel 
     (
-      name: user.displayName ?? '',
+      name: (user.displayName != null && user.displayName!.isNotEmpty)
+          ? user.displayName!
+          : (fallbackName ?? ''),
       email: user.email ?? '',
       UId: user.uid
     );

@@ -75,10 +75,11 @@ Widget build(BuildContext context) {
   screenWidth = MediaQuery.of(context).size.width;
   screenHeight = MediaQuery.of(context).size.height;
 
-  return SafeArea(
-    child: Scaffold(
+  return Scaffold(
       backgroundColor: AppColors.light,
-      body: Stack(
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
         children: [
           Positioned.fill(
             child: Image.asset(

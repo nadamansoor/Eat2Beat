@@ -1,10 +1,12 @@
 
+import 'dart:io';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/widgets/custom_text_field.dart';
 import 'package:eat2beat/features/models/home_model.dart';
+import 'package:eat2beat/core/services/user_profile_notifier.dart';
 import 'package:flutter/material.dart';
 
 class HomeTab extends StatefulWidget {
@@ -64,29 +66,46 @@ class _HomeTabState extends State<HomeTab> {
       extendBodyBehindAppBar: true,
       backgroundColor: AppColors.light,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
-        title: Row(
-          children: [
-              InkWell(
-                onTap: () {
-                  Navigator.of(context).pushNamed(
-                    AppRoutes.profileRouteName, // اسكرينة البروفايل
-                  );
-                },
-                child: CircleAvatar(
-                  radius: 22,
-                  backgroundImage: AssetImage(Assets.imagesMyPhoto),
-                ),
-              ),            
-            SizedBox(width: screenWidth * 0.04),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        title: ListenableBuilder(
+          listenable: UserProfileNotifier(),
+          builder: (context, child) {
+            final profile = UserProfileNotifier();
+            return Row(
               children: [
-                Text("Hello", style: AppStyles.black13w400),
-                Text("Ahmed Salah", style: AppStyles.black16Bold),
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      AppRoutes.profileRouteName,
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 22,
+                    backgroundColor: AppColors.purple50,
+                    backgroundImage: profile.profileImagePath.isNotEmpty
+                        ? FileImage(File(profile.profileImagePath)) as ImageProvider
+                        : null,
+                    child: profile.profileImagePath.isEmpty
+                        ? const Icon(
+                            Icons.person,
+                            size: 22,
+                            color: AppColors.purple,
+                          )
+                        : null,
+                  ),
+                ),
+                SizedBox(width: screenWidth * 0.04),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Hello", style: AppStyles.black13w400),
+                    Text(profile.name, style: AppStyles.black16Bold),
+                  ],
+                )
               ],
-            )
-          ],
+            );
+          },
         ),
         actions: [
           Padding(
@@ -107,7 +126,7 @@ class _HomeTabState extends State<HomeTab> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(height: screenHeight * 0.12),
+                  SizedBox(height: MediaQuery.of(context).padding.top + kToolbarHeight),
 
                   CustomTextFormField(
                     hintText: "Search",
@@ -335,7 +354,7 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                   ],
 
-                  SizedBox(height: screenHeight * 0.08),
+                  SizedBox(height: screenHeight * 0.14),
                 ],
               ),
             ),

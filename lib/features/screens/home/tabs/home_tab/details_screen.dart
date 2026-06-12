@@ -133,100 +133,103 @@ class _DetailsScreenState extends State<DetailsScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: screenWidth * 0.06,
-          vertical: screenHeight * 0.02
-        ),
-        decoration: BoxDecoration(
-          color: Color(0xd9c4b2fc),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Text("\$ ${model.price * quantity}" , style: AppStyles.white25Bold,),
-                Spacer(),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth*0.03,
-                    vertical: screenHeight * 0.015
-                  ),
-                  decoration: BoxDecoration(
-                    color: Color(0x1a1b1432),
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(
-                      color: Colors.white
-                    )
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      InkWell(
-                        onTap: (){
-                          if(quantity > 1){
-                            quantity--;
-                          }
-                          setState(() {
-
-                          });
-                        },
-                          child: Container(
-                              decoration: BoxDecoration(
-                                color: Color(0x33f9f7ff),
-                                shape: BoxShape.circle
-                              ),
-                              child: Icon(Icons.remove, color: Colors.white,))),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.03,
-
-                        ),
-                        child: Text("$quantity", style: AppStyles.white16Bold,),
-                      ),
-                      InkWell(
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.06,
+            vertical: screenHeight * 0.02
+          ),
+          decoration: BoxDecoration(
+            color: Color(0xd9c4b2fc),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24))
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Text("\$ ${model.price * quantity}" , style: AppStyles.white25Bold,),
+                  Spacer(),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth*0.03,
+                      vertical: screenHeight * 0.015
+                    ),
+                    decoration: BoxDecoration(
+                      color: Color(0x1a1b1432),
+                      borderRadius: BorderRadius.circular(50),
+                      border: Border.all(
+                        color: Colors.white
+                      )
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        InkWell(
                           onTap: (){
-
+                            if(quantity > 1){
+                              quantity--;
+                            }
                             setState(() {
-                              quantity++;
+
                             });
                           },
-                          child: Container(
-                              decoration: BoxDecoration(
+                            child: Container(
+                                decoration: BoxDecoration(
                                   color: Color(0x33f9f7ff),
                                   shape: BoxShape.circle
-                              ),
-                              child: Icon(Icons.add, color: Colors.white,))),
-                    ],
-                  ),
-                )
-              ],
-            ),
-            SizedBox(height: screenHeight * 0.02,),
-            Row(
-              children: [
-                Expanded(
-                  child: CustomButton(
-                      text: "Add To Cart",
-                      backgroundColor: AppColors.lightPurple,
-                      onPressed: (){}
-                  ),
-                ),
+                                ),
+                                child: Icon(Icons.remove, color: Colors.white,))),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.03,
 
-                SizedBox(width: screenWidth * 0.06,),
+                          ),
+                          child: Text("$quantity", style: AppStyles.white16Bold,),
+                        ),
+                        InkWell(
+                            onTap: (){
 
-                Expanded(
-                  child: CustomButton(
-                      text: "Order Now",
-                      backgroundColor: AppColors.purple,
-                      onPressed: (){}
+                              setState(() {
+                                quantity++;
+                              });
+                            },
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    color: Color(0x33f9f7ff),
+                                    shape: BoxShape.circle
+                                ),
+                                child: Icon(Icons.add, color: Colors.white,))),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              SizedBox(height: screenHeight * 0.02,),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                        text: "Add To Cart",
+                        backgroundColor: AppColors.lightPurple,
+                        onPressed: (){}
+                    ),
                   ),
-                )
-              ],
-            )
-          ],
+
+                  SizedBox(width: screenWidth * 0.06,),
+
+                  Expanded(
+                    child: CustomButton(
+                        text: "Order Now",
+                        backgroundColor: AppColors.purple,
+                        onPressed: (){}
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

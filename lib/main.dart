@@ -18,7 +18,6 @@ import 'package:eat2beat/features/screens/home/tabs/donation/choose_donate.dart'
 import 'package:eat2beat/features/screens/home/tabs/donation/details_donation.dart';
 import 'package:eat2beat/features/screens/home/tabs/donation/donation_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/home_tab/details_screen.dart';
-import 'package:eat2beat/features/screens/home/tabs/home_tab/home_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/impact/impact_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/offers/offers_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/profile/profile_screen.dart';
@@ -29,6 +28,7 @@ import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:eat2beat/core/services/user_profile_notifier.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +38,7 @@ void main() async {
   );
   
   // await Prefs.init();
+  await UserProfileNotifier().init();
   setupGetIt();
   runApp(const MyApp());
 }

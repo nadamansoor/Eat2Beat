@@ -210,6 +210,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                         item.description,
                         style: const TextStyle(color: Colors.grey),
                       ),
+                      const SizedBox(height: 180),
                     ],
                   ),
                 ),

@@ -14,9 +14,9 @@ class CustomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Container(
       width: 375,
-      height: 70,
       decoration: const ShapeDecoration(
         color: Colors.white,
         shape: RoundedRectangleBorder(
@@ -34,15 +34,24 @@ class CustomNavigationBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: bottoomNavigationBarItems.asMap().entries.map((entry) {
-          return NavigationBarItem(
-            isSelected: selectedIndex == entry.key,
-            item: entry.value,
-            onTap: () => onTap(entry.key),
-          );
-        }).toList(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 70,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: bottoomNavigationBarItems.asMap().entries.map((entry) {
+                return NavigationBarItem(
+                  isSelected: selectedIndex == entry.key,
+                  item: entry.value,
+                  onTap: () => onTap(entry.key),
+                );
+              }).toList(),
+            ),
+          ),
+          SizedBox(height: bottomPadding),
+        ],
       ),
     );
   }

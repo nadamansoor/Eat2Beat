@@ -4,7 +4,6 @@ import 'package:eat2beat/features/screens/home/tabs/cart/checkout_screen.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
-import 'package:eat2beat/core/widgets/circleIcon.dart';
 import 'package:flutter/material.dart';
 
 class CartScreen extends StatefulWidget {
@@ -32,10 +31,11 @@ class _CartScreenState extends State<CartScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
     
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppColors.light,
-        body: Stack(
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
           children: [
             Image.asset(
               Assets.imagesPatternCart,
@@ -53,14 +53,8 @@ class _CartScreenState extends State<CartScreen> {
                   SizedBox(height: screenHeight * 0.05),
                   
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ///Back button
-                      circleIcon(
-                        icon: Icons.arrow_back_ios_new_rounded,
-                        onTap: () => Navigator.pop(context),
-                      ),
-                      SizedBox(width: screenWidth * 0.20),
                       //Cart icon
                       Image.asset(
                         Assets.imagesCarrtIcon,
@@ -100,15 +94,18 @@ class _CartScreenState extends State<CartScreen> {
                   SizedBox(height: screenHeight * 0.02),
 
                 
-                  _buildProceedButton(),
-                  
-                  SizedBox(height: screenHeight * 0.02),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+                   _buildProceedButton(),
+                   
+                   SafeArea(
+                     top: false,
+                     child: SizedBox(height: screenHeight * 0.14),
+                   ),
+                 ],
+               ),
+             ),
+           ],
+           ),
+         ),
     );
   }
 

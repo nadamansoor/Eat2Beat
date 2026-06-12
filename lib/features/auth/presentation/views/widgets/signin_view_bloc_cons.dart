@@ -5,6 +5,7 @@ import 'package:eat2beat/features/auth/presentation/cubits/cubitsignin/signin_cu
 import 'package:eat2beat/features/auth/presentation/views/widgets/signin_view_body.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eat2beat/core/services/user_profile_notifier.dart';
 
 class SigninViewConsumer extends StatelessWidget {
   const SigninViewConsumer({
@@ -16,6 +17,13 @@ class SigninViewConsumer extends StatelessWidget {
     return BlocConsumer<SigninCubit, SigninState>(
       listener: (context, state) {
         if (state is SigninSuccess) {
+          UserProfileNotifier().updateProfile(
+            name: state.userEntity.name,
+            email: state.userEntity.email,
+            phone: UserProfileNotifier().phone,
+            phone2: UserProfileNotifier().phone2,
+            profileImagePath: UserProfileNotifier().profileImagePath,
+          );
           String route = AppRoutes.homeRouteName;
           if (state.role == 'admin') {
             route = AppRoutes.adminRouteName;
