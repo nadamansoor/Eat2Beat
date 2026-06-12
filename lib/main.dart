@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
         AppRoutes.newPassRouteName: (_) => NewPasswordScreen(),
         AppRoutes.changePassRouteName: (_) => ChangePasswordScreen(),
         AppRoutes.homeScreenRouteName: (_) => HomeScreen(),
-        AppRoutes.homeRouteName: (_) => HomeTab(),
+        AppRoutes.homeRouteName: (_) => HomeScreen(),
         AppRoutes.offersRouteName: (_) => OffersTab(),
         AppRoutes.impactRouteName: (_) => ImpactTab(),
         AppRoutes.donationRouteName: (_) => DonationTab(),
