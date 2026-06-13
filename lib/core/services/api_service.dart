@@ -404,4 +404,147 @@ class ApiService {
     }
     throw CustomExceptions(message: 'Missing restaurant_id or failed to fetch');
   }
+
+  Future<List<dynamic>> getUserRestaurants(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/restaurants?limit=50');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data is List) {
+        return data;
+      }
+      return [];
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load restaurants (${response.statusCode})',
+    );
+  }
+
+  Future<List<dynamic>> getRestaurantMeals(String token, String restaurantId) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/restaurant-meals?restaurant_id=$restaurantId&limit=50');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data is List) {
+        return data;
+      }
+      return [];
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load restaurant meals (${response.statusCode})',
+    );
+  }
+
+  Future<void> favoriteMeal(String token, String mealId) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/meals/favorite');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'meal_id': mealId}),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204 && response.statusCode != 201) {
+      throw CustomExceptions(
+        message: response.body.isNotEmpty
+            ? response.body
+            : 'Failed to favorite meal (${response.statusCode})',
+      );
+    }
+  }
+
+  Future<void> unfavoriteMeal(String token, String mealId) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/meals/unfavorite');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'meal_id': mealId}),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw CustomExceptions(
+        message: response.body.isNotEmpty
+            ? response.body
+            : 'Failed to unfavorite meal (${response.statusCode})',
+      );
+    }
+  }
+
+  Future<List<dynamic>> getFavoriteMealIds(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/meals/favorites');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data is List) {
+        return data;
+      }
+      return [];
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load favorite meal IDs (${response.statusCode})',
+    );
+  }
+
+  Future<List<dynamic>> getFavoriteMealsList(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/meals/favorites/list');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data is List) {
+        return data;
+      }
+      return [];
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load favorite meals (${response.statusCode})',
+    );
+  }
 }
+

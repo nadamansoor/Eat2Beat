@@ -18,7 +18,41 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
   int quantity = 1;
   late HomeFoodModel model;
-  //late double totalPrice ;
+  Widget _buildImage(String imagePath, {double? width, double? height, BoxFit fit = BoxFit.cover}) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            Assets.imagesFood,
+            width: width,
+            height: height,
+            fit: fit,
+          );
+        },
+      );
+    } else {
+      final path = imagePath.trim().isEmpty ? Assets.imagesFood : imagePath.trim();
+      return Image.asset(
+        path,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            Assets.imagesFood,
+            width: width,
+            height: height,
+            fit: fit,
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width; // 375
@@ -34,7 +68,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
               children: [
                 Stack(
                   children: [
-                    Image.asset(
+                    _buildImage(
                       model.image,
                       height: screenHeight * 0.4,
                       width: double.infinity,
@@ -71,7 +105,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       Text(model.title, style: AppStyles.black20Bold),
                       Row(
                         children: [
-                          Image.asset(model.restIcon , ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: _buildImage(
+                              model.restIcon,
+                              width: 32,
+                              height: 32,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                           SizedBox(width: screenWidth * 0.02,),
                           Text(model.restName, style: AppStyles.black16w500,),
                           SizedBox(width: screenWidth * 0.02,),

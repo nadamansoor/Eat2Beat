@@ -132,7 +132,7 @@ class ProfileScreen extends StatelessWidget {
                               AppRoutes.loginRouteName,
                               (route) => false,
                             );
-                            await UserProfileNotifier().clearProfile();
+                            await UserProfileNotifier().clearActiveSession();
                           },
                         ),
                       ],

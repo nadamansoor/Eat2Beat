@@ -17,12 +17,10 @@ class SigninViewConsumer extends StatelessWidget {
     return BlocConsumer<SigninCubit, SigninState>(
       listener: (context, state) {
         if (state is SigninSuccess) {
-          UserProfileNotifier().updateProfile(
-            name: state.userEntity.name,
-            email: state.userEntity.email,
-            phone: UserProfileNotifier().phone,
-            phone2: UserProfileNotifier().phone2,
-            profileImagePath: UserProfileNotifier().profileImagePath,
+          UserProfileNotifier().loadProfileForUser(
+            state.userEntity.UId,
+            fallbackName: state.userEntity.name,
+            fallbackEmail: state.userEntity.email,
           );
           String route = AppRoutes.homeRouteName;
           if (state.role == 'admin') {

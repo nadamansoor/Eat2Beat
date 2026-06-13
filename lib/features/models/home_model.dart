@@ -1,6 +1,7 @@
 import '../../core/utils/app_images.dart';
 
 class HomeFoodModel {
+  final String? id;
   final String title;
   final String image;
   late final double price;
@@ -12,6 +13,7 @@ class HomeFoodModel {
   final String restIcon;
 
   HomeFoodModel({
+    this.id,
     required this.restName,
     required this.restIcon,
     required this.size,

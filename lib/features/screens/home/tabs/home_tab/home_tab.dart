@@ -8,6 +8,10 @@ import 'package:eat2beat/core/widgets/custom_text_field.dart';
 import 'package:eat2beat/features/models/home_model.dart';
 import 'package:eat2beat/core/services/user_profile_notifier.dart';
 import 'package:flutter/material.dart';
+import 'package:eat2beat/core/services/get_it_services.dart';
+import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
+import 'package:eat2beat/core/services/api_service.dart';
+import 'package:eat2beat/features/models/restaurant_model.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -25,6 +29,8 @@ class _HomeTabState extends State<HomeTab> {
   late List<HomeFoodModel> searchResults;
 
   List<String> categories = [
+    "Restaurants",
+    "Favorites",
     "New",
     "Near2You",
     "Popular",
@@ -41,10 +47,274 @@ class _HomeTabState extends State<HomeTab> {
     "Egyptian Food",
   ];
 
+  List<RestaurantModel> restaurants = [];
+  bool loadingRestaurants = false;
+  String? restaurantsError;
+
+  RestaurantModel? selectedRestaurant;
+  List<HomeFoodModel> restaurantMeals = [];
+  bool loadingMeals = false;
+  String? mealsError;
+
+  List<HomeFoodModel> favoriteMeals = [];
+  bool loadingFavorites = false;
+  String? favoritesError;
+  Set<String> favoriteMealIds = {};
+
   @override
   void initState() {
     super.initState();
     searchResults = [];
+    _fetchRestaurants();
+    _fetchFavoriteMealIds();
+  }
+
+  bool _isFavorite(String id) {
+    return favoriteMealIds.contains(id);
+  }
+
+  Future<void> _fetchFavoriteMealIds() async {
+    try {
+      final authRepo = getIt<AuthRepo>();
+      final token = await authRepo.getIdToken();
+      if (token == null) return;
+      final rawIds = await getIt<ApiService>().getFavoriteMealIds(token);
+      final Set<String> ids = {};
+      for (final row in rawIds) {
+        final mealId = row['meal_id']?.toString() ?? '';
+        if (mealId.isNotEmpty) {
+          ids.add(mealId);
+        }
+      }
+      setState(() {
+        favoriteMealIds = ids;
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _fetchFavoriteMeals() async {
+    if (loadingFavorites) return;
+    setState(() {
+      loadingFavorites = true;
+      favoritesError = null;
+    });
+    try {
+      final authRepo = getIt<AuthRepo>();
+      final token = await authRepo.getIdToken();
+      if (token == null) {
+        throw Exception("Failed to get authorization token.");
+      }
+      final rawMeals = await getIt<ApiService>().getFavoriteMealsList(token);
+      
+      final List<HomeFoodModel> mappedMeals = [];
+      final Set<String> updatedFavIds = {};
+      for (final m in rawMeals) {
+        final id = m['id']?.toString() ?? m['meal_id']?.toString() ?? '';
+        if (id.isEmpty) continue;
+        updatedFavIds.add(id);
+
+        final title = m['title']?.toString() ?? m['name']?.toString() ?? 'Meal';
+        final description = m['description']?.toString() ?? '';
+        final priceVal = m['price'];
+        double price = 0.0;
+        if (priceVal is num) {
+          price = priceVal.toDouble();
+        } else if (priceVal is String && priceVal.isNotEmpty) {
+          price = double.tryParse(priceVal) ?? 0.0;
+        }
+        final mealImgUrl = m['meal_img_url']?.toString() ?? m['image']?.toString() ?? '';
+        
+        final restName = m['restaurant_name']?.toString() ?? m['rest_name']?.toString() ?? 'Restaurant';
+        final restIcon = m['restaurant_img_url']?.toString() ?? Assets.imagesBurgerKing;
+
+        mappedMeals.add(HomeFoodModel(
+          id: id,
+          restName: restName,
+          restIcon: restIcon,
+          size: 'M',
+          title: title,
+          image: mealImgUrl.isNotEmpty ? mealImgUrl : Assets.imagesFood,
+          price: price,
+          rate: 4.5,
+          description: description,
+          time: '20 Min',
+        ));
+      }
+      
+      setState(() {
+        favoriteMeals = mappedMeals;
+        favoriteMealIds = updatedFavIds;
+        loadingFavorites = false;
+      });
+    } catch (e) {
+      setState(() {
+        favoritesError = e.toString().replaceFirst("Exception: ", "");
+        loadingFavorites = false;
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite(HomeFoodModel item) async {
+    final mealId = item.id;
+    if (mealId == null) return;
+
+    final isFav = _isFavorite(mealId);
+
+    setState(() {
+      if (isFav) {
+        favoriteMealIds.remove(mealId);
+        if (selectedIndex == 1) {
+          favoriteMeals.removeWhere((m) => m.id == mealId);
+        }
+      } else {
+        favoriteMealIds.add(mealId);
+      }
+    });
+
+    try {
+      final authRepo = getIt<AuthRepo>();
+      final token = await authRepo.getIdToken();
+      if (token == null) {
+        throw Exception("Failed to get authorization token.");
+      }
+
+      if (isFav) {
+        await getIt<ApiService>().unfavoriteMeal(token, mealId);
+      } else {
+        await getIt<ApiService>().favoriteMeal(token, mealId);
+      }
+      
+      if (!isFav && selectedIndex == 1) {
+        _fetchFavoriteMeals();
+      }
+    } catch (e) {
+      setState(() {
+        if (isFav) {
+          favoriteMealIds.add(mealId);
+        } else {
+          favoriteMealIds.remove(mealId);
+        }
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to update favorite: ${e.toString()}")),
+      );
+    }
+  }
+
+  Widget _buildImage(String imagePath, {double? width, double? height, BoxFit fit = BoxFit.cover}) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            Assets.imagesFood,
+            width: width,
+            height: height,
+            fit: fit,
+          );
+        },
+      );
+    } else {
+      final path = imagePath.trim().isEmpty ? Assets.imagesFood : imagePath.trim();
+      return Image.asset(
+        path,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            Assets.imagesFood,
+            width: width,
+            height: height,
+            fit: fit,
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> _fetchRestaurants() async {
+    if (loadingRestaurants) return;
+    setState(() {
+      loadingRestaurants = true;
+      restaurantsError = null;
+    });
+    try {
+      final authRepo = getIt<AuthRepo>();
+      final token = await authRepo.getIdToken();
+      if (token == null) {
+        throw Exception("Failed to get authorization token.");
+      }
+      final rawRestaurants = await getIt<ApiService>().getUserRestaurants(token);
+      setState(() {
+        restaurants = rawRestaurants.map((r) => RestaurantModel.fromJson(r)).toList();
+        loadingRestaurants = false;
+      });
+    } catch (e) {
+      setState(() {
+        restaurantsError = e.toString().replaceFirst("Exception: ", "");
+        loadingRestaurants = false;
+      });
+    }
+  }
+
+  Future<void> _fetchRestaurantMeals(RestaurantModel restaurant) async {
+    setState(() {
+      selectedRestaurant = restaurant;
+      loadingMeals = true;
+      mealsError = null;
+      restaurantMeals = [];
+    });
+    try {
+      final authRepo = getIt<AuthRepo>();
+      final token = await authRepo.getIdToken();
+      if (token == null) {
+        throw Exception("Failed to get authorization token.");
+      }
+      final rawMeals = await getIt<ApiService>().getRestaurantMeals(token, restaurant.id);
+      
+      final List<HomeFoodModel> mappedMeals = [];
+      for (final m in rawMeals) {
+        final id = m['id']?.toString() ?? m['meal_id']?.toString() ?? '';
+        final title = m['title']?.toString() ?? m['name']?.toString() ?? 'Meal';
+        final description = m['description']?.toString() ?? '';
+        final priceVal = m['price'];
+        double price = 0.0;
+        if (priceVal is num) {
+          price = priceVal.toDouble();
+        } else if (priceVal is String && priceVal.isNotEmpty) {
+          price = double.tryParse(priceVal) ?? 0.0;
+        }
+        final mealImgUrl = m['meal_img_url']?.toString() ?? m['image']?.toString() ?? '';
+        
+        mappedMeals.add(HomeFoodModel(
+          id: id,
+          restName: restaurant.name,
+          restIcon: restaurant.image.isNotEmpty ? restaurant.image : Assets.imagesBurgerKing,
+          size: 'M',
+          title: title,
+          image: mealImgUrl.isNotEmpty ? mealImgUrl : Assets.imagesFood,
+          price: price,
+          rate: 4.5,
+          description: description,
+          time: '20 Min',
+        ));
+      }
+      
+      setState(() {
+        restaurantMeals = mappedMeals;
+        loadingMeals = false;
+      });
+    } catch (e) {
+      setState(() {
+        mealsError = e.toString().replaceFirst("Exception: ", "");
+        loadingMeals = false;
+      });
+    }
   }
 
   void onSearch(String value) {
@@ -168,7 +438,7 @@ class _HomeTabState extends State<HomeTab> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: Image.asset(
+                                child: _buildImage(
                                   item.image,
                                   width: 90,
                                   height: 90,
@@ -212,146 +482,546 @@ class _HomeTabState extends State<HomeTab> {
 
                
                   if (!isSearching) ...[
-                    SizedBox(
-                      height: screenHeight * 0.05,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: categories.length,
-                        separatorBuilder: (_, __) =>
-                            SizedBox(width: screenWidth * 0.02),
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
+                    if (selectedRestaurant != null) ...[
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: AppColors.purple),
+                            onPressed: () {
                               setState(() {
-                                selectedIndex = index;
+                                selectedRestaurant = null;
                               });
                             },
-                            child: Container(
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: screenWidth * 0.04),
-                              decoration: BoxDecoration(
-                                color: selectedIndex == index
-                                    ? AppColors.purple
-                                    : AppColors.lightPurple,
-                                borderRadius: BorderRadius.circular(40),
-                              ),
-                              child: Text(
-                                categories[index],
-                                style: selectedIndex == index
-                                    ? AppStyles.black16w500
-                                        .copyWith(color: AppColors.light)
-                                    : AppStyles.black16w500,
-                              ),
-                            ),
-                          );
-                        },
+                          ),
+                          Text(
+                            "Back to restaurants",
+                            style: AppStyles.black16w500.copyWith(color: AppColors.purple),
+                          ),
+                        ],
                       ),
-                    ),
-
-                    SizedBox(height: screenHeight * 0.02),
-
-                   
-                    GridView.builder(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: HomeFoodModel.mealDetails.length,
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 12,
-                        mainAxisExtent: screenHeight * 0.28,
+                      SizedBox(height: screenHeight * 0.015),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "${selectedRestaurant!.name} Menu",
+                          style: AppStyles.black20Bold,
+                        ),
                       ),
-                      itemBuilder: (context, index) {
-                        final item =
-                            HomeFoodModel.mealDetails[index];
-                        return InkWell(
-                          onTap: () {
-                            Navigator.of(context).pushNamed(
-                              AppRoutes.detailsRouteName,
-                              arguments: item,
+                      SizedBox(height: screenHeight * 0.02),
+                      if (loadingMeals)
+                        const Center(child: CircularProgressIndicator(color: AppColors.purple))
+                      else if (mealsError != null)
+                        Center(
+                          child: Column(
+                            children: [
+                              Text(mealsError!, style: AppStyles.black16w500),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: () => _fetchRestaurantMeals(selectedRestaurant!),
+                                child: const Text("Retry"),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (restaurantMeals.isEmpty)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24.0),
+                            child: Text("No meals available in this restaurant.", style: TextStyle(fontSize: 16)),
+                          ),
+                        )
+                      else
+                        GridView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: restaurantMeals.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 12,
+                            mainAxisExtent: screenHeight * 0.28,
+                          ),
+                          itemBuilder: (context, index) {
+                            final item = restaurantMeals[index];
+                            return InkWell(
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  AppRoutes.detailsRouteName,
+                                  arguments: item,
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.02,
+                                  vertical: screenHeight * 0.01,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: _buildImage(
+                                            item.image,
+                                            width: double.infinity,
+                                            height: screenHeight * 0.14,
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          left: 8,
+                                          top: 8,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.white,
+                                              borderRadius: BorderRadius.circular(5),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                ImageIcon(
+                                                  AssetImage(Assets.imagesRateIcon),
+                                                  color: AppColors.yellow,
+                                                  size: 14,
+                                                ),
+                                                const SizedBox(width: 2),
+                                                Text(
+                                                  "${item.rate}",
+                                                  style: AppStyles.grey13w400.copyWith(fontSize: 11),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        if (item.id != null && item.id!.isNotEmpty)
+                                          Positioned(
+                                            right: 8,
+                                            top: 8,
+                                            child: InkWell(
+                                              onTap: () => _toggleFavorite(item),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(4),
+                                                decoration: const BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  _isFavorite(item.id!)
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color: Colors.red,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    SizedBox(height: screenHeight * 0.01),
+                                    Text(
+                                      item.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppStyles.black13Bold,
+                                    ),
+                                    const Spacer(),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text("\$ ${item.price.toStringAsFixed(2)}", style: AppStyles.grey13w400),
+                                        ImageIcon(AssetImage(Assets.imagesDotIcon)),
+                                        const Icon(Icons.watch_later_outlined, size: 18),
+                                        Text(item.time, style: AppStyles.grey13w400),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.02,
-                              vertical: screenHeight * 0.01,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.white,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                        ),
+                    ] else ...[
+                      SizedBox(
+                        height: screenHeight * 0.05,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: categories.length,
+                          separatorBuilder: (_, __) =>
+                              SizedBox(width: screenWidth * 0.02),
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  selectedIndex = index;
+                                });
+                                if (index == 0 && restaurants.isEmpty) {
+                                  _fetchRestaurants();
+                                } else if (index == 1) {
+                                  _fetchFavoriteMeals();
+                                }
+                              },
+                              child: Container(
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.04),
+                                decoration: BoxDecoration(
+                                  color: selectedIndex == index
+                                      ? AppColors.purple
+                                      : AppColors.lightPurple,
+                                  borderRadius: BorderRadius.circular(40),
+                                ),
+                                child: Text(
+                                  categories[index],
+                                  style: selectedIndex == index
+                                      ? AppStyles.black16w500
+                                          .copyWith(color: AppColors.light)
+                                      : AppStyles.black16w500,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.02),
+                      if (selectedIndex == 0) ...[
+                        if (loadingRestaurants)
+                          const Center(child: CircularProgressIndicator(color: AppColors.purple))
+                        else if (restaurantsError != null)
+                          Center(
                             child: Column(
                               children: [
-                                Stack(
-                                  alignment: Alignment.topLeft,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius:
-                                          BorderRadius.circular(8),
-                                      child: Image.asset(
-                                        item.image,
-                                        width: double.infinity,
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ),
-                                    Container(
-                                      margin: const EdgeInsets.all(8),
-                                      padding:
-                                          const EdgeInsets.symmetric(horizontal: 6),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(5),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          ImageIcon(
-                                            AssetImage(Assets.imagesRateIcon),
-                                            color: AppColors.yellow,
-                                          ),
-                                          Text("${item.rate}",
-                                              style:
-                                                  AppStyles.grey13w400),
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(height: screenHeight * 0.01),
-                                Text(
-                                  item.description,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppStyles.black13Bold,
-                                ),
-                                const Spacer(),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Text("\$ ${item.price}",
-                                        style:
-                                            AppStyles.grey13w400),
-                                    ImageIcon(
-                                        AssetImage(Assets.imagesDotIcon)),
-                                    const Icon(
-                                        Icons.watch_later_outlined,
-                                        size: 18),
-                                    Text(item.time,
-                                        style:
-                                            AppStyles.grey13w400),
-                                  ],
+                                Text(restaurantsError!, style: AppStyles.black16w500),
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: _fetchRestaurants,
+                                  child: const Text("Retry"),
                                 ),
                               ],
                             ),
+                          )
+                        else if (restaurants.isEmpty)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(24.0),
+                              child: Text("No restaurants available.", style: TextStyle(fontSize: 16)),
+                            ),
+                          )
+                        else
+                          GridView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: restaurants.length,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 12,
+                              mainAxisExtent: screenHeight * 0.28,
+                            ),
+                            itemBuilder: (context, index) {
+                              final restaurant = restaurants[index];
+                              return InkWell(
+                                onTap: () => _fetchRestaurantMeals(restaurant),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.02,
+                                    vertical: screenHeight * 0.01,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: _buildImage(
+                                          restaurant.image,
+                                          width: double.infinity,
+                                          height: screenHeight * 0.14,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      SizedBox(height: screenHeight * 0.015),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
+                                        child: Text(
+                                          restaurant.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppStyles.black16Bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: screenHeight * 0.005),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
+                                        child: Text(
+                                          restaurant.description.isNotEmpty ? restaurant.description : 'Restaurant',
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppStyles.grey13w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
+                      ] else if (selectedIndex == 1) ...[
+                        if (loadingFavorites && favoriteMeals.isEmpty)
+                          const Center(child: CircularProgressIndicator(color: AppColors.purple))
+                        else if (favoritesError != null)
+                          Center(
+                            child: Column(
+                              children: [
+                                Text(favoritesError!, style: AppStyles.black16w500),
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: _fetchFavoriteMeals,
+                                  child: const Text("Retry"),
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (favoriteMeals.isEmpty)
+                          Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: screenHeight * 0.06),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.favorite_border_rounded,
+                                    size: 80,
+                                    color: AppColors.purple.withOpacity(0.3),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    "No Favorites Yet",
+                                    style: AppStyles.black20Bold,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "Start exploring our menu and heart the dishes you love!",
+                                    style: AppStyles.grey13w400,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          GridView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: favoriteMeals.length,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 12,
+                              mainAxisExtent: screenHeight * 0.28,
+                            ),
+                            itemBuilder: (context, index) {
+                              final item = favoriteMeals[index];
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.of(context).pushNamed(
+                                    AppRoutes.detailsRouteName,
+                                    arguments: item,
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.02,
+                                    vertical: screenHeight * 0.01,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: _buildImage(
+                                              item.image,
+                                              width: double.infinity,
+                                              height: screenHeight * 0.14,
+                                              fit: BoxFit.fill,
+                                            ),
+                                          ),
+                                          Positioned(
+                                            left: 8,
+                                            top: 8,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.white,
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ImageIcon(
+                                                    AssetImage(Assets.imagesRateIcon),
+                                                    color: AppColors.yellow,
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    "${item.rate}",
+                                                    style: AppStyles.grey13w400.copyWith(fontSize: 11),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          if (item.id != null && item.id!.isNotEmpty)
+                                            Positioned(
+                                              right: 8,
+                                              top: 8,
+                                              child: InkWell(
+                                                onTap: () => _toggleFavorite(item),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(4),
+                                                  decoration: const BoxDecoration(
+                                                    color: Colors.white,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Icon(
+                                                    _isFavorite(item.id!)
+                                                        ? Icons.favorite
+                                                        : Icons.favorite_border,
+                                                    color: Colors.red,
+                                                    size: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      SizedBox(height: screenHeight * 0.01),
+                                      Text(
+                                        item.title,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppStyles.black13Bold,
+                                      ),
+                                      const Spacer(),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Text("\$ ${item.price.toStringAsFixed(2)}", style: AppStyles.grey13w400),
+                                          ImageIcon(AssetImage(Assets.imagesDotIcon)),
+                                          const Icon(Icons.watch_later_outlined, size: 18),
+                                          Text(item.time, style: AppStyles.grey13w400),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                      ] else ...[
+                        GridView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: HomeFoodModel.mealDetails.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 12,
+                            mainAxisExtent: screenHeight * 0.28,
+                          ),
+                          itemBuilder: (context, index) {
+                            final item = HomeFoodModel.mealDetails[index];
+                            return InkWell(
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  AppRoutes.detailsRouteName,
+                                  arguments: item,
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.02,
+                                  vertical: screenHeight * 0.01,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Stack(
+                                      alignment: Alignment.topLeft,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: _buildImage(
+                                            item.image,
+                                            width: double.infinity,
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                        Container(
+                                          margin: const EdgeInsets.all(8),
+                                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.white,
+                                            borderRadius: BorderRadius.circular(5),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              ImageIcon(
+                                                AssetImage(Assets.imagesRateIcon),
+                                                color: AppColors.yellow,
+                                              ),
+                                              Text("${item.rate}", style: AppStyles.grey13w400),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(height: screenHeight * 0.01),
+                                    Text(
+                                      item.description,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppStyles.black13Bold,
+                                    ),
+                                    const Spacer(),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text("\$ ${item.price}", style: AppStyles.grey13w400),
+                                        ImageIcon(AssetImage(Assets.imagesDotIcon)),
+                                        const Icon(Icons.watch_later_outlined, size: 18),
+                                        Text(item.time, style: AppStyles.grey13w400),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ],
                   ],
 
                   SizedBox(height: screenHeight * 0.14),

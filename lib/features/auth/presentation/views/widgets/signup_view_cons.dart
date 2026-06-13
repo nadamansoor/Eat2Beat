@@ -17,12 +17,10 @@ class signupviewBlocConsumer extends StatelessWidget {
         return BlocConsumer<SignupCubit, SignupState>(
           listener: (context, state) {
             if (state is SignupSuccess) {
-              UserProfileNotifier().updateProfile(
-                name: state.userEntity.name,
-                email: state.userEntity.email,
-                phone: UserProfileNotifier().phone,
-                phone2: UserProfileNotifier().phone2,
-                profileImagePath: UserProfileNotifier().profileImagePath,
+              UserProfileNotifier().loadProfileForUser(
+                state.userEntity.UId,
+                fallbackName: state.userEntity.name,
+                fallbackEmail: state.userEntity.email,
               );
               if (state.role == 'admin') {
                 Navigator.pushReplacementNamed(
