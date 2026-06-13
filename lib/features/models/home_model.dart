@@ -1,4 +1,5 @@
 import '../../core/utils/app_images.dart';
+import 'restaurant_model.dart';
 
 class HomeFoodModel {
   final String? id;
@@ -11,6 +12,9 @@ class HomeFoodModel {
   final String size;
   final String restName;
   final String restIcon;
+  final bool? restIsOpen;
+  final String? restOpenTime;
+  final String? restCloseTime;
 
   HomeFoodModel({
     this.id,
@@ -23,7 +27,16 @@ class HomeFoodModel {
     required this.rate,
     required this.description,
     required this.time,
+    this.restIsOpen,
+    this.restOpenTime,
+    this.restCloseTime,
   });
+
+  bool get isCurrentlyOpen => RestaurantModel.checkIsRestaurantOpen(
+        isOpen: restIsOpen ?? true,
+        openTime: restOpenTime ?? '09:00 AM',
+        closeTime: restCloseTime ?? '11:00 PM',
+      );
 
   static final List<HomeFoodModel> mealDetails = [
     HomeFoodModel(

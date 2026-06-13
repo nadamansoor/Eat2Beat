@@ -15,6 +15,7 @@ import 'package:eat2beat/features/admin/presentation/cubits/profile_cubit/profil
 import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
+import 'package:eat2beat/features/models/restaurant_model.dart';
 
 class ProfileSettingsPage extends StatefulWidget {
   const ProfileSettingsPage({super.key});
@@ -42,6 +43,25 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   bool _hasInitialized = false;
   String? _restaurantImageUrl;
 
+  void _autoUpdateStatus() {
+    final now = DateTime.now();
+    final nowMin = now.hour * 60 + now.minute;
+    final openMin = RestaurantModel.parseTimeToMinutes(_openTime);
+    final closeMin = RestaurantModel.parseTimeToMinutes(_closeTime);
+
+    if (openMin != null && closeMin != null) {
+      bool computedOpen = false;
+      if (closeMin >= openMin) {
+        computedOpen = nowMin >= openMin && nowMin <= closeMin;
+      } else {
+        computedOpen = nowMin >= openMin || nowMin <= closeMin;
+      }
+      setState(() {
+        _isOpen = computedOpen;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -57,10 +77,19 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
           (FirebaseAuth.instance.currentUser?.email ?? '');
       _phoneController.text = data['phone']?.toString() ?? '';
       _addressController.text = data['address']?.toString() ?? '';
-      _isOpen = data['is_open'] == true;
-      _openTime = data['open_time']?.toString() ?? '09:00 AM';
-      _closeTime = data['close_time']?.toString() ?? '11:00 PM';
+      final isOpenVal = data['is_open'] ?? data['isOpen'];
+      if (isOpenVal == null) {
+        _isOpen = true;
+      } else {
+        _isOpen = isOpenVal == true ||
+            isOpenVal == 1 ||
+            isOpenVal?.toString() == 'true' ||
+            isOpenVal?.toString() == '1';
+      }
+      _openTime = data['open_time']?.toString() ?? data['openTime']?.toString() ?? '09:00 AM';
+      _closeTime = data['close_time']?.toString() ?? data['closeTime']?.toString() ?? '11:00 PM';
       _hasInitialized = true;
+      _autoUpdateStatus();
     }
   }
 
@@ -165,10 +194,19 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                   (FirebaseAuth.instance.currentUser?.email ?? '');
               _phoneController.text = data['phone']?.toString() ?? '';
               _addressController.text = data['address']?.toString() ?? '';
-              _isOpen = data['is_open'] == true;
-              _openTime = data['open_time']?.toString() ?? '09:00 AM';
-              _closeTime = data['close_time']?.toString() ?? '11:00 PM';
+              final isOpenVal = data['is_open'] ?? data['isOpen'];
+              if (isOpenVal == null) {
+                _isOpen = true;
+              } else {
+                _isOpen = isOpenVal == true ||
+                    isOpenVal == 1 ||
+                    isOpenVal?.toString() == 'true' ||
+                    isOpenVal?.toString() == '1';
+              }
+              _openTime = data['open_time']?.toString() ?? data['openTime']?.toString() ?? '09:00 AM';
+              _closeTime = data['close_time']?.toString() ?? data['closeTime']?.toString() ?? '11:00 PM';
               _hasInitialized = true;
+              _autoUpdateStatus();
             }
           } else if (state is ProfileUpdateSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -266,6 +304,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                         );
                         if (picked != null) {
                           setState(() => _openTime = picked.format(context));
+                          _autoUpdateStatus();
                         }
                       },
                     ),
@@ -281,6 +320,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                         );
                         if (picked != null) {
                           setState(() => _closeTime = picked.format(context));
+                          _autoUpdateStatus();
                         }
                       },
                     ),

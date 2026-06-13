@@ -23,6 +23,20 @@ class _DetailsScreenState extends State<DetailsScreen> {
   late HomeFoodModel model;
 
   Future<void> _addToCart({bool navigateToCheckout = false}) async {
+    if (!model.isCurrentlyOpen) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'The restaurant is currently closed, please try again later',
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
     if (model.id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -218,10 +232,25 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           SizedBox(width: screenWidth * 0.02,),
                           Text(model.restName, style: AppStyles.black16w500,),
                           SizedBox(width: screenWidth * 0.02,),
-                          TextButton(
-                              onPressed: (){},
-                              child: Text("view", style: AppStyles.blue16w500,)
-                          )
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: model.isCurrentlyOpen
+                                  ? const Color(0x1F10B981)
+                                  : const Color(0x1FEF4444),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              model.isCurrentlyOpen ? 'open' : 'closed',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: model.isCurrentlyOpen
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFEF4444),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       Row(

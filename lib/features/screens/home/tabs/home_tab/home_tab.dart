@@ -126,6 +126,18 @@ class _HomeTabState extends State<HomeTab> {
         
         final restName = m['restaurant_name']?.toString() ?? m['rest_name']?.toString() ?? 'Restaurant';
         final restIcon = m['restaurant_img_url']?.toString() ?? Assets.imagesBurgerKing;
+        final restIsOpenVal = m['is_open'] ?? m['isOpen'];
+        final bool restIsOpen;
+        if (restIsOpenVal == null) {
+          restIsOpen = true;
+        } else {
+          restIsOpen = restIsOpenVal == true ||
+              restIsOpenVal == 1 ||
+              restIsOpenVal?.toString() == 'true' ||
+              restIsOpenVal?.toString() == '1';
+        }
+        final restOpenTime = m['open_time']?.toString() ?? m['openTime']?.toString() ?? '09:00 AM';
+        final restCloseTime = m['close_time']?.toString() ?? m['closeTime']?.toString() ?? '11:00 PM';
 
         mappedMeals.add(HomeFoodModel(
           id: id,
@@ -138,6 +150,9 @@ class _HomeTabState extends State<HomeTab> {
           rate: 4.5,
           description: description,
           time: '20 Min',
+          restIsOpen: restIsOpen,
+          restOpenTime: restOpenTime,
+          restCloseTime: restCloseTime,
         ));
       }
       
@@ -302,6 +317,9 @@ class _HomeTabState extends State<HomeTab> {
           rate: 4.5,
           description: description,
           time: '20 Min',
+          restIsOpen: restaurant.isOpen,
+          restOpenTime: restaurant.openTime,
+          restCloseTime: restaurant.closeTime,
         ));
       }
       
@@ -764,9 +782,38 @@ class _HomeTabState extends State<HomeTab> {
                                         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
                                         child: Text(
                                           restaurant.description.isNotEmpty ? restaurant.description : 'Restaurant',
-                                          maxLines: 2,
+                                          maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: AppStyles.grey13w400,
+                                        ),
+                                      ),
+                                      SizedBox(height: screenHeight * 0.003),
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 8,
+                                              height: 8,
+                                              decoration: BoxDecoration(
+                                                color: restaurant.isCurrentlyOpen
+                                                    ? const Color(0xFF10B981)
+                                                    : const Color(0xFFEF4444),
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              restaurant.isCurrentlyOpen ? 'Open' : 'Closed',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: restaurant.isCurrentlyOpen
+                                                    ? const Color(0xFF10B981)
+                                                    : const Color(0xFFEF4444),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],

@@ -6,11 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class OtpWidget extends StatelessWidget {
-  String correctCode;
+  final TextEditingController controller;
+  final ValueChanged<String>? onCompleted;
+  final ValueChanged<String>? onChanged;
 
-  OtpWidget({
+  const OtpWidget({
     super.key,
-    required this.correctCode,
+    required this.controller,
+    this.onCompleted,
+    this.onChanged,
   });
 
   @override
@@ -20,52 +24,17 @@ class OtpWidget extends StatelessWidget {
     return PinCodeTextField(
       appContext: context,
       length: 4,
+      controller: controller,
       keyboardType: TextInputType.number,
       animationType: AnimationType.fade,
       cursorColor: AppColors.grey,
       enableActiveFill: true,
 
-      onChanged: (value) {
+      onChanged: onChanged ?? (value) {
         print("Current value: $value");
       },
 
-      onCompleted: (value) {
-        //print("OTP Done: $value");
-        if(value == correctCode){
-          showDialog(context: context,
-              builder: (context) {
-               return Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.purple,
-                  ),
-                );
-              },
-          );
-          Timer(
-              Duration(milliseconds: 500),
-                  () => Navigator.pushReplacementNamed(context, AppRoutes.changePassRouteName));
-        }
-        else{
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) {
-              return AlertDialog(
-                backgroundColor: Colors.white,
-                title: Text("OTP Code",style: AppStyles.black24Bold,),
-                content: Text("The code you have entered isn't correct",style: AppStyles.grey16w400,),
-                actions: [
-                  InkWell(
-                    onTap: (){
-                      Navigator.pop(context);
-                    },
-                    child: Text("Try again" , style: AppStyles.black16w500,),
-                  )
-                ],
-              );
-          },);
-        }
-      },
+      onCompleted: onCompleted,
 
       pinTheme: PinTheme(
         shape: PinCodeFieldShape.box,

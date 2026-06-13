@@ -74,16 +74,30 @@ class FirebaseAuthService {
   }
 
   Future<User> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final googleSignIn = GoogleSignIn();
+    try {
+      await googleSignIn.signOut();
+    } catch (e) {
+      log('Exception signing out GoogleSignIn: ${e.toString()}');
+    }
 
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    if (googleUser == null) {
+      throw CustomExceptions(message: 'Google Sign-In was cancelled.');
+    }
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
 
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
     );
-    return (await FirebaseAuth.instance.signInWithCredential(credential)).user!;
+    final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+    if (userCredential.user == null) {
+      throw CustomExceptions(message: 'Failed to sign in with Google.');
+    }
+    return userCredential.user!;
   }
 
   Future<User> signInWithFacebook() async {

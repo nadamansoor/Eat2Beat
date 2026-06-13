@@ -40,8 +40,16 @@ class UserProfileNotifier extends ChangeNotifier {
     _currentUId = uId;
     await _prefs.setString('current_user_uid', uId);
 
-    _name = _prefs.getString('${uId}_name') ?? fallbackName ?? "Nada Mansour";
-    _email = _prefs.getString('${uId}_email') ?? fallbackEmail ?? "nadamansour1566@gmail.com";
+    final savedName = _prefs.getString('${uId}_name');
+    _name = (savedName != null && savedName.trim().isNotEmpty)
+        ? savedName
+        : (fallbackName?.trim().isNotEmpty == true ? fallbackName! : "Nada Mansour");
+
+    final savedEmail = _prefs.getString('${uId}_email');
+    _email = (savedEmail != null && savedEmail.trim().isNotEmpty)
+        ? savedEmail
+        : (fallbackEmail?.trim().isNotEmpty == true ? fallbackEmail! : "nadamansour1566@gmail.com");
+
     _phone = _prefs.getString('${uId}_phone') ?? "";
     _phone2 = _prefs.getString('${uId}_phone2') ?? "";
     _profileImagePath = _prefs.getString('${uId}_profile_image') ?? "";
