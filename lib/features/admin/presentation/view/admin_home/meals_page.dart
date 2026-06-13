@@ -9,8 +9,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MealsPage extends StatefulWidget {
   final String restaurantName;
+  final String? restaurantImageUrl;
 
-  const MealsPage({super.key, required this.restaurantName});
+  const MealsPage({
+    super.key,
+    required this.restaurantName,
+    this.restaurantImageUrl,
+  });
 
   @override
   State<MealsPage> createState() => _MealsPageState();
@@ -103,7 +108,7 @@ class _MealsPageState extends State<MealsPage> {
               CustomAdminAppbar(
                 userName: widget.restaurantName,
                 greeting: 'Restaurant Menu Dashboard',
-                avatarImagePath: state is MealsLoaded ? state.restaurantImageUrl : null,
+                avatarImagePath: widget.restaurantImageUrl,
                 onNotificationTap: () {},
               ),
 

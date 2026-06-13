@@ -1,3 +1,4 @@
+import 'package:eat2beat/features/admin/presentation/cubits/profile_cubit/profile_cubit.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/features/admin/presentation/view/notifications/cubits/notifications_cubit.dart';
 import 'package:eat2beat/features/admin/presentation/view/notifications/notifi.dart';
@@ -72,12 +73,17 @@ class CustomAdminAppbar extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap:
-                          () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const ProfileSettingsPage(),
+                      onTap: () {
+                        final profileCubit = BlocProvider.of<ProfileCubit>(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => BlocProvider.value(
+                              value: profileCubit,
+                              child: const ProfileSettingsPage(),
                             ),
                           ),
+                        );
+                      },
                       child: _buildAvatar(),
                     ),
                     const SizedBox(width: 12),
@@ -155,17 +161,46 @@ class CustomAdminAppbar extends StatelessWidget {
         border: Border.all(color: const Color(0xFF3B82F6), width: 2),
       ),
       child: ClipOval(
-        child:
-            avatarImagePath != null
-                ? Image.asset(avatarImagePath!, fit: BoxFit.cover)
-                : Container(
-                  color: const Color(0xFFDBEAFE),
-                  child: const Icon(
-                    Icons.store_rounded,
-                    color: Color(0xFF3B82F6),
-                    size: 28,
-                  ),
-                ),
+        child: _buildAvatarImage(),
+      ),
+    );
+  }
+
+  Widget _buildAvatarImage() {
+    if (avatarImagePath == null || avatarImagePath!.isEmpty) {
+      return Container(
+        color: const Color(0xFFDBEAFE),
+        child: const Icon(
+          Icons.store_rounded,
+          color: Color(0xFF3B82F6),
+          size: 28,
+        ),
+      );
+    }
+    if (avatarImagePath!.startsWith('http')) {
+      return Image.network(
+        avatarImagePath!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          color: const Color(0xFFDBEAFE),
+          child: const Icon(
+            Icons.store_rounded,
+            color: Color(0xFF3B82F6),
+            size: 28,
+          ),
+        ),
+      );
+    }
+    return Image.asset(
+      avatarImagePath!,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Container(
+        color: const Color(0xFFDBEAFE),
+        child: const Icon(
+          Icons.store_rounded,
+          color: Color(0xFF3B82F6),
+          size: 28,
+        ),
       ),
     );
   }

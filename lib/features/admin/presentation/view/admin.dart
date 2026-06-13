@@ -80,12 +80,18 @@ class _AdminRouteNameState extends State<AdminRouteName> {
       child: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, profileState) {
           String restaurantName = 'Loading...';
+          String? restaurantImageUrl;
           if (profileState is ProfileLoaded) {
             restaurantName = profileState.profileData['restaurant_name']?.toString() ?? 'My Restaurant';
+            restaurantImageUrl = profileState.profileData['restaurant_img_url']?.toString() ??
+                profileState.profileData['img_url']?.toString();
           }
 
           final List<Widget> pages = [
-            MealsPage(restaurantName: restaurantName),
+            MealsPage(
+              restaurantName: restaurantName,
+              restaurantImageUrl: restaurantImageUrl,
+            ),
             AdminUploadPage(onMealPublished: _onMealPublished),
             const OrdersPage(),
             const DashboardPage(),

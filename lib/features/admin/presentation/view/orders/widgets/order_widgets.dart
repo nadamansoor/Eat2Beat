@@ -4,7 +4,6 @@ import 'package:eat2beat/features/admin/domain/entities/order_entity.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eat2beat/features/admin/presentation/cubits/orders_cubit/orders_cubit.dart';
 
-
 // ─── Order Status Extension ──────────────────────────────────────────
 extension OrderStatusExt on OrderStatus {
   String get label {
@@ -144,15 +143,15 @@ class OrderCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: kSurface2.withValues(alpha: 0.8), // deep purple glassmorphic background
+        color: kCard,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: kBorder,
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -165,7 +164,7 @@ class OrderCard extends StatelessWidget {
             border: Border(
               right: BorderSide(
                 color: statusColor,
-                width: 4, // thick status indicator stripe on right
+                width: 4,
               ),
             ),
           ),
@@ -186,7 +185,7 @@ class OrderCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: kTextSub,
+                            color: kMuted,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -196,7 +195,7 @@ class OrderCard extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: kAccent, // gold/yellow for values
+                            color: kPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -210,7 +209,7 @@ class OrderCard extends StatelessWidget {
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Divider(color: Colors.white12, height: 1),
+                child: Divider(color: kBorder, height: 1),
               ),
 
               // Customer info block
@@ -231,7 +230,7 @@ class OrderCard extends StatelessWidget {
 
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Divider(color: Colors.white12, height: 1),
+                child: Divider(color: kBorder, height: 1),
               ),
 
               // Ordered Items
@@ -240,7 +239,7 @@ class OrderCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: kAccent, // gold/yellow
+                  color: kPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -253,7 +252,7 @@ class OrderCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: kTextMain,
+                        color: kText,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -262,7 +261,7 @@ class OrderCard extends StatelessWidget {
                         item.name,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: kTextSub,
+                          color: kMuted,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -273,7 +272,7 @@ class OrderCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: kTextMain,
+                        color: kText,
                       ),
                     ),
                   ],
@@ -282,7 +281,7 @@ class OrderCard extends StatelessWidget {
 
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Divider(color: Colors.white12, height: 1),
+                child: Divider(color: kBorder, height: 1),
               ),
 
               // Footer: Total Amount + Actions Dropdown
@@ -296,7 +295,7 @@ class OrderCard extends StatelessWidget {
                         'Total Amount',
                         style: TextStyle(
                           fontSize: 11,
-                          color: kTextSub,
+                          color: kMuted,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -305,7 +304,7 @@ class OrderCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          color: kAccent, // gold/yellow
+                          color: kPrimary,
                         ),
                       ),
                     ],
@@ -316,16 +315,16 @@ class OrderCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.05),
+                        color: kBorder.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.lock_outline_rounded, color: kTextSub, size: 14),
+                          Icon(Icons.lock_outline_rounded, color: kMuted, size: 14),
                           SizedBox(width: 4),
                           Text(
                             'Completed',
-                            style: TextStyle(color: kTextSub, fontSize: 11, fontWeight: FontWeight.w500),
+                            style: TextStyle(color: kMuted, fontSize: 11, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),
@@ -343,14 +342,14 @@ class OrderCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: kTextSub, size: 15),
+        Icon(icon, color: kMuted, size: 15),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
             style: const TextStyle(
               fontSize: 12,
-              color: kTextMain,
+              color: kText,
             ),
           ),
         ),
@@ -382,17 +381,17 @@ class OrderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        color: kSurface,
+        color: kBg,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
+        border: Border.all(color: kBorder, width: 1),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<OrderStatus>(
           value: order.status,
-          dropdownColor: kSurface2,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: kAccent, size: 18),
+          dropdownColor: kCard,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: kPrimary, size: 18),
           style: const TextStyle(
-            color: kTextMain,
+            color: kText,
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
@@ -407,7 +406,7 @@ class OrderCard extends StatelessWidget {
               child: Text(
                 status.label,
                 style: TextStyle(
-                  color: status == order.status ? kAccent : kTextMain,
+                  color: status == order.status ? kPrimary : kText,
                 ),
               ),
             );

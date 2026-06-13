@@ -106,4 +106,35 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(ProfileLoaded(profileData: _currentProfile));
     }
   }
+
+  Future<void> updateProfileImage(String imgBase64OrUrl) async {
+    emit(ProfileLoading());
+    try {
+      final token = await authRepo.getIdToken();
+      if (token == null) {
+        emit(ProfileError(message: 'Unauthorized. Please login again.'));
+        return;
+      }
+
+      final newUrl = await apiService.updateRestaurantImage(token, imgBase64OrUrl);
+      
+      _currentProfile['restaurant_img_url'] = newUrl;
+      _currentProfile['img_url'] = newUrl;
+
+      // Save to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final userEmail = FirebaseAuth.instance.currentUser?.email ?? 'default';
+      await prefs.setString('cached_profile_$userEmail', json.encode(_currentProfile));
+
+      emit(ProfileUpdateSuccess(
+        profileData: _currentProfile,
+        message: 'Profile image updated successfully!',
+      ));
+      
+      emit(ProfileLoaded(profileData: _currentProfile));
+    } catch (e) {
+      emit(ProfileError(message: e.toString()));
+      emit(ProfileLoaded(profileData: _currentProfile));
+    }
+  }
 }

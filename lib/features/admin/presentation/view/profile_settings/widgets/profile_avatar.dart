@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../admin_home/const.dart';
 
@@ -14,6 +15,31 @@ class ProfileAvatarSection extends StatelessWidget {
     required this.email,
     this.onChangPhoto,
   });
+
+  Widget _buildAvatarImage() {
+    if (imagePath == null || imagePath!.isEmpty) {
+      return const Icon(Icons.store_rounded, color: kPrimary, size: 42);
+    }
+    if (imagePath!.startsWith('http')) {
+      return Image.network(
+        imagePath!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(Icons.store_rounded, color: kPrimary, size: 42),
+      );
+    }
+    if (imagePath!.startsWith('assets/') || !imagePath!.contains('/')) {
+      return Image.asset(
+        imagePath!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(Icons.store_rounded, color: kPrimary, size: 42),
+      );
+    }
+    return Image.file(
+      File(imagePath!),
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => const Icon(Icons.store_rounded, color: kPrimary, size: 42),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +60,7 @@ class ProfileAvatarSection extends StatelessWidget {
                   color: const Color(0xFFDBEAFE),
                 ),
                 child: ClipOval(
-                  child: imagePath != null
-                      ? Image.asset(imagePath!, fit: BoxFit.cover)
-                      : const Icon(Icons.store_rounded,
-                          color: kPrimary, size: 42),
+                  child: _buildAvatarImage(),
                 ),
               ),
               Positioned(
