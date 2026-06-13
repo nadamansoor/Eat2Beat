@@ -10,7 +10,7 @@ class MockupData {
         sevenDayAverage: 45.4,
         visitorsLast7Days: 60,
         dayNumber: 3,
-        dayName: 'الاثنين',
+        dayName: 'Monday',
         isWeekend: false,
         isHoliday: false,
         weekForecast: [

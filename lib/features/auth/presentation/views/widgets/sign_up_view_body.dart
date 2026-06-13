@@ -23,7 +23,7 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
   String email = '';
   String password = '';
   String name = '';
-  String selectedRole = 'user'; // ✅ القيمة الافتراضية
+  String selectedRole = 'user'; // Default value
   late bool isTermsAccepted = false;
 
   // Restaurant-specific fields

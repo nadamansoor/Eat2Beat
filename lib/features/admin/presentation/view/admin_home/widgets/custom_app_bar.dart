@@ -31,7 +31,7 @@ class CustomAdminAppbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    // زيادة الارتفاع عشان السيرش اتضاف تحت الـ row
+    // Increased height because search is added under the row
     final double totalHeight = statusBarHeight + 130;
 
     return SliverAppBar(
@@ -136,7 +136,7 @@ class CustomAdminAppbar extends StatelessWidget {
                   ],
                 ),
               ),
-              // ── Search (الملف الموجود عندك بدون تغيير) ──────────
+              // ── Search (Unchanged) ──────────
               SizedBox(height: 12),
               const SearchTextField(),
             ],

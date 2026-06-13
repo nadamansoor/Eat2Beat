@@ -62,7 +62,7 @@ class TermsandConditionsState extends State<TermsandConditions> {
             ),
           ],
         ),
-       // textDirection: TextDirection.rtl, // مهم عشان العربي
+       // textDirection: TextDirection.rtl, // Important for RTL layout
       ),
     ),
       ],

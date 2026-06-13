@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/widgets/custom_button.dart';
@@ -7,6 +6,10 @@ import '../../../../models/home_model.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/app_styles.dart';
 import '../../../../../core/widgets/leading_widget.dart';
+import 'package:eat2beat/core/services/get_it_services.dart';
+import 'package:eat2beat/core/services/api_service.dart';
+import 'package:eat2beat/features/screens/home/tabs/cart/checkout_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DetailsScreen extends StatefulWidget {
   const DetailsScreen({super.key});
@@ -18,6 +21,112 @@ class DetailsScreen extends StatefulWidget {
 class _DetailsScreenState extends State<DetailsScreen> {
   int quantity = 1;
   late HomeFoodModel model;
+
+  Future<void> _addToCart({bool navigateToCheckout = false}) async {
+    if (model.id == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'This mock meal cannot be ordered',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Login Required'),
+          content: const Text(
+            'Please login first to complete your order.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.loginRouteName);
+              },
+              child: const Text('Login'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: AppColors.purple),
+      ),
+    );
+
+    try {
+      final token = await user.getIdToken();
+      if (token != null) {
+        final apiService = getIt<ApiService>();
+        final cart = await apiService.getCart(token);
+        int currentQty = 0;
+        for (final row in cart) {
+          if (row['meal_id'] == model.id) {
+            currentQty = row['quantity'] is int 
+                ? row['quantity'] 
+                : int.tryParse(row['quantity']?.toString() ?? '') ?? 0;
+            break;
+          }
+        }
+        final targetQty = currentQty + quantity;
+        await apiService.setCartItem(token, model.id!, targetQty);
+
+        if (!mounted) return;
+
+        Navigator.pop(context); // Pop loading dialog
+
+        if (navigateToCheckout) {
+          final double subtotal = model.price * targetQty;
+          final double deliveryCharges = 3.99;
+          final double total = subtotal + deliveryCharges;
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CheckoutScreen(
+                subtotal: subtotal,
+                deliveryCharges: deliveryCharges,
+                total: total,
+                deliveryAddress: "Home",
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Added to Cart (Qty: $quantity)',
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // Pop loading dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add to cart: $e')),
+      );
+    }
+  }
+
   Widget _buildImage(String imagePath, {double? width, double? height, BoxFit fit = BoxFit.cover}) {
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return Image.network(
@@ -83,14 +192,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           LeadingWidget(),
-                          LeadingWidget(
-                            icon: Center(
-                              child: Icon(Icons.shopping_cart, size: 20),
-                            ),
-                            action: () {
-                              Navigator.of(context).pushNamed(AppRoutes.chooseDonateRouteName);
-                            },
-                          ),
                         ],
                       ),
                     ),
@@ -255,7 +356,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     child: CustomButton(
                         text: "Add To Cart",
                         backgroundColor: AppColors.lightPurple,
-                        onPressed: (){}
+                        onPressed: () => _addToCart(navigateToCheckout: false),
                     ),
                   ),
 
@@ -265,7 +366,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     child: CustomButton(
                         text: "Order Now",
                         backgroundColor: AppColors.purple,
-                        onPressed: (){}
+                        onPressed: () => _addToCart(navigateToCheckout: true),
                     ),
                   )
                 ],

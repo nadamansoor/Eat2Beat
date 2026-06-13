@@ -546,5 +546,190 @@ class ApiService {
           : 'Failed to load favorite meals (${response.statusCode})',
     );
   }
+
+  Future<List<dynamic>> getCart(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/cart');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data is List) {
+        return data;
+      }
+      return [];
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load cart (${response.statusCode})',
+    );
+  }
+
+  Future<void> setCartItem(String token, String mealId, int quantity) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/cart/set-item');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({
+        'meal_id': mealId,
+        'quantity': quantity,
+      }),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(
+        message: response.body.isNotEmpty
+            ? response.body
+            : 'Failed to update cart item quantity (${response.statusCode})',
+      );
+    }
+  }
+
+  Future<void> removeCartItem(String token, String mealId) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/cart/remove-item');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({
+        'meal_id': mealId,
+      }),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(
+        message: response.body.isNotEmpty
+            ? response.body
+            : 'Failed to remove cart item (${response.statusCode})',
+      );
+    }
+  }
+
+  Future<void> clearCart(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/cart/clear');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({}),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(
+        message: response.body.isNotEmpty
+            ? response.body
+            : 'Failed to clear cart (${response.statusCode})',
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> checkoutCart(
+    String token, {
+    required String address,
+    required String area,
+    required String name,
+    required String phone,
+  }) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/checkout');
+    final idempotencyKey = '${DateTime.now().millisecondsSinceEpoch}-${DateTime.now().microsecondsSinceEpoch}';
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Idempotency-Key': idempotencyKey,
+      },
+      body: json.encode({
+        'address': address,
+        'area': area,
+        'customer_name': name,
+        'customer_phone': phone,
+      }),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = json.decode(response.body);
+      if (data is Map<String, dynamic>) {
+        return data;
+      }
+      return {};
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to place order (${response.statusCode})',
+    );
+  }
+
+  Future<Map<String, dynamic>> getUserOrderHistoryPage(
+    String token, {
+    int limit = 10,
+    String? cursor,
+    int offset = 0,
+    String time = 'all',
+    String status = '',
+  }) async {
+    final Map<String, String> queryParams = {
+      'limit': limit.toString(),
+      'time': time,
+      'tz_offset_minutes': DateTime.now().timeZoneOffset.inMinutes.toString(),
+    };
+    if (status.trim().isNotEmpty) {
+      queryParams['status'] = status.trim();
+    }
+    if (cursor != null && cursor.trim().isNotEmpty) {
+      queryParams['cursor'] = cursor.trim();
+    } else {
+      queryParams['offset'] = offset.toString();
+    }
+
+    final uri = Uri.parse('$_workerBaseUrl/user/history/orders').replace(queryParameters: queryParams);
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final List<dynamic> rows = data is List
+          ? data
+          : (data is Map && data['orders'] is List
+              ? data['orders']
+              : (data is Map && data['data'] is List ? data['data'] : [data]));
+      final nextCursor = response.headers['x-next-cursor'] ?? response.headers['X-Next-Cursor'];
+      return {
+        'rows': rows,
+        'nextCursor': nextCursor?.trim().isNotEmpty == true ? nextCursor!.trim() : null,
+      };
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load order history (${response.statusCode})',
+    );
+  }
 }
 

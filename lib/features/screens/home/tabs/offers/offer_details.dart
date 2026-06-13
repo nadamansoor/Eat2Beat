@@ -1,7 +1,12 @@
 import 'dart:ui';
-
 import 'package:eat2beat/features/models/offers_model.dart';
 import 'package:eat2beat/core/widgets/circleIcon.dart';
+import 'package:eat2beat/core/utils/app_colors.dart';
+import 'package:eat2beat/core/utils/app_routes.dart';
+import 'package:eat2beat/core/services/get_it_services.dart';
+import 'package:eat2beat/core/services/api_service.dart';
+import 'package:eat2beat/features/screens/home/tabs/cart/checkout_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class OfferDetailsScreen extends StatefulWidget {
@@ -15,6 +20,100 @@ class OfferDetailsScreen extends StatefulWidget {
 
 class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
   int quantity = 1;
+
+  Future<void> _addToCart({bool navigateToCheckout = false}) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Login Required'),
+          content: const Text(
+            'Please login first to complete your order.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, AppRoutes.loginRouteName);
+              },
+              child: const Text('Login'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(color: AppColors.purple),
+      ),
+    );
+
+    try {
+      final token = await user.getIdToken();
+      if (token != null) {
+        final apiService = getIt<ApiService>();
+        final cart = await apiService.getCart(token);
+        int currentQty = 0;
+        for (final row in cart) {
+          if (row['meal_id'] == widget.item.id) {
+            currentQty = row['quantity'] is int 
+                ? row['quantity'] 
+                : int.tryParse(row['quantity']?.toString() ?? '') ?? 0;
+            break;
+          }
+        }
+        final targetQty = currentQty + quantity;
+        await apiService.setCartItem(token, widget.item.id, targetQty);
+
+        if (!mounted) return;
+
+        Navigator.pop(context); // Pop loading dialog
+
+        if (navigateToCheckout) {
+          final double subtotal = widget.item.price * targetQty;
+          final double deliveryCharges = 3.99;
+          final double total = subtotal + deliveryCharges;
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CheckoutScreen(
+                subtotal: subtotal,
+                deliveryCharges: deliveryCharges,
+                total: total,
+                deliveryAddress: "Home",
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Added to Cart (Qty: $quantity)',
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // Pop loading dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add to cart: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -178,8 +277,8 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                   216,
                                   153,
                                   252,
-                                ), // لون الحواف
-                                width: 2, // سمك الحافة
+                                ), // Border color
+                                width: 2, // Border width
                               ),
                               color: const Color.fromARGB(255, 187, 166, 221),
                               shape: BoxShape.circle,
@@ -317,7 +416,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                       vertical: 14,
                                     ),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () => _addToCart(navigateToCheckout: false),
                                   child: const Text(
                                     'Add To Cart',
                                     style: TextStyle(
@@ -330,7 +429,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                               Expanded(
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0x008966fa),
+                                    backgroundColor: AppColors.purple,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
@@ -338,7 +437,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                       vertical: 14,
                                     ),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () => _addToCart(navigateToCheckout: true),
                                   child: const Text(
                                     'Order Now',
                                     style: TextStyle(color: Colors.white),

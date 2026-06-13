@@ -22,7 +22,7 @@ class BannerItem extends StatelessWidget {
             /// LEFT SIDE (TEXT)
             Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 6), // 👈 مسافة من جوه الكونتينر
+                  padding: const EdgeInsets.only(left: 6), // Inner container padding
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,

@@ -34,7 +34,7 @@ class NavigationBarItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // انيميشن على الأيقونة
+            // Icon animation
             AnimatedScale(
               scale: isSelected ? 1.2 : 1.0,
               duration: const Duration(milliseconds: 300),
@@ -46,7 +46,7 @@ class NavigationBarItem extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            // انيميشن على النص
+            // Text animation
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
