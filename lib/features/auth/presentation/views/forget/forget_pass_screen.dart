@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
@@ -78,7 +77,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                     ),
                     SizedBox(height: screenHeight * 0.05),
                     CustomButton(
-                      text: "Send Code",
+                      text: "Send Reset Link",
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
                           final email = emailController.text.trim();
@@ -100,38 +99,64 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                             context,
                           );
 
-                          // Generate mock OTP
-                          final otp =
-                              (1000 + Random().nextInt(9000)).toString();
-
                           try {
-                            // Try sending real Firebase reset email
+                            // Send real Firebase reset email
                             await FirebaseAuth.instance.sendPasswordResetEmail(
                               email: email,
                             );
-                          } catch (e) {
-                            debugPrint("Firebase reset email failed: $e");
-                          }
 
-                          // Pop loading dialog and navigate
-                          navigator.pop();
+                            // Pop loading dialog
+                            navigator.pop();
 
-                          // Show snackbar with code
-                          scaffoldMessenger.showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                "Verification code sent: $otp (Email reset link also sent)",
+                            // Show success message
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "A password reset link has been sent to $email. Please check your Gmail.",
+                                ),
+                                backgroundColor: AppColors.purple,
+                                duration: const Duration(seconds: 5),
                               ),
-                              backgroundColor: AppColors.purple,
-                              duration: const Duration(seconds: 6),
-                            ),
-                          );
+                            );
 
-                          // Navigate to OTP screen
-                          navigator.pushNamed(
-                            AppRoutes.otpRouteName,
-                            arguments: {'email': email, 'otpCode': otp},
-                          );
+                            // Navigate back to the login screen
+                            navigator.pop();
+                          } on FirebaseAuthException catch (e) {
+                            // Pop loading dialog
+                            navigator.pop();
+
+                            String errorMessage = "Failed to send reset email. Please try again.";
+                            if (e.code == 'user-not-found') {
+                              errorMessage = "This email address is not registered.";
+                            } else if (e.code == 'invalid-email') {
+                              errorMessage = "The email address is not valid.";
+                            } else if (e.code == 'network-request-failed') {
+                              errorMessage = "Please check your internet connection.";
+                            } else if (e.code == 'too-many-requests') {
+                              errorMessage = "Too many requests. Please try again later.";
+                            } else if (e.message != null) {
+                              errorMessage = e.message!;
+                            }
+
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text(errorMessage),
+                                backgroundColor: Colors.redAccent,
+                                duration: const Duration(seconds: 4),
+                              ),
+                            );
+                          } catch (e) {
+                            // Pop loading dialog
+                            navigator.pop();
+
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text("An error occurred: ${e.toString()}"),
+                                backgroundColor: Colors.redAccent,
+                                duration: const Duration(seconds: 4),
+                              ),
+                            );
+                          }
                         }
                       },
                     ),
