@@ -60,14 +60,31 @@ class _HomeScreenState extends State<HomeScreen> {
               width: double.infinity,
               hideOnScroll: false,
               iconHeight: 65,
-              barColor: Colors.white.withOpacity(0.15),
+              barColor: Colors.black.withOpacity(0.2),
               offset: 0,
               fit: StackFit.expand,
               barDecoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50),
-                gradient: const LinearGradient(
-                  colors: [Color(0xffE8ECF4), Color(0xffE8ECF4)],
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xff2D323F).withOpacity(0.75),
+                    const Color(0xff14161C).withOpacity(0.92),
+                  ],
                 ),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 15,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
 
               body: (context, controller) {
@@ -128,11 +145,37 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ImageIcon(
-              AssetImage(icon),
-              color: isSelected ? AppColors.purple : Colors.white,
-              size: 24,
-            ),
+            if (index == 1)
+              Container(
+                width: 25,
+                height: 25,
+                decoration: ShapeDecoration(
+                  color: isSelected ? AppColors.purple : Colors.white,
+                  shape: const StarBorder(
+                    points: 12,
+                    innerRadiusRatio: 0.85,
+                    pointRounding: 0.3,
+                    valleyRounding: 0.3,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    '%',
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppColors.purple,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              )
+            else
+              ImageIcon(
+                AssetImage(icon),
+                color: isSelected ? AppColors.purple : Colors.white,
+                size: 24,
+              ),
             const SizedBox(height: 4),
             Text(
               label,

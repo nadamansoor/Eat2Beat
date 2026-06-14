@@ -97,7 +97,9 @@ class _AccountScreenState extends State<AccountScreen> {
                         },
                         child: Text(
                           "Save",
-                          style: AppStyles.purple,
+                          style: AppStyles.purple.copyWith(
+                            color: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
+                          ),
                         ),
                       ),
                     ],
