@@ -24,6 +24,13 @@ class MealsPage extends StatefulWidget {
 class _MealsPageState extends State<MealsPage> {
   FoodCategory _category = FoodCategory.all;
   String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   List<MealEntity> _getFiltered(List<MealEntity> meals) {
     return meals.where((item) {
@@ -110,6 +117,12 @@ class _MealsPageState extends State<MealsPage> {
                 greeting: 'Restaurant Menu Dashboard',
                 avatarImagePath: widget.restaurantImageUrl,
                 onNotificationTap: () {},
+                searchController: _searchController,
+                onSearchChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
               ),
 
               // Sliver category quick filter tabs

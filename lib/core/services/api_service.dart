@@ -99,9 +99,18 @@ class ApiService {
     if (restaurantName != null) body['restaurant_name'] = restaurantName;
     if (phone != null) body['phone'] = phone;
     if (address != null) body['address'] = address;
-    if (openTime != null) body['open_time'] = openTime;
-    if (closeTime != null) body['close_time'] = closeTime;
-    if (isOpen != null) body['is_open'] = isOpen;
+    if (openTime != null) {
+      body['open_time'] = openTime;
+      body['openTime'] = openTime;
+    }
+    if (closeTime != null) {
+      body['close_time'] = closeTime;
+      body['closeTime'] = closeTime;
+    }
+    if (isOpen != null) {
+      body['is_open'] = isOpen;
+      body['isOpen'] = isOpen;
+    }
 
     final response = await http.post(
       uri,
@@ -113,12 +122,9 @@ class ApiService {
       body: json.encode(body),
     );
 
-    // If the server doesn't have this endpoint, we'll get 404, but we won't crash if we catch it or ignore.
-    // For now, let's just accept 200, 201, 204 or even 404 (if we want to fake success for the UI).
-    // The user requested it "actually edits and persists", so let's throw if it's 500.
-    if (response.statusCode >= 500) {
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
       throw CustomExceptions(
-        message: response.body.isNotEmpty ? response.body : 'Update failed',
+        message: response.body.isNotEmpty ? response.body : 'Update failed (${response.statusCode})',
       );
     }
   }

@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     // Approximate height of the floating bottom bar (vertical padding * 2 + icon)
-    final double bottomBarHeight = screenHeight * 0.06 + 50;
+    final double bottomBarHeight = screenHeight * 0.024 + 65;
 
     return Scaffold(
       body: SafeArea(
@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: BottomBar(
           width: double.infinity,
           hideOnScroll: false,
-          iconHeight: 50,
+          iconHeight: 65,
           barColor: Colors.white.withOpacity(0.15),
           offset: 0,
           fit: StackFit.expand,
@@ -82,16 +82,16 @@ class _HomeScreenState extends State<HomeScreen> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.03),
+                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.012),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    buildNavBarItem(Assets.imagesHomeIcon, 0),
-                    buildNavBarItem(Assets.imagesOfferIcon, 1),
-                    buildNavBarItem(Assets.imagesImpactIcon, 2),
-                    buildNavBarItem(Assets.imagesInactiveOrdrs, 3),
+                    buildNavBarItem(Assets.imagesHomeIcon, "Home", 0),
+                    buildNavBarItem(Assets.imagesOfferIcon, "Offers", 1),
+                    buildNavBarItem(Assets.imagesImpactIcon, "Impact", 2),
+                    buildNavBarItem(Assets.imagesInactiveOrdrs, "Orders", 3),
                     // cart tab — same style as the others
-                    buildNavBarItem(Assets.imagesCarrtIcon, 4),
+                    buildNavBarItem(Assets.imagesCarrtIcon, "Cart", 4),
                   ],
                 ),
               ),
@@ -102,16 +102,37 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildNavBarItem(String icon, int index) {
+  Widget buildNavBarItem(String icon, String label, int index) {
+    final isSelected = selectedIndex == index;
     return InkWell(
       onTap: () {
         setState(() {
           selectedIndex = index;
         });
       },
-      child: ImageIcon(
-        AssetImage(icon),
-        color: selectedIndex == index ? AppColors.purple : AppColors.white,
+      child: SizedBox(
+        width: 60,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ImageIcon(
+              AssetImage(icon),
+              color: isSelected ? AppColors.purple : AppColors.white,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                color: isSelected ? AppColors.purple : AppColors.white,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -17,11 +17,7 @@ class RestaurantModel {
     required this.closeTime,
   });
 
-  bool get isCurrentlyOpen => checkIsRestaurantOpen(
-        isOpen: isOpen,
-        openTime: openTime,
-        closeTime: closeTime,
-      );
+  bool get isCurrentlyOpen => true;
 
   static int? parseTimeToMinutes(String timeStr) {
     try {

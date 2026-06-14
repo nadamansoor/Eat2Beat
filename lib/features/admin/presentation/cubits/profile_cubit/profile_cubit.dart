@@ -4,6 +4,7 @@ import 'package:eat2beat/core/services/api_service.dart';
 import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
@@ -66,19 +67,17 @@ class ProfileCubit extends Cubit<ProfileState> {
         return;
       }
 
-      try {
-        await apiService.updateProfile(
-          token,
-          restaurantName: restaurantName,
-          phone: phone,
-          address: address,
-          openTime: openTime,
-          closeTime: closeTime,
-          isOpen: isOpen,
-        );
-      } catch (_) {
-        // Ignore API error for updating profile so local storage still works
-      }
+      debugPrint("E2B_DEBUG: Updating profile with: Name: $restaurantName, Phone: $phone, Address: $address, OpenTime: $openTime, CloseTime: $closeTime, IsOpen: $isOpen");
+
+      await apiService.updateProfile(
+        token,
+        restaurantName: restaurantName,
+        phone: phone,
+        address: address,
+        openTime: openTime,
+        closeTime: closeTime,
+        isOpen: isOpen,
+      );
 
       // Locally update to avoid fetching again immediately
       if (restaurantName != null) _currentProfile['restaurant_name'] = restaurantName;
@@ -101,6 +100,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       // Reload back to standard loaded state after showing success
       emit(ProfileLoaded(profileData: _currentProfile));
     } catch (e) {
+      debugPrint("E2B_DEBUG: updateProfile failed: $e");
       emit(ProfileError(message: e.toString()));
       // Re-emit loaded so UI recovers
       emit(ProfileLoaded(profileData: _currentProfile));

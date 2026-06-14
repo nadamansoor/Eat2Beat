@@ -32,11 +32,7 @@ class HomeFoodModel {
     this.restCloseTime,
   });
 
-  bool get isCurrentlyOpen => RestaurantModel.checkIsRestaurantOpen(
-        isOpen: restIsOpen ?? true,
-        openTime: restOpenTime ?? '09:00 AM',
-        closeTime: restCloseTime ?? '11:00 PM',
-      );
+  bool get isCurrentlyOpen => true;
 
   static final List<HomeFoodModel> mealDetails = [
     HomeFoodModel(

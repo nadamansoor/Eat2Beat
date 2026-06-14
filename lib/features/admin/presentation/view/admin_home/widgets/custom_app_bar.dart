@@ -20,6 +20,8 @@ class CustomAdminAppbar extends StatelessWidget {
   final String greeting;
   final String? avatarImagePath;
   final VoidCallback? onNotificationTap;
+  final TextEditingController? searchController;
+  final ValueChanged<String>? onSearchChanged;
 
   const CustomAdminAppbar({
     super.key,
@@ -27,6 +29,8 @@ class CustomAdminAppbar extends StatelessWidget {
     this.greeting = 'Hello',
     this.avatarImagePath,
     this.onNotificationTap,
+    this.searchController,
+    this.onSearchChanged,
   });
 
   @override
@@ -143,8 +147,11 @@ class CustomAdminAppbar extends StatelessWidget {
                 ),
               ),
               // ── Search (Unchanged) ──────────
-              SizedBox(height: 12),
-              const SearchTextField(),
+              const SizedBox(height: 12),
+              SearchTextField(
+                controller: searchController,
+                onChanged: onSearchChanged,
+              ),
             ],
           ),
         ),

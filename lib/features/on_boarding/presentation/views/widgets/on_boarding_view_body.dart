@@ -69,6 +69,12 @@ class _OnBoardingViewBodyState extends State<OnBoardingViewBody> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
