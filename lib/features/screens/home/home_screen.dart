@@ -7,8 +7,11 @@ import 'package:eat2beat/features/screens/home/tabs/impact/impact_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/offers/offers_tab.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+// ... (rest of imports remain)
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,22 +22,26 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
-  late final List<Widget> tabs;
 
-  @override
-  void initState() {
-    super.initState();
-    tabs = [
-      HomeTab(),
-      OffersTab(),
-      ImpactTab(),
-      OrderHistoryTab(onSwitchTab: (index) {
-        setState(() {
-          selectedIndex = index;
+  Widget _buildTab(int index) {
+    switch (index) {
+      case 0:
+        return HomeTab();
+      case 1:
+        return OffersTab();
+      case 2:
+        return ImpactTab();
+      case 3:
+        return OrderHistoryTab(onSwitchTab: (idx) {
+          setState(() {
+            selectedIndex = idx;
+          });
         });
-      }),
-      CartScreen(),
-    ];
+      case 4:
+        return CartScreen();
+      default:
+        return HomeTab();
+    }
   }
 
   @override
@@ -43,62 +50,67 @@ class _HomeScreenState extends State<HomeScreen> {
     // Approximate height of the floating bottom bar (vertical padding * 2 + icon)
     final double bottomBarHeight = screenHeight * 0.024 + 65;
 
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: BottomBar(
-          width: double.infinity,
-          hideOnScroll: false,
-          iconHeight: 65,
-          barColor: Colors.white.withOpacity(0.15),
-          offset: 0,
-          fit: StackFit.expand,
-          barDecoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(50),
-            gradient: const LinearGradient(
-              colors: [Color(0xffE8ECF4), Color(0xffE8ECF4)],
-            ),
-          ),
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
+          body: SafeArea(
+            bottom: false,
+            child: BottomBar(
+              width: double.infinity,
+              hideOnScroll: false,
+              iconHeight: 65,
+              barColor: Colors.white.withOpacity(0.15),
+              offset: 0,
+              fit: StackFit.expand,
+              barDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                gradient: const LinearGradient(
+                  colors: [Color(0xffE8ECF4), Color(0xffE8ECF4)],
+                ),
+              ),
 
-          body: (context, controller) {
-            return Stack(
-              children: [
-                // ── active tab content ──
-                tabs[selectedIndex],
-
-                // ── FAB floating above the bottom bar ──
-                if (selectedIndex != 4)
-                  Positioned(
-                    right: 24,
-                    bottom: bottomBarHeight + 45,
-                    child: _buildFAB(),
-                  ),
-              ],
-            );
-          },
-
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(50),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.012),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              body: (context, controller) {
+                return Stack(
                   children: [
-                    buildNavBarItem(Assets.imagesHomeIcon, "Home", 0),
-                    buildNavBarItem(Assets.imagesOfferIcon, "Offers", 1),
-                    buildNavBarItem(Assets.imagesImpactIcon, "Impact", 2),
-                    buildNavBarItem(Assets.imagesInactiveOrdrs, "Orders", 3),
-                    // cart tab — same style as the others
-                    buildNavBarItem(Assets.imagesCarrtIcon, "Cart", 4),
+                    // ── active tab content ──
+                    _buildTab(selectedIndex),
+
+                    // ── FAB floating above the bottom bar ──
+                    if (selectedIndex != 4)
+                      Positioned(
+                        right: 24,
+                        bottom: bottomBarHeight + 45,
+                        child: _buildFAB(),
+                      ),
                   ],
+                );
+              },
+
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: screenHeight * 0.012),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        buildNavBarItem(Assets.imagesHomeIcon, "Home", 0),
+                        buildNavBarItem(Assets.imagesOfferIcon, "Offers", 1),
+                        buildNavBarItem(Assets.imagesImpactIcon, "Impact", 2),
+                        buildNavBarItem(Assets.imagesInactiveOrdrs, "Orders", 3),
+                        // cart tab — same style as the others
+                        buildNavBarItem(Assets.imagesCarrtIcon, "Cart", 4),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -118,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             ImageIcon(
               AssetImage(icon),
-              color: isSelected ? AppColors.purple : AppColors.white,
+              color: isSelected ? AppColors.purple : Colors.white,
               size: 24,
             ),
             const SizedBox(height: 4),
@@ -126,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
               label,
               style: TextStyle(
                 fontSize: 10,
-                color: isSelected ? AppColors.purple : AppColors.white,
+                color: isSelected ? AppColors.purple : Colors.white,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
               textAlign: TextAlign.center,

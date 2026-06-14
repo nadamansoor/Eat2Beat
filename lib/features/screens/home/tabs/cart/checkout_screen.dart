@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
@@ -163,19 +164,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: AppColors.light,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              Assets.imagesPatternCart,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          
-          SafeArea(
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: AppColors.light,
+          body: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  ThemeNotifier().isDarkMode ? Assets.imagesPattern : Assets.imagesPatternCart,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              
+              SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screenWidth * 0.04,
@@ -221,6 +225,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     SizedBox(height: screenHeight * 0.02),
                     CustomButton(
                       text: _selectedPaymentMethod == 0 ? "Place Order (Cash)" : "Place Order (Card)",
+                      backgroundColor: AppColors.white,
+                      textColor: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
                       isLoading: _isProcessing,
                       onPressed: _placeOrder,
                     ),
@@ -247,13 +253,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ],
       ),
     );
+      },
+    );
   }
 
   Widget _buildDeliveryDetailsCard() {
     return Container(
       padding: EdgeInsets.all(screenWidth * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -365,7 +373,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Container(
       padding: EdgeInsets.all(screenWidth * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -503,7 +511,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           vertical: screenHeight * 0.015,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.purple.withOpacity(0.08) : Colors.white,
+          color: isSelected ? AppColors.purple.withOpacity(0.08) : AppColors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? AppColors.purple : AppColors.grey800,
@@ -529,7 +537,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Container(
       padding: EdgeInsets.all(screenWidth * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -571,7 +579,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Container(
       padding: EdgeInsets.all(screenWidth * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -645,7 +653,7 @@ class _SuccessOverlayState extends State<SuccessOverlay> with SingleTickerProvid
         margin: const EdgeInsets.symmetric(horizontal: 24),
         padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(

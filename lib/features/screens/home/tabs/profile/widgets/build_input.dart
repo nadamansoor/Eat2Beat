@@ -27,7 +27,7 @@ Widget buildInput({
               hintText: hintText,
               hintStyle: AppStyles.grey13w400,
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.white,
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
               enabledBorder: OutlineInputBorder(

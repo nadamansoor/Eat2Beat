@@ -1,5 +1,7 @@
 import 'package:eat2beat/features/models/offers_model.dart';
 import 'package:eat2beat/features/screens/home/tabs/offers/offer_details.dart';
+import 'package:eat2beat/core/utils/app_colors.dart';
+import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:flutter/material.dart';
 
 class FoodCard extends StatelessWidget {
@@ -31,7 +33,7 @@ class FoodCard extends StatelessWidget {
           vertical: screenHeight * 0.02,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -51,7 +53,7 @@ class FoodCard extends StatelessWidget {
                   margin: const EdgeInsets.all(8),
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(5),
                   ),
                   child: Row(
@@ -59,7 +61,7 @@ class FoodCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.star, size: 16, color: Colors.amber),
                       const SizedBox(width: 4),
-                      Text(item.rate.toString()),
+                      Text(item.rate.toString(), style: AppStyles.black13w400),
                     ],
                   ),
                 )
@@ -70,13 +72,13 @@ class FoodCard extends StatelessWidget {
               item.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: AppStyles.black16Bold,
             ),
             SizedBox(height: screenHeight * 0.01),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text('\$ ${item.price}'),
+                Text('\$ ${item.price}', style: AppStyles.black13Bold),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

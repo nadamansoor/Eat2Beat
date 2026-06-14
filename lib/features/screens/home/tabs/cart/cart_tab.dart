@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/features/models/offers_model.dart';
 import 'package:eat2beat/features/screens/home/tabs/cart/checkout_screen.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
@@ -146,14 +147,17 @@ class _CartScreenState extends State<CartScreen> {
     
     final user = FirebaseAuth.instance.currentUser;
 
-    return Scaffold(
-      backgroundColor: AppColors.light,
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: AppColors.light,
       body: SafeArea(
         bottom: false,
         child: Stack(
           children: [
             Image.asset(
-              Assets.imagesPatternCart,
+              ThemeNotifier().isDarkMode ? Assets.imagesPattern : Assets.imagesPatternCart,
               width: double.infinity,
               fit: BoxFit.cover,
             ),
@@ -290,6 +294,8 @@ class _CartScreenState extends State<CartScreen> {
           ],
         ),
       ),
+        );
+      },
     );
   }
 
@@ -303,7 +309,7 @@ class _CartScreenState extends State<CartScreen> {
         bottom: screenWidth * 0.04,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -350,7 +356,7 @@ class _CartScreenState extends State<CartScreen> {
 
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: AppColors.grey800, width: 1),
             ),
@@ -425,7 +431,7 @@ class _CartScreenState extends State<CartScreen> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -470,7 +476,7 @@ class _CartScreenState extends State<CartScreen> {
       width: double.infinity,
       padding: EdgeInsets.all(screenWidth * 0.04),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -592,7 +598,7 @@ class _CartScreenState extends State<CartScreen> {
           ).then((_) => _loadCart());
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.purple,
+          backgroundColor: ThemeNotifier().isDarkMode ? AppColors.purple800 : AppColors.purple,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/features/models/coupon_model.dart';
 import 'package:eat2beat/features/screens/home/tabs/profile/widgets/Coupon_Item.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
@@ -33,19 +34,22 @@ class PointsScreen extends StatelessWidget {
      final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
    
-    return Scaffold(
-        backgroundColor: AppColors.light,
-        body: SafeArea(
-          bottom: false,
-          child: Stack(
-          children: [
-            /// Background
-            Positioned.fill(
-              child: Image.asset(
-                Assets.imagesPatternCart,
-                fit: BoxFit.cover,
-              ),
-            ),
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: AppColors.light,
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              children: [
+                /// Background
+                Positioned.fill(
+                  child: Image.asset(
+                    ThemeNotifier().isDarkMode ? Assets.imagesPattern : Assets.imagesPatternCart,
+                    fit: BoxFit.cover,
+                  ),
+                ),
 
 
 
@@ -85,7 +89,7 @@ class PointsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.white,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.purple, width: 1.2),
               ),
@@ -138,6 +142,8 @@ class PointsScreen extends StatelessWidget {
           ],
           ),
         ),
+        );
+      },
     );
   }
 }

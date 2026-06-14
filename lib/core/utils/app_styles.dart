@@ -1,34 +1,35 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppStyles {
 
-  static const TextStyle grey16w400 = TextStyle(
-      color: AppColors.grey,
+  static TextStyle get grey16w400 => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white.withOpacity(0.7) : AppColors.grey,
       fontSize: 16,
       fontWeight: FontWeight.w400
   );
 
-  static const TextStyle grey16Bold = TextStyle(
-      color: AppColors.grey,
+  static TextStyle get grey16Bold => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white.withOpacity(0.8) : AppColors.grey,
       fontSize: 16,
       fontWeight: FontWeight.bold
   );
 
-  static const TextStyle grey13w400 = TextStyle(
-      color: Color(0xff555555),
+  static TextStyle get grey13w400 => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white.withOpacity(0.6) : const Color(0xff555555),
       fontSize: 13,
       fontWeight: FontWeight.w400
   );
 
-  static const TextStyle grey8w400 = TextStyle(
-      color: Color(0xff555555),
+  static TextStyle get grey8w400 => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white.withOpacity(0.6) : const Color(0xff555555),
       fontSize: 8,
       fontWeight: FontWeight.w400
   );
 
-  static const TextStyle black24Bold = TextStyle(
-      color: AppColors.black,
+  static TextStyle get black24Bold => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white : AppColors.black,
       fontSize: 24,
       fontWeight: FontWeight.bold
   );
@@ -51,32 +52,32 @@ class AppStyles {
       fontWeight: FontWeight.bold
   );
 
-  static const TextStyle black16w500 = TextStyle(
-      color: Colors.black,
+  static TextStyle get black16w500 => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black,
       fontSize: 16,
       fontWeight: FontWeight.w500
   );
 
-  static const TextStyle black16Bold = TextStyle(
-      color: Colors.black,
+  static TextStyle get black16Bold => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black,
       fontSize: 16,
       fontWeight: FontWeight.bold
   );
 
-  static const TextStyle black20Bold = TextStyle(
-      color: Colors.black,
+  static TextStyle get black20Bold => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black,
       fontSize: 20,
       fontWeight: FontWeight.bold
   );
 
-  static const TextStyle black13w400 = TextStyle(
-      color: Colors.black,
+  static TextStyle get black13w400 => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black,
       fontSize: 13,
       fontWeight: FontWeight.w400
   );
 
-  static const TextStyle black13Bold = TextStyle(
-      color: Colors.black,
+  static TextStyle get black13Bold => TextStyle(
+      color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black,
       fontSize: 13,
       fontWeight: FontWeight.bold
   );

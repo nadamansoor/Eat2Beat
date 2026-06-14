@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/features/models/address_model.dart';
 import 'package:eat2beat/features/screens/home/tabs/profile/widgets/Address_Item.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
@@ -47,19 +48,22 @@ class _AddressesScreenState extends State<AddressesScreen> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    return Scaffold(
-        backgroundColor: AppColors.light,
-        body: SafeArea(
-          bottom: false,
-          child: Stack(
-          children: [
-            /// Background
-            Positioned.fill(
-              child: Image.asset(
-                Assets.imagesPatternCart,
-                fit: BoxFit.cover,
-              ),
-            ),
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: AppColors.light,
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              children: [
+                /// Background
+                Positioned.fill(
+                  child: Image.asset(
+                    ThemeNotifier().isDarkMode ? Assets.imagesPattern : Assets.imagesPatternCart,
+                    fit: BoxFit.cover,
+                  ),
+                ),
 
       Padding(
         padding: const EdgeInsets.all(16),
@@ -104,8 +108,10 @@ class _AddressesScreenState extends State<AddressesScreen> {
         ),
       ),
           ],
-          ),
         ),
+      ),
+    );
+      },
     );
   }
 }

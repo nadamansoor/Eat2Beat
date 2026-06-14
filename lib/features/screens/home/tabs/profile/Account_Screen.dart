@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/features/screens/home/tabs/profile/widgets/build_input.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
@@ -48,19 +49,22 @@ class _AccountScreenState extends State<AccountScreen> {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-        backgroundColor: AppColors.light,
-        body: SafeArea(
-          bottom: false,
-          child: Stack(
-          children: [
-            /// Background
-            Positioned.fill(
-              child: Image.asset(
-                Assets.imagesPatternCart,
-                fit: BoxFit.cover,
-              ),
-            ),
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: AppColors.light,
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              children: [
+                /// Background
+                Positioned.fill(
+                  child: Image.asset(
+                    ThemeNotifier().isDarkMode ? Assets.imagesPattern : Assets.imagesPatternCart,
+                    fit: BoxFit.cover,
+                  ),
+                ),
 
             Padding(
               padding: EdgeInsets.symmetric(horizontal: width * 0.05),
@@ -171,9 +175,10 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
             ),
           ],
-          ),
         ),
+      ),
+    );
+      },
     );
   }
-
 }

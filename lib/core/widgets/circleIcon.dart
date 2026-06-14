@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
 Widget circleIcon({required IconData icon, VoidCallback? onTap}) {
@@ -8,11 +9,11 @@ Widget circleIcon({required IconData icon, VoidCallback? onTap}) {
         
         decoration:  BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
-          color: Colors.white,
+          color: AppColors.white,
           shape: BoxShape.rectangle,
 
         ),
-        child: Icon(icon),
+        child: Icon(icon, color: AppColors.black),
       ),
     );
   }

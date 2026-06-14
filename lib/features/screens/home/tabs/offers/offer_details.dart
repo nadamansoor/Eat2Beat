@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'dart:ui';
 import 'package:eat2beat/features/models/offers_model.dart';
 import 'package:eat2beat/core/widgets/circleIcon.dart';
@@ -429,7 +430,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                               Expanded(
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.purple,
+                                    backgroundColor: ThemeNotifier().isDarkMode ? AppColors.purple800 : AppColors.purple,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),

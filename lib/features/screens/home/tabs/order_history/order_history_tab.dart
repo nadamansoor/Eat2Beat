@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
@@ -211,15 +212,18 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
 
     final user = FirebaseAuth.instance.currentUser;
 
-    return Scaffold(
-      backgroundColor: AppColors.light,
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: AppColors.light,
       body: SafeArea(
         bottom: false,
         child: Stack(
           children: [
             Positioned.fill(
               child: Image.asset(
-                Assets.imagesPatternCart,
+                ThemeNotifier().isDarkMode ? Assets.imagesPattern : Assets.imagesPatternCart,
                 fit: BoxFit.cover,
               ),
             ),
@@ -233,7 +237,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.history,
                         color: AppColors.black,
                         size: 26,
@@ -386,6 +390,8 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
           ],
         ),
       ),
+        );
+      },
     );
   }
 
@@ -396,9 +402,9 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: ThemeNotifier().isDarkMode ? Colors.transparent : Colors.grey.shade200),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -427,9 +433,9 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: ThemeNotifier().isDarkMode ? Colors.transparent : Colors.grey.shade200),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
@@ -505,7 +511,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -559,9 +565,9 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: ThemeNotifier().isDarkMode ? const Color(0xff8966FA).withOpacity(0.15) : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: ThemeNotifier().isDarkMode ? Colors.transparent : Colors.grey.shade200),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

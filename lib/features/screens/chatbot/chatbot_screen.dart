@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'dart:convert';
 import 'dart:math' show Random;
 import 'package:eat2beat/core/utils/app_colors.dart';
@@ -314,41 +315,43 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       }
     });
   }
-
-  // ─────────────────────────────────────────────
-  // UI
-  // ─────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffFDF0EE),
-      body: Stack(
-        children: [
-          Opacity(
-            opacity: 0.07,
-            child: Image.asset(
-              'assets/images/Pattern.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-            ),
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        final isDark = ThemeNotifier().isDarkMode;
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xff45337D) : const Color(0xffFDF0EE),
+          body: Stack(
+            children: [
+              Opacity(
+                opacity: 0.07,
+                child: Image.asset(
+                  'assets/images/Pattern.png',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+              SafeArea(
+                child: Column(
+                  children: [
+                    _buildAppBar(isDark),
+                    Expanded(child: _buildMessageList(isDark)),
+                    if (_isSending) _buildTypingIndicator(isDark),
+                    _buildInputBar(isDark),
+                  ],
+                ),
+              ),
+            ],
           ),
-          SafeArea(
-            child: Column(
-              children: [
-                _buildAppBar(),
-                Expanded(child: _buildMessageList()),
-                if (_isSending) _buildTypingIndicator(),
-                _buildInputBar(),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -359,7 +362,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? const Color(0xff8966FA) : Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -369,22 +372,23 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   ),
                 ],
               ),
-              child: const Icon(Icons.chevron_left_rounded,
-                  color: Colors.black87, size: 24),
+              child: Icon(Icons.chevron_left_rounded,
+                  color: isDark ? Colors.white : Colors.black87, size: 24),
             ),
           ),
-          const Expanded(
+          Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.smart_toy_rounded, color: AppColors.purple, size: 24),
-                SizedBox(width: 8),
+                Icon(Icons.smart_toy_rounded,
+                    color: isDark ? Colors.white : AppColors.purple, size: 24),
+                const SizedBox(width: 8),
                 Text(
                   'Chatbot',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
               ],
@@ -396,16 +400,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
   }
 
-  Widget _buildMessageList() {
+  Widget _buildMessageList(bool isDark) {
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: _messages.length,
-      itemBuilder: (context, index) => _buildBubble(_messages[index]),
+      itemBuilder: (context, index) => _buildBubble(_messages[index], isDark),
     );
   }
 
-  Widget _buildBubble(ChatMessage msg) {
+  Widget _buildBubble(ChatMessage msg, bool isDark) {
     final isBot = msg.isBot;
     return Align(
       alignment: isBot ? Alignment.centerLeft : Alignment.centerRight,
@@ -416,7 +420,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           maxWidth: MediaQuery.of(context).size.width * 0.72,
         ),
         decoration: BoxDecoration(
-          color: isBot ? const Color(0xffEDE8FF) : AppColors.purple,
+          color: isBot 
+              ? (isDark ? const Color(0xff8966FA) : const Color(0xffEDE8FF))
+              : (isDark ? Colors.white : AppColors.purple),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
             topRight: const Radius.circular(18),
@@ -434,7 +440,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         child: Text(
           msg.text,
           style: TextStyle(
-            color: isBot ? Colors.black87 : Colors.white,
+            color: isBot 
+                ? (isDark ? Colors.white : Colors.black87)
+                : (isDark ? const Color(0xff45337D) : Colors.white),
             fontSize: 14,
             height: 1.5,
           ),
@@ -443,15 +451,15 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
   }
 
-  Widget _buildTypingIndicator() {
+  Widget _buildTypingIndicator(bool isDark) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(left: 16, bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-        decoration: const BoxDecoration(
-          color: Color(0xffEDE8FF),
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xff8966FA) : const Color(0xffEDE8FF),
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(18),
             topRight: Radius.circular(18),
             bottomRight: Radius.circular(18),
@@ -462,19 +470,22 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           mainAxisSize: MainAxisSize.min,
           children: List.generate(
             3,
-            (i) => _TypingDot(delay: Duration(milliseconds: i * 200)),
+            (i) => _TypingDot(
+              delay: Duration(milliseconds: i * 200),
+              isDark: isDark,
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildInputBar() {
+  Widget _buildInputBar(bool isDark) {
     return Container(
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xff8966FA) : Colors.white,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
@@ -487,7 +498,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       child: Row(
         children: [
           Icon(Icons.attach_file_rounded,
-              color: AppColors.purple.withOpacity(0.7), size: 22),
+              color: isDark ? Colors.white70 : AppColors.purple.withOpacity(0.7), size: 22),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
@@ -495,12 +506,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               focusNode: _focusNode,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendMessage(),
-              decoration: const InputDecoration(
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 14,
+              ),
+              decoration: InputDecoration(
                 hintText: 'Type a message...',
-                hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                hintStyle: TextStyle(
+                  color: isDark ? Colors.white70 : Colors.grey,
+                  fontSize: 14,
+                ),
                 border: InputBorder.none,
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 4),
+                contentPadding: const EdgeInsets.symmetric(vertical: 4),
               ),
             ),
           ),
@@ -510,11 +528,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             child: Container(
               width: 36,
               height: 36,
-              decoration: const BoxDecoration(
-                color: AppColors.purple,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white : AppColors.purple,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+              child: Icon(Icons.send_rounded, 
+                  color: isDark ? const Color(0xff45337D) : Colors.white, size: 18),
             ),
           ),
         ],
@@ -528,7 +547,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 // ─────────────────────────────────────────────
 class _TypingDot extends StatefulWidget {
   final Duration delay;
-  const _TypingDot({required this.delay});
+  final bool isDark;
+  const _TypingDot({required this.delay, required this.isDark});
 
   @override
   State<_TypingDot> createState() => _TypingDotState();
@@ -570,8 +590,8 @@ class _TypingDotState extends State<_TypingDot>
           width: 8,
           height: 8,
           margin: const EdgeInsets.symmetric(horizontal: 3),
-          decoration: const BoxDecoration(
-            color: AppColors.purple,
+          decoration: BoxDecoration(
+            color: widget.isDark ? Colors.white : AppColors.purple,
             shape: BoxShape.circle,
           ),
         ),

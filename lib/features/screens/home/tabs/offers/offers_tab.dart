@@ -1,6 +1,7 @@
 import 'package:eat2beat/data/dummy_offer_data.dart';
 import 'package:eat2beat/features/screens/home/tabs/offers/banner_card.dart';
 import 'package:eat2beat/features/screens/home/tabs/offers/food_card.dart';
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,10 @@ class OffersTab extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
        backgroundColor: AppColors.light,
       body: Stack(
         children: [
@@ -109,6 +113,8 @@ class OffersTab extends StatelessWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 }

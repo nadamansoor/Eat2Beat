@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +13,7 @@ Widget buildSimpleItem({
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(

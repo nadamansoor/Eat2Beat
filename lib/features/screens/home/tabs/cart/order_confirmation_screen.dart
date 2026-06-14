@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
@@ -75,44 +76,47 @@ Widget build(BuildContext context) {
   screenWidth = MediaQuery.of(context).size.width;
   screenHeight = MediaQuery.of(context).size.height;
 
-  return Scaffold(
-      backgroundColor: AppColors.light,
-      body: SafeArea(
-        bottom: false,
-        child: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              Assets.imagesPatternCart,
-              fit: BoxFit.cover,
-            ),
-          ),
-
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: screenHeight * 0.04),
-
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    width: 45,
-                    height: 45,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(Icons.close),
-                  ),
+  return ListenableBuilder(
+    listenable: ThemeNotifier(),
+    builder: (context, child) {
+      return Scaffold(
+        backgroundColor: AppColors.light,
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  ThemeNotifier().isDarkMode ? Assets.imagesPattern : Assets.imagesPatternCart,
+                  fit: BoxFit.cover,
                 ),
+              ),
+
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: screenHeight * 0.04),
+
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: Icon(Icons.close, color: AppColors.black),
+                      ),
+                    ),
 
                 SizedBox(height: screenHeight * 0.04),
 
@@ -160,7 +164,7 @@ Widget build(BuildContext context) {
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: AppColors.white,
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
@@ -198,12 +202,14 @@ Widget build(BuildContext context) {
                     ),
                   ),
                 ),
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
+        ),
+      );
+    },
   );
 }
 Widget _infoRow({

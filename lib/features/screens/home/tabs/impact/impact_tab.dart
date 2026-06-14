@@ -1,5 +1,6 @@
 import 'package:eat2beat/features/screens/home/tabs/impact/rest_container.dart';
 import 'package:eat2beat/features/screens/home/tabs/impact/statistics_container.dart';
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
@@ -45,10 +46,13 @@ class _ImpactTabState extends State<ImpactTab> {
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width; // 375
     screenHeight = MediaQuery.of(context).size.height; // 812
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.light,
-        body: Stack(
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return SafeArea(
+          child: Scaffold(
+            backgroundColor: AppColors.light,
+            body: Stack(
           children: [
             Image.asset(Assets.imagesPattern),
             Padding(
@@ -84,7 +88,7 @@ class _ImpactTabState extends State<ImpactTab> {
                       width: double.infinity,
                       height: screenHeight * 0.06,
                       decoration: BoxDecoration(
-                        color: AppColors.lightPurple,
+                        color: ThemeNotifier().isDarkMode ? const Color(0xff45337D) : AppColors.lightPurple,
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Row(
@@ -245,33 +249,40 @@ class _ImpactTabState extends State<ImpactTab> {
         ),
       ),
     );
+      },
+    );
   }
 
   Widget buildStatContainer({required int index, required String duration}) {
+    final isDark = ThemeNotifier().isDarkMode;
+    final isSelected = selectedIndex == index;
     return InkWell(
       onTap: () {
         selectedIndex = index;
         setState(() {});
       },
-      child:
-          selectedIndex == index
-              ? Container(
-                margin: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.01,
-                  vertical: screenHeight * 0.003,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                alignment: Alignment.center,
-                padding: EdgeInsets.symmetric(
-                  // horizontal: screenWidth * 0.1,
-                  // vertical: screenHeight * 0.008,
-                ),
-                child: Text(duration, style: AppStyles.black13w400),
-              )
-              : Text(duration, style: AppStyles.black13w400),
+      child: isSelected
+          ? Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.01,
+                vertical: screenHeight * 0.003,
+              ),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.purple : AppColors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                duration,
+                style: isDark
+                    ? const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w400)
+                    : AppStyles.black13w400,
+              ),
+            )
+          : Text(
+              duration,
+              style: AppStyles.black13w400,
+            ),
     );
   }
 }

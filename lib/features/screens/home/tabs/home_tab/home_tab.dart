@@ -1,5 +1,6 @@
 
 import 'dart:io';
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
@@ -371,7 +372,10 @@ class _HomeTabState extends State<HomeTab> {
             .contains(searchQuery.toLowerCase()))
         .toList();
 
-    return Scaffold(
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: AppColors.light,
       appBar: AppBar(
@@ -419,7 +423,7 @@ class _HomeTabState extends State<HomeTab> {
         actions: [
           Padding(
             padding: EdgeInsets.only(right: screenWidth * 0.02),
-            child: const Icon(Icons.notifications,
+            child: Icon(Icons.notifications,
                 color: AppColors.black, size: 25),
           )
         ],
@@ -441,7 +445,7 @@ class _HomeTabState extends State<HomeTab> {
                     hintText: "Search",
                     controller: searchController,
                     onChanged: onSearch,
-                    prefixIcon: const Icon(Icons.search,
+                    prefixIcon: Icon(Icons.search,
                         color: AppColors.black),
                     suffixIcon: isSearching
                         ? IconButton(
@@ -461,7 +465,11 @@ class _HomeTabState extends State<HomeTab> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: AppColors.purple),
+                          icon: Icon(
+                            Icons.arrow_back_ios_new,
+                            size: 18,
+                            color: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
+                          ),
                           onPressed: () {
                             searchController.clear();
                             setState(() {
@@ -473,7 +481,9 @@ class _HomeTabState extends State<HomeTab> {
                         ),
                         Text(
                           "Back to restaurants",
-                          style: AppStyles.black16w500.copyWith(color: AppColors.purple),
+                          style: AppStyles.black16w500.copyWith(
+                            color: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
+                          ),
                         ),
                       ],
                     ),
@@ -659,14 +669,19 @@ class _HomeTabState extends State<HomeTab> {
                               decoration: BoxDecoration(
                                 color: selectedIndex == index
                                     ? AppColors.purple
-                                    : AppColors.lightPurple,
+                                    : (ThemeNotifier().isDarkMode
+                                        ? const Color(0xff45337D)
+                                        : AppColors.lightPurple),
                                 borderRadius: BorderRadius.circular(40),
+                                border: selectedIndex == index
+                                    ? Border.all(color: Colors.white, width: 1.5)
+                                    : null,
                               ),
                               child: Text(
                                 categories[index],
                                 style: selectedIndex == index
                                     ? AppStyles.black16w500
-                                        .copyWith(color: AppColors.light)
+                                        .copyWith(color: Colors.white)
                                     : AppStyles.black16w500,
                               ),
                             ),
@@ -1075,6 +1090,8 @@ class _HomeTabState extends State<HomeTab> {
           ),
         ],
       ),
+        );
+      },
     );
   }
 }

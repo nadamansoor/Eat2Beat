@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/widgets/custom_button.dart';
@@ -182,8 +183,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
     double screenHeight = MediaQuery.of(context).size.height; // 812
 
     model = ModalRoute.of(context)?.settings.arguments as HomeFoodModel;
-    return Scaffold(
-      body: Stack(
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
+          body: Stack(
         children: [
           SingleChildScrollView(
             child: Column(
@@ -384,7 +388,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   Expanded(
                     child: CustomButton(
                         text: "Add To Cart",
-                        backgroundColor: AppColors.lightPurple,
+                        backgroundColor: ThemeNotifier().isDarkMode ? const Color(0xff45337D) : AppColors.lightPurple,
+                        textColor: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
                         onPressed: () => _addToCart(navigateToCheckout: false),
                     ),
                   ),
@@ -394,7 +399,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   Expanded(
                     child: CustomButton(
                         text: "Order Now",
-                        backgroundColor: AppColors.purple,
+                        backgroundColor: ThemeNotifier().isDarkMode ? AppColors.purple800 : AppColors.purple,
                         onPressed: () => _addToCart(navigateToCheckout: true),
                     ),
                   )
@@ -404,6 +409,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
           ),
         ),
       ),
+    );
+      },
     );
   }
 }

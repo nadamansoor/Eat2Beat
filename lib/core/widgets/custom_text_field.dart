@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:flutter/material.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_styles.dart';
@@ -24,7 +25,7 @@ class CustomTextFormField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     required this.hintText,
-    this.hintStyle = AppStyles.grey16w400,
+    TextStyle? hintStyle,
     required this.controller,
     this.validator,
     this.obscureText = false,
@@ -34,33 +35,38 @@ class CustomTextFormField extends StatelessWidget {
     this.radius,
     this.onChanged,
 
-  });
+  }) : hintStyle = hintStyle ?? AppStyles.grey16w400;
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      decoration: InputDecoration(
-          enabledBorder: builtOutlineBorder(borderSideColor),
-          focusedBorder: builtOutlineBorder(focusedBorderColor ?? AppColors.blue),
-          errorBorder: builtOutlineBorder(Colors.red),
-          focusedErrorBorder: builtOutlineBorder(Colors.red),
-          prefixIcon: prefixIcon,
-          prefixIconColor: borderSideColor,
-          suffixIcon: suffixIcon,
-          suffixIconColor: borderSideColor,
-          hintText: hintText,
-          hintStyle: hintStyle,
-          fillColor: Colors.white,
-          filled: true
-      ),
-      style: hintStyle,
-      cursorColor: borderSideColor,
-      controller: controller,
-      onChanged: onChanged,
-      validator: validator,
-      obscureText: obscureText,
-      keyboardType: keyBoardType,
-      maxLines: maxLines?? 1,
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return TextFormField(
+          decoration: InputDecoration(
+              enabledBorder: builtOutlineBorder(borderSideColor),
+              focusedBorder: builtOutlineBorder(focusedBorderColor ?? AppColors.blue),
+              errorBorder: builtOutlineBorder(Colors.red),
+              focusedErrorBorder: builtOutlineBorder(Colors.red),
+              prefixIcon: prefixIcon,
+              prefixIconColor: borderSideColor,
+              suffixIcon: suffixIcon,
+              suffixIconColor: borderSideColor,
+              hintText: hintText,
+              hintStyle: hintStyle,
+              fillColor: ThemeNotifier().isDarkMode ? AppColors.white : Colors.white,
+              filled: true
+          ),
+          style: hintStyle.copyWith(color: AppColors.black),
+          cursorColor: borderSideColor,
+          controller: controller,
+          onChanged: onChanged,
+          validator: validator,
+          obscureText: obscureText,
+          keyboardType: keyBoardType,
+          maxLines: maxLines?? 1,
+        );
+      },
     );
   }
 

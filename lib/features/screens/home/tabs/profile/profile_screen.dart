@@ -1,7 +1,6 @@
+import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/features/screens/home/tabs/profile/Account_Screen.dart';
-import 'package:eat2beat/features/screens/home/tabs/profile/addresses_screen.dart';
-import 'package:eat2beat/features/screens/home/tabs/profile/points_screen.dart';
-import 'package:eat2beat/features/screens/home/tabs/profile/settings_screen.dart';
+import 'package:eat2beat/features/screens/home/tabs/profile/theme_screen.dart';
 import 'package:eat2beat/features/screens/home/tabs/profile/widgets/menu_Item.dart';
 import 'package:eat2beat/features/screens/home/tabs/profile/widgets/profile_header.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
@@ -21,19 +20,22 @@ class ProfileScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-        backgroundColor: AppColors.light,
-        body: SafeArea(
-          bottom: false,
-          child: Stack(
-          children: [
-            /// Background Pattern
-            Positioned.fill(
-              child: Image.asset(
-                Assets.imagesPatternCart,
-                fit: BoxFit.cover,
-              ),
-            ),
+    return ListenableBuilder(
+      listenable: ThemeNotifier(),
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: AppColors.light,
+          body: SafeArea(
+            bottom: false,
+            child: Stack(
+              children: [
+                /// Background Pattern
+                Positioned.fill(
+                  child: Image.asset(
+                    ThemeNotifier().isDarkMode ? Assets.imagesPattern : Assets.imagesPatternCart,
+                    fit: BoxFit.cover,
+                  ),
+                ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
               child: Column(
@@ -73,49 +75,16 @@ class ProfileScreen extends StatelessWidget {
                           },
                         ),
                         buildMenuItem(
-                          icon: Icons.credit_card,
-                          title: "Payment",
-                        ),
-                        buildMenuItem(
-                          icon: Icons.location_on_outlined,
-                            title: "Addresses",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const AddressesScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                        buildMenuItem(
-                          icon: Icons.star_border,
-                          title: "My Points",
-                          onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>  PointsScreen(),
-                                ),
-                              );
-                            },
-                        ),
-                        buildMenuItem(
-                          icon: Icons.settings_outlined,
-                          title: "Settings",
+                          icon: Icons.palette_outlined,
+                          title: "Theme",
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const SettingsScreen(),
+                                builder: (_) => const ThemeScreen(),
                               ),
                             );
                           },
-                        ),
-
-                        buildMenuItem(
-                          icon: Icons.star_outline,
-                          title: "Rate App",
                         ),
                         buildMenuItem(
                           icon: Icons.logout,
@@ -142,8 +111,10 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ],
-          ),
         ),
+      ),
     );
+  },
+);
   }
 }
