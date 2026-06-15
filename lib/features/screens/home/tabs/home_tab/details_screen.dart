@@ -451,27 +451,33 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           ),
                         ],
                       ),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: screenWidth * 0.04,
+                        runSpacing: 8.0,
                         children: [
-                          Image.asset(Assets.imagesRateIcon ,width: 20, height: 20,),
-                          SizedBox(width: screenWidth * 0.01,),
-                          Text(
-                            "${(avgRating ?? model.rate).toStringAsFixed(1)}${ratingCount > 0 ? " ($ratingCount)" : ""}",
-                            style: AppStyles.grey16w400,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset(Assets.imagesRateIcon, width: 20, height: 20),
+                              SizedBox(width: screenWidth * 0.01),
+                              Text(
+                                "${(avgRating ?? model.rate).toStringAsFixed(1)}${ratingCount > 0 ? " ($ratingCount)" : ""}",
+                                style: AppStyles.grey16w400,
+                              ),
+                            ],
                           ),
-                          SizedBox(width: screenWidth * 0.06,),
-                          Image.asset(Assets.imagesDotIcon, color: AppColors.grey,),
-                          SizedBox(width: screenWidth * 0.06,),
-                          Text("\$ ${model.price}", style: AppStyles.grey16w400,),
-                          SizedBox(width: screenWidth * 0.06,),
-                          Image.asset(Assets.imagesDotIcon, color: AppColors.grey,),
-                          SizedBox(width: screenWidth * 0.06,),
-                          Icon(Icons.watch_later_outlined ,
-                            color: AppColors.grey,
-                            size: 20,
+                          Image.asset(Assets.imagesDotIcon, color: AppColors.grey),
+                          Text("\$ ${model.price}", style: AppStyles.grey16w400),
+                          Image.asset(Assets.imagesDotIcon, color: AppColors.grey),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.watch_later_outlined, color: AppColors.grey, size: 20),
+                              SizedBox(width: screenWidth * 0.01),
+                              Text(model.time, style: AppStyles.grey16w400),
+                            ],
                           ),
-                          SizedBox(width: screenWidth * 0.01,),
-                          Text(model.time, style: AppStyles.grey16w400,),
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.03),

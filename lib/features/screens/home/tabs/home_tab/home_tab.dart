@@ -552,13 +552,7 @@ class _HomeTabState extends State<HomeTab> {
             );
           },
         ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: screenWidth * 0.02),
-            child: Icon(Icons.notifications,
-                color: AppColors.black, size: 25),
-          )
-        ],
+        actions: const [],
       ),
       body: Stack(
         children: [
@@ -702,7 +696,7 @@ class _HomeTabState extends State<HomeTab> {
                           crossAxisCount: 2,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 12,
-                          mainAxisExtent: screenHeight * 0.28,
+                          mainAxisExtent: (screenHeight * 0.28).clamp(220.0, 280.0),
                         ),
                         itemBuilder: (context, index) {
                           final item = filteredMeals[index];
@@ -915,7 +909,7 @@ class _HomeTabState extends State<HomeTab> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 12,
-                            mainAxisExtent: screenHeight * 0.28,
+                            mainAxisExtent: (screenHeight * 0.28).clamp(220.0, 280.0),
                           ),
                           itemBuilder: (context, index) {
                             final item = filteredRecMeals[index];
@@ -1059,7 +1053,7 @@ class _HomeTabState extends State<HomeTab> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 12,
-                            mainAxisExtent: screenHeight * 0.28,
+                            mainAxisExtent: (screenHeight * 0.28).clamp(220.0, 280.0),
                           ),
                           itemBuilder: (context, index) {
                             final restaurant = filteredRestaurants[index];
@@ -1224,7 +1218,7 @@ class _HomeTabState extends State<HomeTab> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 12,
-                            mainAxisExtent: screenHeight * 0.28,
+                            mainAxisExtent: (screenHeight * 0.28).clamp(220.0, 280.0),
                           ),
                           itemBuilder: (context, index) {
                             final item = filteredFavMeals[index];
@@ -1353,7 +1347,7 @@ class _HomeTabState extends State<HomeTab> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 12,
-                            mainAxisExtent: screenHeight * 0.28,
+                            mainAxisExtent: (screenHeight * 0.28).clamp(220.0, 280.0),
                           ),
                           itemBuilder: (context, index) {
                             final item = filteredGeneralMeals[index];

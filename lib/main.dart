@@ -85,6 +85,17 @@ class MyApp extends StatelessWidget {
           navigatorObservers: [
             ThemeNavigatorObserver(),
           ],
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: MediaQuery.of(context).textScaler.clamp(
+                  minScaleFactor: 0.8,
+                  maxScaleFactor: 1.15,
+                ),
+              ),
+              child: child!,
+            );
+          },
           initialRoute: AppRoutes.SplashRouteName,
           routes: {
             AppRoutes.SplashRouteName: (_) => SplashView(),

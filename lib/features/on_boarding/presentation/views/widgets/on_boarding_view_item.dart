@@ -14,6 +14,7 @@ class PageViewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     return Stack(
       children: [
         Positioned(
@@ -21,7 +22,7 @@ class PageViewItem extends StatelessWidget {
           left: 0,
           right: 0,
           child: Container(
-            height: 300,
+            height: screenHeight * 0.35,
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage("assets/images/Pattern.png"),
@@ -35,13 +36,13 @@ class PageViewItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             children: [
-              const SizedBox(height: 120),
+              SizedBox(height: screenHeight * 0.08),
               Container(
-                height: 370,
+                height: screenHeight * 0.36,
                 margin: const EdgeInsets.only(top: 20),
                 child: Image.asset(
                   image,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: 10),
@@ -49,7 +50,7 @@ class PageViewItem extends StatelessWidget {
                 title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 27,
+                  fontSize: 24,
                   fontWeight: FontWeight.w700,
                   fontFamily: 'Urbanist',
                   color: Color(0xFF1A1A1A),
@@ -61,14 +62,14 @@ class PageViewItem extends StatelessWidget {
                 description,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 15,
                   fontWeight: FontWeight.w400,
                   color: Color(0xFF555555),
                   height: 1.4,
                 ),
               ),
               const Spacer(),
-              const SizedBox(height: 80),
+              SizedBox(height: screenHeight * 0.11),
             ],
           ),
         ),

@@ -259,33 +259,44 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                           const SizedBox(height: 20),
 
                           /// RATE + PRICE + TIME
-                          Row(
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 12,
+                            runSpacing: 8,
                             children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.orange,
-                                size: 18,
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.star,
+                                    color: Colors.orange,
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    item.rate.toString(),
+                                    style: TextStyle(color: AppColors.grey800),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                item.rate.toString(),
-                                style: TextStyle(color: AppColors.grey800),
-                              ),
-                              const SizedBox(width: 12),
                               Text(
                                 '\$ ${item.price}',
                                 style: TextStyle(color: AppColors.grey800),
                               ),
-                              const SizedBox(width: 12),
-                              Icon(
-                                Icons.access_time,
-                                size: 18,
-                                color: AppColors.grey800,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                item.time,
-                                style: TextStyle(color: AppColors.grey800),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 18,
+                                    color: AppColors.grey800,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    item.time,
+                                    style: TextStyle(color: AppColors.grey800),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

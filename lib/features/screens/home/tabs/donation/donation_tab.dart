@@ -58,7 +58,7 @@ class DonationTab extends StatelessWidget {
                         //childAspectRatio: 0.5,
                         crossAxisSpacing: 8,
                         mainAxisSpacing: 12,
-                        mainAxisExtent: screenHeight*0.28,
+                        mainAxisExtent: (screenHeight * 0.28).clamp(220.0, 280.0),
                       ),
                       itemBuilder: (context, index) {
                         return InkWell(

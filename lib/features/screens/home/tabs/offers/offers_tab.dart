@@ -156,7 +156,7 @@ class _OffersTabState extends State<OffersTab> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 0.1),
                           child: Container(
-                            height: screenHeight * 0.23,
+                            height: (screenHeight * 0.23).clamp(160.0, 200.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16), 
                               color: Colors.transparent, 
@@ -260,7 +260,7 @@ class _OffersTabState extends State<OffersTab> {
                               crossAxisCount: 2,
                               crossAxisSpacing: 8,
                               mainAxisSpacing: 12,
-                              mainAxisExtent: screenHeight * 0.28,
+                              mainAxisExtent: (screenHeight * 0.28).clamp(220.0, 280.0),
                             ),
                             itemBuilder: (context, index) {
                               final item = _offers[index];
