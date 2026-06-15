@@ -148,7 +148,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(
-        child: CircularProgressIndicator(color: AppColors.purple),
+        child: CircularProgressIndicator(color: AppColors.purple800),
       ),
     );
 
@@ -299,7 +299,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                   else if (_isLoading)
                     const Expanded(
                       child: Center(
-                        child: CircularProgressIndicator(color: AppColors.purple),
+                        child: CircularProgressIndicator(color: AppColors.purple800),
                       ),
                     )
                   else if (_orders.isEmpty)
@@ -359,7 +359,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                                 return const Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Center(
-                                    child: CircularProgressIndicator(color: AppColors.purple),
+                                    child: CircularProgressIndicator(color: AppColors.purple800),
                                   ),
                                 );
                               } else if (!_hasMore && _orders.isNotEmpty) {

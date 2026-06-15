@@ -1,7 +1,6 @@
 import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'dart:ui';
 import 'package:eat2beat/features/models/offers_model.dart';
-import 'package:eat2beat/core/widgets/circleIcon.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/services/get_it_services.dart';
@@ -9,6 +8,10 @@ import 'package:eat2beat/core/services/api_service.dart';
 import 'package:eat2beat/features/screens/home/tabs/cart/checkout_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:eat2beat/core/utils/app_images.dart';
+import 'package:eat2beat/core/utils/app_styles.dart';
+import 'package:eat2beat/core/widgets/custom_button.dart';
+import 'package:intl/intl.dart';
 
 class OfferDetailsScreen extends StatefulWidget {
   final FoodModel item;
@@ -21,6 +24,199 @@ class OfferDetailsScreen extends StatefulWidget {
 
 class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
   int quantity = 1;
+
+  // New variables for reviews and ratings
+  User? currentUser;
+  String? token;
+
+  bool reviewsLoading = false;
+  List<dynamic> reviews = [];
+  double? avgRating;
+  int ratingCount = 0;
+  String? reviewsErrorMessage;
+
+  bool myRatingLoading = false;
+  bool hasExistingRating = false;
+  int mySelectedRating = 0;
+  final TextEditingController reviewTextController = TextEditingController();
+
+  bool ratingSubmitting = false;
+  String? ratingSuccessMessage;
+  String? ratingErrorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _initMealReviewsAndRatings();
+  }
+
+  @override
+  void dispose() {
+    reviewTextController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initMealReviewsAndRatings() async {
+    currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null && widget.item.id.isNotEmpty) {
+      try {
+        final fetchedToken = await currentUser!.getIdToken();
+        if (fetchedToken != null) {
+          setState(() {
+            token = fetchedToken;
+          });
+          await Future.wait([
+            _loadReviews(fetchedToken, widget.item.id),
+            _loadMyRating(fetchedToken, widget.item.id),
+          ]);
+        }
+      } catch (e) {
+        debugPrint('Error loading reviews/rating: $e');
+      }
+    }
+  }
+
+  Future<void> _loadReviews(String token, String mealId) async {
+    setState(() {
+      reviewsLoading = true;
+      reviewsErrorMessage = null;
+    });
+    try {
+      final apiService = getIt<ApiService>();
+      final data = await apiService.getMealReviews(token, mealId);
+      final List<dynamic> loadedReviews = data['reviews'] is List ? data['reviews'] : [];
+      final dynamic avg = data['avg_rating'];
+      final dynamic count = data['rating_count'];
+
+      double finalAvg = 0.0;
+      int finalCount = 0;
+      
+      if (avg is num && avg > 0) {
+        finalAvg = avg.toDouble();
+      }
+      if (count is int && count > 0) {
+        finalCount = count;
+      }
+      
+      if (finalCount == 0 && loadedReviews.isNotEmpty) {
+        double total = 0.0;
+        int rCount = 0;
+        for (final rev in loadedReviews) {
+          final r = rev['rating'];
+          if (r is num) {
+            total += r.toDouble();
+            rCount++;
+          }
+        }
+        if (rCount > 0) {
+          finalAvg = total / rCount;
+          finalCount = rCount;
+        }
+      }
+
+      setState(() {
+        reviews = loadedReviews;
+        avgRating = finalCount > 0 ? finalAvg : null;
+        ratingCount = finalCount;
+        reviewsLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        reviewsLoading = false;
+        reviewsErrorMessage = 'Reviews are unavailable right now.';
+      });
+    }
+  }
+
+  Future<void> _loadMyRating(String token, String mealId) async {
+    setState(() {
+      myRatingLoading = true;
+    });
+    try {
+      final apiService = getIt<ApiService>();
+      final data = await apiService.getMyMealRating(token, mealId);
+      if (data != null) {
+        final dynamic rating = data['rating'];
+        final String text = data['review_text']?.toString() ?? '';
+        setState(() {
+          myRatingLoading = false;
+          final parsedRating = rating is num ? rating.toDouble() : null;
+          if (parsedRating != null) {
+            mySelectedRating = parsedRating.round();
+            hasExistingRating = true;
+          } else {
+            hasExistingRating = false;
+          }
+          reviewTextController.text = text;
+        });
+      } else {
+        setState(() {
+          hasExistingRating = false;
+          myRatingLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        hasExistingRating = false;
+        myRatingLoading = false;
+      });
+    }
+  }
+
+  Future<void> _submitRating() async {
+    if (widget.item.id.isEmpty) return;
+    if (mySelectedRating < 1 || mySelectedRating > 5) {
+      setState(() {
+        ratingErrorMessage = 'Rating must be between 1 and 5.';
+      });
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    setState(() {
+      ratingSubmitting = true;
+      ratingErrorMessage = null;
+      ratingSuccessMessage = null;
+    });
+
+    try {
+      final token = await user.getIdToken();
+      if (token != null) {
+        final apiService = getIt<ApiService>();
+        await apiService.rateMeal(
+          token,
+          mealId: widget.item.id,
+          rating: mySelectedRating.toDouble(),
+          reviewText: reviewTextController.text,
+        );
+        setState(() {
+          ratingSuccessMessage = 'Rating submitted successfully.';
+          hasExistingRating = true;
+          ratingSubmitting = false;
+        });
+        await _loadReviews(token, widget.item.id);
+        await _loadMyRating(token, widget.item.id);
+      }
+    } catch (e) {
+      setState(() {
+        ratingErrorMessage = 'Failed to submit rating: $e';
+        ratingSubmitting = false;
+      });
+    }
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '';
+    try {
+      final parsed = DateTime.tryParse(dateStr);
+      if (parsed != null) {
+        return DateFormat.yMMMd().format(parsed.toLocal());
+      }
+    } catch (_) {}
+    return dateStr;
+  }
 
   Future<void> _addToCart({bool navigateToCheckout = false}) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -55,7 +251,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(
-        child: CircularProgressIndicator(color: AppColors.purple),
+        child: CircularProgressIndicator(color: AppColors.purple800),
       ),
     );
 
@@ -127,65 +323,105 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
     }
   }
 
+  Widget _buildImage(String imagePath, {double? width, double? height, BoxFit fit = BoxFit.cover}) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            Assets.imagesFood,
+            width: width,
+            height: height,
+            fit: fit,
+          );
+        },
+      );
+    } else {
+      final path = imagePath.trim().isEmpty ? Assets.imagesFood : imagePath.trim();
+      return Image.asset(
+        path,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            Assets.imagesFood,
+            width: width,
+            height: height,
+            fit: fit,
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return ListenableBuilder(
       listenable: ThemeNotifier(),
       builder: (context, child) {
         return Scaffold(
-          backgroundColor: ThemeNotifier().isDarkMode ? const Color(0xff1A1A1A) : const Color(0xffF7F7F7),
-          body: SizedBox.expand(
-            child: Stack(
-              children: [
-                /// IMAGE
-                SizedBox(
-                  height: 340,
-                  width: double.infinity,
-                  child: item.image.startsWith('http')
-                      ? Image.network(item.image, fit: BoxFit.cover)
-                      : Image.asset(item.image, fit: BoxFit.cover),
-                ),
-
-                /// BACK
-                Positioned(
-                  top: 50,
-                  left: 20,
-                  child: circleIcon(
-                    icon: Icons.arrow_back_ios_new_rounded,
-                    onTap: () => Navigator.pop(context),
-                  ),
-                ),
-
-                /// CONTENT
-                Positioned(
-                  top: 260,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          backgroundColor: ThemeNotifier().isDarkMode ? const Color(0xff1D1030) : AppColors.lightPurple,
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Stack(
+                      children: [
+                        _buildImage(
+                          item.image,
+                          height: screenHeight * 0.4,
+                          width: double.infinity,
+                          fit: BoxFit.fill,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.06,
+                            vertical: screenHeight * 0.08,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.arrow_back_ios_new,
+                                    size: 18,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    child: SingleChildScrollView(
+                    SizedBox(height: screenHeight * 0.02),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          /// NAME + SALE
                           Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  item.name,
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.black,
-                                  ),
-                                ),
+                                child: Text(item.name, style: AppStyles.black20Bold),
                               ),
                               Container(
                                 padding: const EdgeInsets.symmetric(
@@ -206,322 +442,530 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          // Res name + Icon(not working) + view
+                          SizedBox(height: screenHeight * 0.01),
                           Row(
                             children: [
-                              /// ICON
-                              CircleAvatar(
-                                radius: 14,
-                                backgroundColor: Colors.orange,
-                                child: widget.item.restauranteIcon.startsWith('http')
-                                    ? ClipOval(
-                                        child: Image.network(
-                                          widget.item.restauranteIcon,
-                                          fit: BoxFit.cover,
-                                          width: 28,
-                                          height: 28,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                              const Icon(Icons.restaurant, size: 16, color: Colors.white),
-                                        ),
-                                      )
-                                    : Image.asset(widget.item.restauranteIcon),
-                              ),
-
-                              const SizedBox(width: 8),
-
-                              /// RESTAURANT NAME
-                              Text(
-                                widget.item.restruanteName,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.black,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(50),
+                                child: _buildImage(
+                                  item.restauranteIcon,
+                                  width: 32,
+                                  height: 32,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-
-                              const SizedBox(width: 8),
-
-                              GestureDetector(
-                                onTap: () {},
-                                child: const Text(
-                                  'View',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
+                              SizedBox(width: screenWidth * 0.02,),
+                              Text(item.restruanteName, style: AppStyles.black16w500,),
                             ],
                           ),
-                          const SizedBox(height: 20),
-
-                          /// RATE + PRICE + TIME
-                          Wrap(
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 12,
-                            runSpacing: 8,
+                          SizedBox(height: screenHeight * 0.01),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.star,
-                                    color: Colors.orange,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    item.rate.toString(),
-                                    style: TextStyle(color: AppColors.grey800),
-                                  ),
-                                ],
-                              ),
+                              Image.asset(Assets.imagesRateIcon, width: 20, height: 20),
+                              SizedBox(width: screenWidth * 0.01),
                               Text(
-                                '\$ ${item.price}',
-                                style: TextStyle(color: AppColors.grey800),
+                                "${(avgRating ?? widget.item.rate).toStringAsFixed(1)}${ratingCount > 0 ? " ($ratingCount)" : ""}",
+                                style: AppStyles.grey16w400,
                               ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.access_time,
-                                    size: 18,
-                                    color: AppColors.grey800,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    item.time,
-                                    style: TextStyle(color: AppColors.grey800),
-                                  ),
-                                ],
-                              ),
+                              Image.asset(Assets.imagesDotIcon, color: AppColors.grey),
+                              Text("\$ ${item.price}", style: AppStyles.grey16w400),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: screenHeight * 0.03),
                           Row(
                             children: [
-                              Text(
-                                'Size',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FontStyle.normal,
-                                  color: AppColors.black,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-
+                              Text("Size ", style: AppStyles.black16w500,),
+                              SizedBox(width: screenWidth * 0.01,),
                               Container(
-                                width: 32,
-                                height: 32,
                                 alignment: Alignment.center,
+                                width: screenWidth * 0.085,
+                                height: screenHeight * 0.044,
+                                padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: const Color.fromARGB(
-                                      175,
-                                      216,
-                                      153,
-                                      252,
-                                    ), // Border color
-                                    width: 2, // Border width
-                                  ),
-                                  color: const Color.fromARGB(255, 187, 166, 221),
-                                  shape: BoxShape.circle,
+                                  color: AppColors.purple50,
+                                  borderRadius: BorderRadius.circular(110),
                                 ),
-                                child: const Text(
-                                  'L',
+                                child: Text(item.size, style: AppStyles.black16w500,),
+                              )
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          Text("Ingredients", style: AppStyles.black16Bold,),
+                          SizedBox(height: screenHeight * 0.01),
+                          Text(item.description, style: AppStyles.grey13w400,),
+                          SizedBox(height: screenHeight * 0.03),
+                          Divider(color: ThemeNotifier().isDarkMode ? Colors.white10 : Colors.black12, thickness: 1),
+                          SizedBox(height: screenHeight * 0.02),
+                          
+                          // Header Section
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Reviews", style: AppStyles.black16Bold),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+
+                          // Rating & Review Form (for Logged-in Users)
+                          if (currentUser != null && widget.item.id.isNotEmpty) ...[
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: ThemeNotifier().isDarkMode 
+                                    ? Colors.white.withOpacity(0.03) 
+                                    : Colors.black.withOpacity(0.02),
+                                border: Border.all(
+                                  color: ThemeNotifier().isDarkMode 
+                                      ? Colors.white.withOpacity(0.08) 
+                                      : Colors.black.withOpacity(0.05),
+                                ),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    hasExistingRating ? "Update your rating" : "Rate this meal", 
+                                    style: AppStyles.black16w500
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "Choose a score from 1 to 5 and add an optional review.",
+                                    style: AppStyles.grey13w400,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  
+                                  if (myRatingLoading)
+                                    const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                                        child: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(color: AppColors.purple800, strokeWidth: 2),
+                                        ),
+                                      ),
+                                    )
+                                  else ...[
+                                    // Star Selection
+                                    Row(
+                                      children: List.generate(5, (index) {
+                                        final starIndex = index + 1;
+                                        return GestureDetector(
+                                          onTap: ratingSubmitting 
+                                              ? null 
+                                              : () {
+                                                  setState(() {
+                                                    mySelectedRating = starIndex;
+                                                    ratingErrorMessage = null;
+                                                    ratingSuccessMessage = null;
+                                                  });
+                                                },
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(right: 8.0),
+                                            child: AnimatedScale(
+                                              scale: mySelectedRating == starIndex ? 1.15 : 1.0,
+                                              duration: const Duration(milliseconds: 150),
+                                              child: Icon(
+                                                Icons.star,
+                                                size: 34,
+                                                color: starIndex <= mySelectedRating
+                                                    ? const Color(0xFFFFC833)
+                                                    : (ThemeNotifier().isDarkMode 
+                                                        ? Colors.white.withOpacity(0.15) 
+                                                        : Colors.black.withOpacity(0.1)),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    
+                                    // Text Input Field
+                                    TextField(
+                                      controller: reviewTextController,
+                                      maxLines: 3,
+                                      enabled: !ratingSubmitting,
+                                      style: TextStyle(
+                                        color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black87,
+                                        fontSize: 14,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: "Optional review...",
+                                        hintStyle: TextStyle(
+                                          color: ThemeNotifier().isDarkMode ? Colors.white54 : Colors.black45,
+                                        ),
+                                        filled: true,
+                                        fillColor: ThemeNotifier().isDarkMode 
+                                            ? Colors.white.withOpacity(0.02) 
+                                            : Colors.black.withOpacity(0.01),
+                                        contentPadding: const EdgeInsets.all(12),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: BorderSide(
+                                            color: ThemeNotifier().isDarkMode 
+                                                ? Colors.white.withOpacity(0.1) 
+                                                : Colors.black.withOpacity(0.1),
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          borderSide: const BorderSide(color: AppColors.purple, width: 1.5),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+
+                                    // Feedback Messages
+                                    if (ratingErrorMessage != null)
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(10),
+                                        margin: const EdgeInsets.only(bottom: 12),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0x1FEF4444),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          ratingErrorMessage!,
+                                          style: const TextStyle(color: Color(0xFFEF4444), fontSize: 13, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    if (ratingSuccessMessage != null)
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(10),
+                                        margin: const EdgeInsets.only(bottom: 12),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0x1F10B981),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          ratingSuccessMessage!,
+                                          style: const TextStyle(color: Color(0xFF10B981), fontSize: 13, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+
+                                    // Submit Button
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 48,
+                                      child: ElevatedButton(
+                                        onPressed: ratingSubmitting ? null : _submitRating,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.purple,
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                          elevation: 0,
+                                        ),
+                                        child: ratingSubmitting
+                                            ? const SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                              )
+                                            : Text(
+                                                hasExistingRating ? 'Update Rating' : 'Submit Rating',
+                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                              ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ] else ...[
+                            // Unauthorized User / Mock Meal Prompt
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: ThemeNotifier().isDarkMode 
+                                    ? Colors.white.withOpacity(0.03) 
+                                    : Colors.black.withOpacity(0.02),
+                                border: Border.all(
+                                  color: ThemeNotifier().isDarkMode 
+                                      ? Colors.white.withOpacity(0.08) 
+                                      : Colors.black.withOpacity(0.05),
+                                ),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    widget.item.id.isEmpty
+                                        ? "Reviews are only available for online menu meals."
+                                        : "Sign in with a user account to view & write reviews.",
+                                    style: AppStyles.black13w400,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  if (widget.item.id.isNotEmpty) ...[
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      width: 140,
+                                      height: 38,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pushNamed(context, AppRoutes.loginRouteName);
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.purple,
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          elevation: 0,
+                                        ),
+                                        child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+                          SizedBox(height: screenHeight * 0.02),
+
+                          // Reviews List Section
+                          if (reviewsLoading)
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20.0),
+                                child: CircularProgressIndicator(color: AppColors.purple800),
+                              ),
+                            )
+                          else if (reviewsErrorMessage != null)
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                child: Text(reviewsErrorMessage!, style: AppStyles.grey13w400),
+                              ),
+                            )
+                          else if (reviews.isEmpty)
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 24.0),
+                                child: Text(
+                                  "No reviews yet for this dish.",
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                    fontStyle: FontStyle.italic,
+                                    color: ThemeNotifier().isDarkMode ? Colors.white54 : Colors.black54,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-
-                          /// INGREDIENTS
-                          Text(
-                            'Ingredients',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.black,
+                            )
+                          else
+                            Column(
+                              children: reviews.map((rev) {
+                                final String userName = rev['user_name']?.toString() ?? 'User';
+                                final double userRate = rev['rating'] is num 
+                                    ? (rev['rating'] as num).toDouble() 
+                                    : (double.tryParse(rev['rating']?.toString() ?? '') ?? 0.0);
+                                final String? reviewText = rev['review_text']?.toString();
+                                final String dateText = _formatDate(rev['updated_at']?.toString() ?? rev['created_at']?.toString());
+                                
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: ThemeNotifier().isDarkMode 
+                                        ? Colors.white.withOpacity(0.025) 
+                                        : Colors.black.withOpacity(0.015),
+                                    border: Border.all(
+                                      color: ThemeNotifier().isDarkMode 
+                                          ? Colors.white.withOpacity(0.05) 
+                                          : Colors.black.withOpacity(0.03),
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            userName, 
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                              color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black87,
+                                            ),
+                                          ),
+                                          if (dateText.isNotEmpty)
+                                            Text(
+                                              dateText, 
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: ThemeNotifier().isDarkMode ? Colors.white38 : Colors.black38,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          Row(
+                                            children: List.generate(5, (index) {
+                                              return Icon(
+                                                Icons.star,
+                                                size: 15,
+                                                color: (index + 1) <= userRate 
+                                                    ? const Color(0xFFFFC833) 
+                                                    : (ThemeNotifier().isDarkMode 
+                                                        ? Colors.white.withOpacity(0.12) 
+                                                        : Colors.black.withOpacity(0.08)),
+                                              );
+                                            }),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "${userRate.toStringAsFixed(1)}/5.0",
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFFFFC833),
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      if (reviewText != null && reviewText.trim().isNotEmpty)
+                                        Text(
+                                          reviewText,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: ThemeNotifier().isDarkMode ? Colors.white70 : Colors.black87,
+                                          ),
+                                        )
+                                      else
+                                        Text(
+                                          "No written review provided.",
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontStyle: FontStyle.italic,
+                                            color: ThemeNotifier().isDarkMode ? Colors.white30 : Colors.black38,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-
-                          Text(
-                            item.description,
-                            style: TextStyle(color: AppColors.grey800),
-                          ),
-                          const SizedBox(height: 180),
+                          SizedBox(height: screenHeight * 0.25),
                         ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-
-                /// BOTTOM BAR
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(30),
-                    ),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.deepPurple.withOpacity(0.35),
+              ),
+            ],
+          ),
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.06,
+                vertical: screenHeight * 0.02
+              ),
+              decoration: const BoxDecoration(
+                color: Color(0xd9c4b2fc),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24))
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Text("\$ ${item.price * quantity}", style: AppStyles.white25Bold,),
+                      const Spacer(),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.03,
+                          vertical: screenHeight * 0.015
                         ),
-                        child: SafeArea(
-                          top: false,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              /// TOP ROW (PRICE + QUANTITY)
-                              Row(
-                                children: [
-                                  /// PRICE - LEFT
-                                  Text(
-                                    '\$ ${item.price * quantity}',
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                        decoration: BoxDecoration(
+                          color: const Color(0x1a1b1432),
+                          borderRadius: BorderRadius.circular(50),
+                          border: Border.all(
+                            color: Colors.white
+                          )
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              onTap: (){
+                                if(quantity > 1){
+                                  quantity--;
+                                }
+                                setState(() {
 
-                                  const Spacer(),
-
-                                  /// QUANTITY BOX - RIGHT
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.25),
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        qtyButton(
-                                          icon: Icons.remove,
-                                          onTap: () {
-                                            if (quantity > 1) {
-                                              setState(() => quantity--);
-                                            }
-                                          },
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                          ),
-                                          child: Text(
-                                            quantity.toString(),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        qtyButton(
-                                          icon: Icons.add,
-                                          onTap: () {
-                                            setState(() => quantity++);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                                });
+                              },
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Color(0x33f9f7ff),
+                                  shape: BoxShape.circle
+                                ),
+                                child: const Icon(Icons.remove, color: Colors.white,)
+                              )
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.03,
                               ),
-
-                              const SizedBox(height: 16),
-
-                              /// BOTTOM BUTTONS
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: OutlinedButton(
-                                      style: OutlinedButton.styleFrom(
-                                        backgroundColor: ThemeNotifier().isDarkMode ? const Color(0xff45337D) : Colors.white,
-                                        side: BorderSide(
-                                          color: ThemeNotifier().isDarkMode ? Colors.transparent : Colors.deepPurple,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 14,
-                                        ),
-                                      ),
-                                      onPressed: () => _addToCart(navigateToCheckout: false),
-                                      child: Text(
-                                        'Add To Cart',
-                                        style: TextStyle(
-                                          color: ThemeNotifier().isDarkMode ? Colors.white : Colors.deepPurpleAccent,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: ThemeNotifier().isDarkMode ? AppColors.purple800 : AppColors.purple,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 14,
-                                        ),
-                                      ),
-                                      onPressed: () => _addToCart(navigateToCheckout: true),
-                                      child: const Text(
-                                        'Order Now',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                              child: Text("$quantity", style: AppStyles.white16Bold,),
+                            ),
+                            InkWell(
+                              onTap: (){
+                                setState(() {
+                                  quantity++;
+                                });
+                              },
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Color(0x33f9f7ff),
+                                  shape: BoxShape.circle
+                                ),
+                                child: const Icon(Icons.add, color: Colors.white,)
+                              )
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.02,),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomButton(
+                          text: "Add To Cart",
+                          backgroundColor: ThemeNotifier().isDarkMode ? const Color(0xff45337D) : AppColors.lightPurple,
+                          textColor: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
+                          onPressed: () => _addToCart(navigateToCheckout: false),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              ],
+
+                      SizedBox(width: screenWidth * 0.06,),
+
+                      Expanded(
+                        child: CustomButton(
+                          text: "Order Now",
+                          backgroundColor: ThemeNotifier().isDarkMode ? AppColors.purple800 : AppColors.purple,
+                          onPressed: () => _addToCart(navigateToCheckout: true),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         );
       },
-    );
-  }
-
-  Widget qtyButton({required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, size: 18),
-      ),
     );
   }
 }

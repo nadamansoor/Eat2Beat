@@ -234,7 +234,7 @@ class _CartScreenState extends State<CartScreen> {
                   else if (isLoading && cartItems.isEmpty)
                     const Expanded(
                       child: Center(
-                        child: CircularProgressIndicator(color: AppColors.purple),
+                        child: CircularProgressIndicator(color: AppColors.purple800),
                       ),
                     )
                   else if (cartItems.isEmpty)
@@ -243,10 +243,10 @@ class _CartScreenState extends State<CartScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.remove_shopping_cart_outlined,
                               size: 64,
-                              color: AppColors.grey,
+                              color: ThemeNotifier().isDarkMode ? Colors.white : Colors.black,
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -293,7 +293,7 @@ class _CartScreenState extends State<CartScreen> {
                 child: Container(
                   color: Colors.black.withOpacity(0.1),
                   child: const Center(
-                    child: CircularProgressIndicator(color: AppColors.purple),
+                    child: CircularProgressIndicator(color: AppColors.purple800),
                   ),
                 ),
               ),

@@ -101,10 +101,23 @@ class _OffersTabState extends State<OffersTab> {
     final restName = json['restaurant_name']?.toString() ?? 
                      json['restaurant']?['name']?.toString() ?? 
                      'Restaurant';
-    final restIcon = json['restaurant']?['logo_url']?.toString() ?? '';
+    final restIcon = json['restaurant_img_url']?.toString() ?? 
+                     json['restaurant']?['logo_url']?.toString() ?? 
+                     json['restaurant']?['img_url']?.toString() ?? 
+                     json['restaurant']?['rest_img_url']?.toString() ?? 
+                     json['restaurant']?['image']?.toString() ?? 
+                     '';
     
     final qty = (json['quantity'] as num?)?.toInt() ?? 1;
     final desc = json['description']?.toString() ?? '';
+    
+    final rateVal = json['rate'] ?? json['rating'] ?? json['avg_rating'] ?? json['average_rating'];
+    double rate = 0.0;
+    if (rateVal is num) {
+      rate = rateVal.toDouble();
+    } else if (rateVal is String && rateVal.isNotEmpty) {
+      rate = double.tryParse(rateVal) ?? 0.0;
+    }
     
     return FoodModel(
       id: id,
@@ -112,7 +125,7 @@ class _OffersTabState extends State<OffersTab> {
       image: imageUrl,
       price: price,
       sale: saleText.isNotEmpty ? saleText : 'Special Offer',
-      rate: 4.8,
+      rate: rate,
       time: '20 Min',
       quantity: qty,
       description: desc,
@@ -238,7 +251,7 @@ class _OffersTabState extends State<OffersTab> {
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 40),
                             child: Center(
-                              child: CircularProgressIndicator(color: AppColors.purple),
+                              child: CircularProgressIndicator(color: AppColors.purple800),
                             ),
                           )
                         else if (_offers.isEmpty)

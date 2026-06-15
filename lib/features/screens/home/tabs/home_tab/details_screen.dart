@@ -91,11 +91,36 @@ class _DetailsScreenState extends State<DetailsScreen> {
       final List<dynamic> loadedReviews = data['reviews'] is List ? data['reviews'] : [];
       final dynamic avg = data['avg_rating'];
       final dynamic count = data['rating_count'];
+      double finalAvg = 0.0;
+      int finalCount = 0;
+      
+      if (avg is num && avg > 0) {
+        finalAvg = avg.toDouble();
+      }
+      if (count is int && count > 0) {
+        finalCount = count;
+      }
+      
+      if (finalCount == 0 && loadedReviews.isNotEmpty) {
+        double total = 0.0;
+        int rCount = 0;
+        for (final rev in loadedReviews) {
+          final r = rev['rating'];
+          if (r is num) {
+            total += r.toDouble();
+            rCount++;
+          }
+        }
+        if (rCount > 0) {
+          finalAvg = total / rCount;
+          finalCount = rCount;
+        }
+      }
 
       setState(() {
         reviews = loadedReviews;
-        avgRating = avg is num ? avg.toDouble() : null;
-        ratingCount = count is int ? count : (int.tryParse(count?.toString() ?? '') ?? loadedReviews.length);
+        avgRating = finalCount > 0 ? finalAvg : null;
+        ratingCount = finalCount;
         reviewsLoading = false;
       });
     } catch (e) {
@@ -469,15 +494,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           ),
                           Image.asset(Assets.imagesDotIcon, color: AppColors.grey),
                           Text("\$ ${model.price}", style: AppStyles.grey16w400),
-                          Image.asset(Assets.imagesDotIcon, color: AppColors.grey),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.watch_later_outlined, color: AppColors.grey, size: 20),
-                              SizedBox(width: screenWidth * 0.01),
-                              Text(model.time, style: AppStyles.grey16w400),
-                            ],
-                          ),
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.03),
@@ -511,13 +527,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("Reviews", style: AppStyles.black16Bold),
-                          if (avgRating != null || ratingCount > 0)
-                            Text(
-                              "${(avgRating ?? model.rate).toStringAsFixed(1)} average from $ratingCount review${ratingCount == 1 ? '' : 's'}",
-                              style: AppStyles.grey13w400,
-                            )
-                          else
-                            Text("No reviews yet", style: AppStyles.grey13w400),
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.02),

@@ -99,8 +99,24 @@ class _HomeTabState extends State<HomeTab> {
           price = double.tryParse(priceVal) ?? 0.0;
         }
         final mealImgUrl = m['meal_img_url']?.toString() ?? m['image']?.toString() ?? '';
-        final restName = m['restaurant_name']?.toString() ?? m['rest_name']?.toString() ?? 'Restaurant';
-        final restIcon = m['restaurant_img_url']?.toString() ?? Assets.imagesBurgerKing;
+        final restName = m['restaurant_name']?.toString() ?? 
+                         m['rest_name']?.toString() ?? 
+                         m['restaurant']?['name']?.toString() ?? 
+                         'Restaurant';
+        final restIcon = m['restaurant_img_url']?.toString() ?? 
+                         m['restaurant']?['logo_url']?.toString() ?? 
+                         m['restaurant']?['img_url']?.toString() ?? 
+                         m['restaurant']?['rest_img_url']?.toString() ?? 
+                         m['restaurant']?['image']?.toString() ?? 
+                         Assets.imagesBurgerKing;
+        
+        final rateVal = m['rate'] ?? m['rating'] ?? m['avg_rating'] ?? m['average_rating'];
+        double rate = 0.0;
+        if (rateVal is num) {
+          rate = rateVal.toDouble();
+        } else if (rateVal is String && rateVal.isNotEmpty) {
+          rate = double.tryParse(rateVal) ?? 0.0;
+        }
         
         final isActiveVal = m['is_active'] ?? m['isActive'] ?? m['restaurant']?['is_active'] ?? m['restaurant']?['isActive'];
         final bool? isActive = isActiveVal == null ? null : (isActiveVal == true || isActiveVal == 1 || isActiveVal?.toString() == 'true' || isActiveVal?.toString() == '1');
@@ -124,7 +140,7 @@ class _HomeTabState extends State<HomeTab> {
           title: title,
           image: mealImgUrl.isNotEmpty ? mealImgUrl : Assets.imagesFood,
           price: price,
-          rate: 4.5,
+          rate: rate,
           description: description,
           time: '20 Min',
           restIsOpen: true,
@@ -204,8 +220,25 @@ class _HomeTabState extends State<HomeTab> {
         }
         final mealImgUrl = m['meal_img_url']?.toString() ?? m['image']?.toString() ?? '';
         
-        final restName = m['restaurant_name']?.toString() ?? m['rest_name']?.toString() ?? 'Restaurant';
-        final restIcon = m['restaurant_img_url']?.toString() ?? Assets.imagesBurgerKing;
+        final restName = m['restaurant_name']?.toString() ?? 
+                         m['rest_name']?.toString() ?? 
+                         m['restaurant']?['name']?.toString() ?? 
+                         'Restaurant';
+        final restIcon = m['restaurant_img_url']?.toString() ?? 
+                         m['restaurant']?['logo_url']?.toString() ?? 
+                         m['restaurant']?['img_url']?.toString() ?? 
+                         m['restaurant']?['rest_img_url']?.toString() ?? 
+                         m['restaurant']?['image']?.toString() ?? 
+                         Assets.imagesBurgerKing;
+                         
+        final rateVal = m['rate'] ?? m['rating'] ?? m['avg_rating'] ?? m['average_rating'];
+        double rate = 0.0;
+        if (rateVal is num) {
+          rate = rateVal.toDouble();
+        } else if (rateVal is String && rateVal.isNotEmpty) {
+          rate = double.tryParse(rateVal) ?? 0.0;
+        }
+        
         final restIsOpenVal = m['is_open'] ?? m['isOpen'];
         final bool restIsOpen;
         if (restIsOpenVal == null) {
@@ -241,7 +274,7 @@ class _HomeTabState extends State<HomeTab> {
           title: title,
           image: mealImgUrl.isNotEmpty ? mealImgUrl : Assets.imagesFood,
           price: price,
-          rate: 4.5,
+          rate: rate,
           description: description,
           time: '20 Min',
           restIsOpen: restIsOpen,
@@ -407,6 +440,14 @@ class _HomeTabState extends State<HomeTab> {
         }
         final mealImgUrl = m['meal_img_url']?.toString() ?? m['image']?.toString() ?? '';
         
+        final rateVal = m['rate'] ?? m['rating'] ?? m['avg_rating'] ?? m['average_rating'];
+        double rate = 0.0;
+        if (rateVal is num) {
+          rate = rateVal.toDouble();
+        } else if (rateVal is String && rateVal.isNotEmpty) {
+          rate = double.tryParse(rateVal) ?? 0.0;
+        }
+        
         final isActiveVal = m['is_active'] ?? m['isActive'];
         final bool? isActive = isActiveVal == null ? restaurant.isActive : (isActiveVal == true || isActiveVal == 1 || isActiveVal?.toString() == 'true' || isActiveVal?.toString() == '1');
 
@@ -429,7 +470,7 @@ class _HomeTabState extends State<HomeTab> {
           title: title,
           image: mealImgUrl.isNotEmpty ? mealImgUrl : Assets.imagesFood,
           price: price,
-          rate: 4.5,
+          rate: rate,
           description: description,
           time: '20 Min',
           restIsOpen: restaurant.isOpen,
@@ -717,6 +758,7 @@ class _HomeTabState extends State<HomeTab> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Stack(
                                     children: [
@@ -725,36 +767,37 @@ class _HomeTabState extends State<HomeTab> {
                                         child: _buildImage(
                                           item.image,
                                           width: double.infinity,
-                                          height: screenHeight * 0.14,
+                                          height: screenHeight * 0.12,
                                           fit: BoxFit.fill,
                                         ),
                                       ),
-                                      Positioned(
-                                        left: 8,
-                                        top: 8,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.white,
-                                            borderRadius: BorderRadius.circular(5),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              ImageIcon(
-                                                AssetImage(Assets.imagesRateIcon),
-                                                color: AppColors.yellow,
-                                                size: 14,
-                                              ),
-                                              const SizedBox(width: 2),
-                                              Text(
-                                                "${item.rate}",
-                                                style: AppStyles.grey13w400.copyWith(fontSize: 11),
-                                              ),
-                                            ],
+                                      if (item.rate > 0)
+                                        Positioned(
+                                          left: 8,
+                                          top: 8,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.white,
+                                              borderRadius: BorderRadius.circular(5),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                ImageIcon(
+                                                  AssetImage(Assets.imagesRateIcon),
+                                                  color: AppColors.yellow,
+                                                  size: 14,
+                                                ),
+                                                const SizedBox(width: 2),
+                                                Text(
+                                                  "${item.rate}",
+                                                  style: AppStyles.grey13w400.copyWith(fontSize: 11),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      ),
                                       if (item.id != null && item.id!.isNotEmpty)
                                         Positioned(
                                           right: 8,
@@ -780,21 +823,35 @@ class _HomeTabState extends State<HomeTab> {
                                     ],
                                   ),
                                   SizedBox(height: screenHeight * 0.01),
-                                  Text(
-                                    item.title,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppStyles.black13Bold,
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                    child: Text(
+                                      item.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppStyles.black13Bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                    child: Text(
+                                      item.description,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 10,
+                                      ),
+                                    ),
                                   ),
                                   const Spacer(),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Text("\$ ${item.price.toStringAsFixed(2)}", style: AppStyles.grey13w400),
-                                      ImageIcon(AssetImage(Assets.imagesDotIcon)),
-                                      const Icon(Icons.watch_later_outlined, size: 18),
-                                      Text(item.time, style: AppStyles.grey13w400),
-                                    ],
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                    child: Text(
+                                      "\$ ${item.price.toStringAsFixed(2)}",
+                                      style: AppStyles.grey13w400.copyWith(fontWeight: FontWeight.bold),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -930,6 +987,7 @@ class _HomeTabState extends State<HomeTab> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Stack(
                                       children: [
@@ -938,36 +996,37 @@ class _HomeTabState extends State<HomeTab> {
                                           child: _buildImage(
                                             item.image,
                                             width: double.infinity,
-                                            height: screenHeight * 0.14,
+                                            height: screenHeight * 0.12,
                                             fit: BoxFit.fill,
                                           ),
                                         ),
-                                        Positioned(
-                                          left: 8,
-                                          top: 8,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.white,
-                                              borderRadius: BorderRadius.circular(5),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                ImageIcon(
-                                                  AssetImage(Assets.imagesRateIcon),
-                                                  color: AppColors.yellow,
-                                                  size: 14,
-                                                ),
-                                                const SizedBox(width: 2),
-                                                Text(
-                                                  "${item.rate}",
-                                                  style: AppStyles.grey13w400.copyWith(fontSize: 11),
-                                                ),
-                                              ],
+                                        if (item.rate > 0)
+                                          Positioned(
+                                            left: 8,
+                                            top: 8,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.white,
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ImageIcon(
+                                                    AssetImage(Assets.imagesRateIcon),
+                                                    color: AppColors.yellow,
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    "${item.rate}",
+                                                    style: AppStyles.grey13w400.copyWith(fontSize: 11),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
                                         if (item.id != null && item.id!.isNotEmpty)
                                           Positioned(
                                             right: 8,
@@ -993,21 +1052,35 @@ class _HomeTabState extends State<HomeTab> {
                                       ],
                                     ),
                                     SizedBox(height: screenHeight * 0.01),
-                                    Text(
-                                      item.title,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppStyles.black13Bold,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        item.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppStyles.black13Bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        item.description,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 10,
+                                        ),
+                                      ),
                                     ),
                                     const Spacer(),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Text("\$ ${item.price.toStringAsFixed(2)}", style: AppStyles.grey13w400),
-                                        ImageIcon(AssetImage(Assets.imagesDotIcon)),
-                                        const Icon(Icons.watch_later_outlined, size: 18),
-                                        Text(item.time, style: AppStyles.grey13w400),
-                                      ],
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        "\$ ${item.price.toStringAsFixed(2)}",
+                                        style: AppStyles.grey13w400.copyWith(fontWeight: FontWeight.bold),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1239,6 +1312,7 @@ class _HomeTabState extends State<HomeTab> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Stack(
                                       children: [
@@ -1247,36 +1321,37 @@ class _HomeTabState extends State<HomeTab> {
                                           child: _buildImage(
                                             item.image,
                                             width: double.infinity,
-                                            height: screenHeight * 0.14,
+                                            height: screenHeight * 0.12,
                                             fit: BoxFit.fill,
                                           ),
                                         ),
-                                        Positioned(
-                                          left: 8,
-                                          top: 8,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.white,
-                                              borderRadius: BorderRadius.circular(5),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                ImageIcon(
-                                                  AssetImage(Assets.imagesRateIcon),
-                                                  color: AppColors.yellow,
-                                                  size: 14,
-                                                ),
-                                                const SizedBox(width: 2),
-                                                Text(
-                                                  "${item.rate}",
-                                                  style: AppStyles.grey13w400.copyWith(fontSize: 11),
-                                                ),
-                                              ],
+                                        if (item.rate > 0)
+                                          Positioned(
+                                            left: 8,
+                                            top: 8,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.white,
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ImageIcon(
+                                                    AssetImage(Assets.imagesRateIcon),
+                                                    color: AppColors.yellow,
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    "${item.rate}",
+                                                    style: AppStyles.grey13w400.copyWith(fontSize: 11),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
                                         if (item.id != null && item.id!.isNotEmpty)
                                           Positioned(
                                             right: 8,
@@ -1302,21 +1377,35 @@ class _HomeTabState extends State<HomeTab> {
                                       ],
                                     ),
                                     SizedBox(height: screenHeight * 0.01),
-                                    Text(
-                                      item.title,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppStyles.black13Bold,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        item.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppStyles.black13Bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        item.description,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 10,
+                                        ),
+                                      ),
                                     ),
                                     const Spacer(),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Text("\$ ${item.price.toStringAsFixed(2)}", style: AppStyles.grey13w400),
-                                        ImageIcon(AssetImage(Assets.imagesDotIcon)),
-                                        const Icon(Icons.watch_later_outlined, size: 18),
-                                        Text(item.time, style: AppStyles.grey13w400),
-                                      ],
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        "\$ ${item.price.toStringAsFixed(2)}",
+                                        style: AppStyles.grey13w400.copyWith(fontWeight: FontWeight.bold),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1368,6 +1457,7 @@ class _HomeTabState extends State<HomeTab> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Stack(
                                       alignment: Alignment.topLeft,
@@ -1377,45 +1467,61 @@ class _HomeTabState extends State<HomeTab> {
                                           child: _buildImage(
                                             item.image,
                                             width: double.infinity,
+                                            height: screenHeight * 0.12,
                                             fit: BoxFit.fill,
                                           ),
                                         ),
-                                        Container(
-                                          margin: const EdgeInsets.all(8),
-                                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.white,
-                                            borderRadius: BorderRadius.circular(5),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              ImageIcon(
-                                                AssetImage(Assets.imagesRateIcon),
-                                                color: AppColors.yellow,
-                                              ),
-                                              Text("${item.rate}", style: AppStyles.grey13w400),
-                                            ],
-                                          ),
-                                        )
+                                        if (item.rate > 0)
+                                          Container(
+                                            margin: const EdgeInsets.all(8),
+                                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.white,
+                                              borderRadius: BorderRadius.circular(5),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                ImageIcon(
+                                                  AssetImage(Assets.imagesRateIcon),
+                                                  color: AppColors.yellow,
+                                                ),
+                                                Text("${item.rate}", style: AppStyles.grey13w400),
+                                              ],
+                                            ),
+                                          )
                                       ],
                                     ),
                                     SizedBox(height: screenHeight * 0.01),
-                                    Text(
-                                      item.description,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: AppStyles.black13Bold,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        item.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppStyles.black13Bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        item.description,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 10,
+                                        ),
+                                      ),
                                     ),
                                     const Spacer(),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Text("\$ ${item.price}", style: AppStyles.grey13w400),
-                                        ImageIcon(AssetImage(Assets.imagesDotIcon)),
-                                        const Icon(Icons.watch_later_outlined, size: 18),
-                                        Text(item.time, style: AppStyles.grey13w400),
-                                      ],
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        "\$ ${item.price.toStringAsFixed(2)}",
+                                        style: AppStyles.grey13w400.copyWith(fontWeight: FontWeight.bold),
+                                      ),
                                     ),
                                   ],
                                 ),
