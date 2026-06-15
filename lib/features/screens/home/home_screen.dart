@@ -3,7 +3,6 @@ import 'package:eat2beat/features/screens/chatbot/chatbot_screen.dart';
 import 'package:eat2beat/features/screens/home/tabs/cart/cart_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/order_history/order_history_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/home_tab/home_tab.dart';
-import 'package:eat2beat/features/screens/home/tabs/impact/impact_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/offers/offers_tab.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
@@ -30,14 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return OffersTab();
       case 2:
-        return ImpactTab();
-      case 3:
         return OrderHistoryTab(onSwitchTab: (idx) {
           setState(() {
             selectedIndex = idx;
           });
         });
-      case 4:
+      case 3:
         return CartScreen();
       default:
         return HomeTab();
@@ -60,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: double.infinity,
               hideOnScroll: false,
               iconHeight: 65,
-              barColor: Colors.black.withOpacity(0.2),
+              barColor: Colors.transparent,
               offset: 0,
               fit: StackFit.expand,
               barDecoration: BoxDecoration(
@@ -94,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildTab(selectedIndex),
 
                     // ── FAB floating above the bottom bar ──
-                    if (selectedIndex != 4)
+                    if (selectedIndex != 3)
                       Positioned(
                         right: 24,
                         bottom: bottomBarHeight + 45,
@@ -115,10 +112,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         buildNavBarItem(Assets.imagesHomeIcon, "Home", 0),
                         buildNavBarItem(Assets.imagesOfferIcon, "Offers", 1),
-                        buildNavBarItem(Assets.imagesImpactIcon, "Impact", 2),
-                        buildNavBarItem(Assets.imagesInactiveOrdrs, "Orders", 3),
+                        buildNavBarItem(Assets.imagesInactiveOrdrs, "Orders", 2),
                         // cart tab — same style as the others
-                        buildNavBarItem(Assets.imagesCarrtIcon, "Cart", 4),
+                        buildNavBarItem(Assets.imagesCarrtIcon, "Cart", 3),
                       ],
                     ),
                   ),

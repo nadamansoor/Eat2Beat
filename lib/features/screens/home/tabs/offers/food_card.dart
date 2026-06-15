@@ -43,11 +43,21 @@ class FoodCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    item.image,
-                    width: double.infinity,
-                    fit: BoxFit.fill,
-                  ),
+                  child: item.image.startsWith('http')
+                      ? Image.network(
+                          item.image,
+                          width: double.infinity,
+                          height: screenHeight * 0.11,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 40),
+                        )
+                      : Image.asset(
+                          item.image,
+                          width: double.infinity,
+                          height: screenHeight * 0.11,
+                          fit: BoxFit.cover,
+                        ),
                 ),
                 Container(
                   margin: const EdgeInsets.all(8),
@@ -72,9 +82,9 @@ class FoodCard extends StatelessWidget {
               item.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: AppStyles.black16Bold,
+              style: AppStyles.black13Bold,
             ),
-            SizedBox(height: screenHeight * 0.01),
+            const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

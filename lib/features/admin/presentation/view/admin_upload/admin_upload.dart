@@ -9,6 +9,7 @@ import 'package:eat2beat/features/admin/presentation/cubits/add_meal_cubit/add_m
 import 'package:eat2beat/features/admin/presentation/cubits/add_meal_cubit/add_meal_state.dart';
 import 'package:eat2beat/features/admin/domain/usecases/add_meal_usecase.dart';
 import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
+import 'package:eat2beat/features/admin/presentation/view/admin_upload/const.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,16 +23,44 @@ class AdminUploadPage extends StatefulWidget {
 
 class _AdminUploadPageState extends State<AdminUploadPage> {
   final _nameController = TextEditingController();
-  final _categoryController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController();
   final _expiryController = TextEditingController();
 
+  String? _selectedCategory;
+
+  final List<Map<String, String>> categoryOptions = const [
+    {'value': 'burgers', 'labelEn': 'Burgers', 'labelAr': 'برجر'},
+    {'value': 'pizza', 'labelEn': 'Pizza', 'labelAr': 'بيتزا'},
+    {'value': 'fried_chicken', 'labelEn': 'Fried Chicken', 'labelAr': 'دجاج مقلي'},
+    {'value': 'shawarma', 'labelEn': 'Shawarma', 'labelAr': 'شاورما'},
+    {'value': 'grills', 'labelEn': 'Grills', 'labelAr': 'مشويات'},
+    {'value': 'sandwiches', 'labelEn': 'Sandwiches', 'labelAr': 'سندوتشات'},
+    {'value': 'wraps', 'labelEn': 'Wraps', 'labelAr': 'لفائف'},
+    {'value': 'koshary', 'labelEn': 'Koshary', 'labelAr': 'كشري'},
+    {'value': 'pasta', 'labelEn': 'Pasta', 'labelAr': 'معكرونة'},
+    {'value': 'rice_bowls', 'labelEn': 'Rice Bowls', 'labelAr': 'أطباق أرز'},
+    {'value': 'salads', 'labelEn': 'Salads', 'labelAr': 'سلطات'},
+    {'value': 'soups', 'labelEn': 'Soups', 'labelAr': 'شوربة'},
+    {'value': 'breakfast', 'labelEn': 'Breakfast', 'labelAr': 'فطور'},
+    {'value': 'desserts', 'labelEn': 'Desserts', 'labelAr': 'حلويات'},
+    {'value': 'bakery', 'labelEn': 'Bakery', 'labelAr': 'مخبوزات'},
+    {'value': 'coffee', 'labelEn': 'Coffee', 'labelAr': 'قهوة'},
+    {'value': 'drinks', 'labelEn': 'Drinks', 'labelAr': 'مشروبات'},
+    {'value': 'snacks', 'labelEn': 'Snacks', 'labelAr': 'مقبلات / تسالي'},
+    {'value': 'seafood_meals', 'labelEn': 'Seafood Meals', 'labelAr': 'مأكولات بحرية'},
+    {'value': 'healthy_meals', 'labelEn': 'Healthy Meals', 'labelAr': 'وجبات صحية'},
+    {'value': 'crepes', 'labelEn': 'Crepes', 'labelAr': 'كريب'},
+    {'value': 'waffles', 'labelEn': 'Waffles', 'labelAr': 'وافل'},
+    {'value': 'ice_cream', 'labelEn': 'Ice Cream', 'labelAr': 'آيس كريم'},
+    {'value': 'hot_dogs', 'labelEn': 'Hot Dogs', 'labelAr': 'هوت دوج'},
+    {'value': 'manakish', 'labelEn': 'Manakish', 'labelAr': 'مناقيش'},
+  ];
+
   @override
   void dispose() {
     _nameController.dispose();
-    _categoryController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
     _quantityController.dispose();
@@ -41,17 +70,19 @@ class _AdminUploadPageState extends State<AdminUploadPage> {
 
   void _clearForm(AddMealCubit cubit) {
     _nameController.clear();
-    _categoryController.clear();
     _descriptionController.clear();
     _priceController.clear();
     _quantityController.clear();
     _expiryController.clear();
+    setState(() {
+      _selectedCategory = null;
+    });
     cubit.reset();
   }
 
   void _onSubmit(BuildContext context, AddMealCubit cubit) {
     final name = _nameController.text.trim();
-    final category = _categoryController.text.trim();
+    final category = _selectedCategory ?? '';
     final description = _descriptionController.text.trim();
     final priceStr = _priceController.text.trim();
     final quantityStr = _quantityController.text.trim();
@@ -149,9 +180,40 @@ class _AdminUploadPageState extends State<AdminUploadPage> {
                       hint: 'Meal name...',
                       controller: _nameController,
                     ),
-                    UploadTextField(
-                      hint: 'Category...',
-                      controller: _categoryController,
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: kCard,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: kBorder),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedCategory,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          hint: const Text(
+                            'Category...',
+                            style: TextStyle(fontSize: 14, color: kMuted),
+                          ),
+                          style: const TextStyle(fontSize: 14, color: kText),
+                          dropdownColor: kCard,
+                          items: categoryOptions.map((cat) {
+                            return DropdownMenuItem<String>(
+                              value: cat['value'],
+                              child: Text(cat['labelEn']!),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedCategory = val;
+                            });
+                          },
+                        ),
+                      ),
                     ),
                     UploadTextField(
                       hint: 'Description...',

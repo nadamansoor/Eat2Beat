@@ -6,6 +6,11 @@ class RestaurantModel {
   final bool isOpen;
   final String openTime;
   final String closeTime;
+  final bool? isActive;
+  final bool? isAcceptingOrders;
+  final bool? isOpenNow;
+  final bool? isOrderableNow;
+  final String? pauseReason;
 
   RestaurantModel({
     required this.id,
@@ -15,9 +20,46 @@ class RestaurantModel {
     required this.isOpen,
     required this.openTime,
     required this.closeTime,
+    this.isActive,
+    this.isAcceptingOrders,
+    this.isOpenNow,
+    this.isOrderableNow,
+    this.pauseReason,
   });
 
-  bool get isCurrentlyOpen => true;
+  bool get isCurrentlyOpen {
+    if (isOpenNow != null) return isOpenNow!;
+    return checkIsRestaurantOpen(
+      isOpen: isOpen,
+      openTime: openTime,
+      closeTime: closeTime,
+    );
+  }
+
+  String get orderabilityLabel {
+    if (isOrderableNow == true) return 'Open Now';
+    if (isAcceptingOrders == false) {
+      final reason = pauseReason?.toString().trim() ?? '';
+      return 'Paused${reason.isNotEmpty ? " ($reason)" : ""}';
+    }
+    if (isOpenNow == false) return 'Closed now';
+    if (isActive == false) return 'Inactive';
+    return isCurrentlyOpen ? 'Open now' : 'Closed now';
+  }
+
+  String? get orderabilityReason {
+    if (isAcceptingOrders == false) {
+      return pauseReason?.toString().trim();
+    }
+    return null;
+  }
+
+  String get orderabilityTone {
+    if (isOrderableNow == true) return 'success';
+    if (isAcceptingOrders == false) return 'danger';
+    if (isOpenNow == false) return 'warning';
+    return isCurrentlyOpen ? 'success' : 'danger';
+  }
 
   static int? parseTimeToMinutes(String timeStr) {
     try {
@@ -96,6 +138,20 @@ class RestaurantModel {
     final openTime = json['open_time']?.toString() ?? json['openTime']?.toString() ?? '09:00 AM';
     final closeTime = json['close_time']?.toString() ?? json['closeTime']?.toString() ?? '11:00 PM';
 
+    final isActiveVal = json['is_active'] ?? json['isActive'];
+    final bool? isActive = isActiveVal == null ? null : (isActiveVal == true || isActiveVal == 1 || isActiveVal?.toString() == 'true' || isActiveVal?.toString() == '1');
+
+    final isAcceptingOrdersVal = json['is_accepting_orders'] ?? json['isAcceptingOrders'];
+    final bool? isAcceptingOrders = isAcceptingOrdersVal == null ? null : (isAcceptingOrdersVal == true || isAcceptingOrdersVal == 1 || isAcceptingOrdersVal?.toString() == 'true' || isAcceptingOrdersVal?.toString() == '1');
+
+    final isOpenNowVal = json['is_open_now'] ?? json['isOpenNow'];
+    final bool? isOpenNow = isOpenNowVal == null ? null : (isOpenNowVal == true || isOpenNowVal == 1 || isOpenNowVal?.toString() == 'true' || isOpenNowVal?.toString() == '1');
+
+    final isOrderableNowVal = json['is_orderable_now'] ?? json['isOrderableNow'];
+    final bool? isOrderableNow = isOrderableNowVal == null ? null : (isOrderableNowVal == true || isOrderableNowVal == 1 || isOrderableNowVal?.toString() == 'true' || isOrderableNowVal?.toString() == '1');
+
+    final pauseReason = json['pause_reason']?.toString() ?? json['pauseReason']?.toString();
+
     return RestaurantModel(
       id: id,
       name: name,
@@ -104,6 +160,11 @@ class RestaurantModel {
       isOpen: isOpen,
       openTime: openTime,
       closeTime: closeTime,
+      isActive: isActive,
+      isAcceptingOrders: isAcceptingOrders,
+      isOpenNow: isOpenNow,
+      isOrderableNow: isOrderableNow,
+      pauseReason: pauseReason,
     );
   }
 }

@@ -29,6 +29,7 @@ class _HomeTabState extends State<HomeTab> {
   String searchQuery = '';
 
   List<String> categories = [
+    "Recommended",
     "Restaurants",
     "Favorites",
     "New",
@@ -61,11 +62,91 @@ class _HomeTabState extends State<HomeTab> {
   String? favoritesError;
   Set<String> favoriteMealIds = {};
 
+  List<HomeFoodModel> recommendedMeals = [];
+  bool loadingRecommendations = false;
+  String? recommendationsError;
+
   @override
   void initState() {
     super.initState();
-    _fetchRestaurants();
+    _fetchRecommendedMeals();
     _fetchFavoriteMealIds();
+  }
+
+  Future<void> _fetchRecommendedMeals() async {
+    if (loadingRecommendations) return;
+    setState(() {
+      loadingRecommendations = true;
+      recommendationsError = null;
+    });
+    try {
+      final authRepo = getIt<AuthRepo>();
+      final token = await authRepo.getIdToken();
+      if (token == null) {
+        throw Exception("Please log in to view recommendations.");
+      }
+      final rawMeals = await getIt<ApiService>().getRecommendedMeals(token);
+      final List<HomeFoodModel> mappedMeals = [];
+      for (final m in rawMeals) {
+        final id = m['id']?.toString() ?? m['meal_id']?.toString() ?? '';
+        final title = m['title']?.toString() ?? m['name']?.toString() ?? 'Meal';
+        final description = m['description']?.toString() ?? '';
+        final priceVal = m['price'];
+        double price = 0.0;
+        if (priceVal is num) {
+          price = priceVal.toDouble();
+        } else if (priceVal is String && priceVal.isNotEmpty) {
+          price = double.tryParse(priceVal) ?? 0.0;
+        }
+        final mealImgUrl = m['meal_img_url']?.toString() ?? m['image']?.toString() ?? '';
+        final restName = m['restaurant_name']?.toString() ?? m['rest_name']?.toString() ?? 'Restaurant';
+        final restIcon = m['restaurant_img_url']?.toString() ?? Assets.imagesBurgerKing;
+        
+        final isActiveVal = m['is_active'] ?? m['isActive'] ?? m['restaurant']?['is_active'] ?? m['restaurant']?['isActive'];
+        final bool? isActive = isActiveVal == null ? null : (isActiveVal == true || isActiveVal == 1 || isActiveVal?.toString() == 'true' || isActiveVal?.toString() == '1');
+
+        final isAcceptingOrdersVal = m['is_accepting_orders'] ?? m['isAcceptingOrders'] ?? m['restaurant']?['is_accepting_orders'] ?? m['restaurant']?['isAcceptingOrders'];
+        final bool? isAcceptingOrders = isAcceptingOrdersVal == null ? null : (isAcceptingOrdersVal == true || isAcceptingOrdersVal == 1 || isAcceptingOrdersVal?.toString() == 'true' || isAcceptingOrdersVal?.toString() == '1');
+
+        final isOpenNowVal = m['is_open_now'] ?? m['isOpenNow'] ?? m['restaurant']?['is_open_now'] ?? m['restaurant']?['isOpenNow'];
+        final bool? isOpenNow = isOpenNowVal == null ? null : (isOpenNowVal == true || isOpenNowVal == 1 || isOpenNowVal?.toString() == 'true' || isOpenNowVal?.toString() == '1');
+
+        final isOrderableNowVal = m['is_orderable_now'] ?? m['isOrderableNow'] ?? m['restaurant']?['is_orderable_now'] ?? m['restaurant']?['isOrderableNow'];
+        final bool? isOrderableNow = isOrderableNowVal == null ? null : (isOrderableNowVal == true || isOrderableNowVal == 1 || isOrderableNowVal?.toString() == 'true' || isOrderableNowVal?.toString() == '1');
+
+        final pauseReason = m['pause_reason']?.toString() ?? m['pauseReason']?.toString() ?? m['restaurant']?['pause_reason']?.toString() ?? m['restaurant']?['pauseReason']?.toString();
+
+        mappedMeals.add(HomeFoodModel(
+          id: id,
+          restName: restName,
+          restIcon: restIcon,
+          size: 'M',
+          title: title,
+          image: mealImgUrl.isNotEmpty ? mealImgUrl : Assets.imagesFood,
+          price: price,
+          rate: 4.5,
+          description: description,
+          time: '20 Min',
+          restIsOpen: true,
+          restOpenTime: '09:00 AM',
+          restCloseTime: '11:00 PM',
+          isActive: isActive,
+          isAcceptingOrders: isAcceptingOrders,
+          isOpenNow: isOpenNow,
+          isOrderableNow: isOrderableNow,
+          pauseReason: pauseReason,
+        ));
+      }
+      setState(() {
+        recommendedMeals = mappedMeals;
+        loadingRecommendations = false;
+      });
+    } catch (e) {
+      setState(() {
+        recommendationsError = e.toString().replaceFirst("Exception: ", "");
+        loadingRecommendations = false;
+      });
+    }
   }
 
   bool _isFavorite(String id) {
@@ -138,6 +219,20 @@ class _HomeTabState extends State<HomeTab> {
         final restOpenTime = m['open_time']?.toString() ?? m['openTime']?.toString() ?? '09:00 AM';
         final restCloseTime = m['close_time']?.toString() ?? m['closeTime']?.toString() ?? '11:00 PM';
 
+        final isActiveVal = m['is_active'] ?? m['isActive'] ?? m['restaurant']?['is_active'] ?? m['restaurant']?['isActive'];
+        final bool? isActive = isActiveVal == null ? null : (isActiveVal == true || isActiveVal == 1 || isActiveVal?.toString() == 'true' || isActiveVal?.toString() == '1');
+
+        final isAcceptingOrdersVal = m['is_accepting_orders'] ?? m['isAcceptingOrders'] ?? m['restaurant']?['is_accepting_orders'] ?? m['restaurant']?['isAcceptingOrders'];
+        final bool? isAcceptingOrders = isAcceptingOrdersVal == null ? null : (isAcceptingOrdersVal == true || isAcceptingOrdersVal == 1 || isAcceptingOrdersVal?.toString() == 'true' || isAcceptingOrdersVal?.toString() == '1');
+
+        final isOpenNowVal = m['is_open_now'] ?? m['isOpenNow'] ?? m['restaurant']?['is_open_now'] ?? m['restaurant']?['isOpenNow'];
+        final bool? isOpenNow = isOpenNowVal == null ? null : (isOpenNowVal == true || isOpenNowVal == 1 || isOpenNowVal?.toString() == 'true' || isOpenNowVal?.toString() == '1');
+
+        final isOrderableNowVal = m['is_orderable_now'] ?? m['isOrderableNow'] ?? m['restaurant']?['is_orderable_now'] ?? m['restaurant']?['isOrderableNow'];
+        final bool? isOrderableNow = isOrderableNowVal == null ? null : (isOrderableNowVal == true || isOrderableNowVal == 1 || isOrderableNowVal?.toString() == 'true' || isOrderableNowVal?.toString() == '1');
+
+        final pauseReason = m['pause_reason']?.toString() ?? m['pauseReason']?.toString() ?? m['restaurant']?['pause_reason']?.toString() ?? m['restaurant']?['pauseReason']?.toString();
+
         mappedMeals.add(HomeFoodModel(
           id: id,
           restName: restName,
@@ -152,6 +247,11 @@ class _HomeTabState extends State<HomeTab> {
           restIsOpen: restIsOpen,
           restOpenTime: restOpenTime,
           restCloseTime: restCloseTime,
+          isActive: isActive,
+          isAcceptingOrders: isAcceptingOrders,
+          isOpenNow: isOpenNow,
+          isOrderableNow: isOrderableNow,
+          pauseReason: pauseReason,
         ));
       }
       
@@ -177,7 +277,7 @@ class _HomeTabState extends State<HomeTab> {
     setState(() {
       if (isFav) {
         favoriteMealIds.remove(mealId);
-        if (selectedIndex == 1) {
+        if (selectedIndex == 2) {
           favoriteMeals.removeWhere((m) => m.id == mealId);
         }
       } else {
@@ -198,7 +298,7 @@ class _HomeTabState extends State<HomeTab> {
         await getIt<ApiService>().favoriteMeal(token, mealId);
       }
       
-      if (!isFav && selectedIndex == 1) {
+      if (!isFav && selectedIndex == 2) {
         _fetchFavoriteMeals();
       }
     } catch (e) {
@@ -307,6 +407,20 @@ class _HomeTabState extends State<HomeTab> {
         }
         final mealImgUrl = m['meal_img_url']?.toString() ?? m['image']?.toString() ?? '';
         
+        final isActiveVal = m['is_active'] ?? m['isActive'];
+        final bool? isActive = isActiveVal == null ? restaurant.isActive : (isActiveVal == true || isActiveVal == 1 || isActiveVal?.toString() == 'true' || isActiveVal?.toString() == '1');
+
+        final isAcceptingOrdersVal = m['is_accepting_orders'] ?? m['isAcceptingOrders'];
+        final bool? isAcceptingOrders = isAcceptingOrdersVal == null ? restaurant.isAcceptingOrders : (isAcceptingOrdersVal == true || isAcceptingOrdersVal == 1 || isAcceptingOrdersVal?.toString() == 'true' || isAcceptingOrdersVal?.toString() == '1');
+
+        final isOpenNowVal = m['is_open_now'] ?? m['isOpenNow'];
+        final bool? isOpenNow = isOpenNowVal == null ? restaurant.isOpenNow : (isOpenNowVal == true || isOpenNowVal == 1 || isOpenNowVal?.toString() == 'true' || isOpenNowVal?.toString() == '1');
+
+        final isOrderableNowVal = m['is_orderable_now'] ?? m['isOrderableNow'];
+        final bool? isOrderableNow = isOrderableNowVal == null ? restaurant.isOrderableNow : (isOrderableNowVal == true || isOrderableNowVal == 1 || isOrderableNowVal?.toString() == 'true' || isOrderableNowVal?.toString() == '1');
+
+        final pauseReason = m['pause_reason']?.toString() ?? m['pauseReason']?.toString() ?? restaurant.pauseReason;
+
         mappedMeals.add(HomeFoodModel(
           id: id,
           restName: restaurant.name,
@@ -321,6 +435,11 @@ class _HomeTabState extends State<HomeTab> {
           restIsOpen: restaurant.isOpen,
           restOpenTime: restaurant.openTime,
           restCloseTime: restaurant.closeTime,
+          isActive: isActive,
+          isAcceptingOrders: isAcceptingOrders,
+          isOpenNow: isOpenNow,
+          isOrderableNow: isOrderableNow,
+          pauseReason: pauseReason,
         ));
       }
       
@@ -341,6 +460,13 @@ class _HomeTabState extends State<HomeTab> {
       searchQuery = value.trim();
       isSearching = searchQuery.isNotEmpty;
     });
+  }
+
+  Color _getToneColor(String tone) {
+    if (tone == 'success') return const Color(0xFF10B981);
+    if (tone == 'warning') return const Color(0xFFF59E0B);
+    if (tone == 'danger') return const Color(0xFFEF4444);
+    return const Color(0xFF9499A5);
   }
 
   @override
@@ -367,6 +493,12 @@ class _HomeTabState extends State<HomeTab> {
         .toList();
 
     final filteredGeneralMeals = HomeFoodModel.mealDetails
+        .where((item) => item.title
+            .toLowerCase()
+            .contains(searchQuery.toLowerCase()))
+        .toList();
+
+    final filteredRecMeals = recommendedMeals
         .where((item) => item.title
             .toLowerCase()
             .contains(searchQuery.toLowerCase()))
@@ -490,14 +622,51 @@ class _HomeTabState extends State<HomeTab> {
                     SizedBox(height: screenHeight * 0.015),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        "${selectedRestaurant!.name} Menu",
-                        style: AppStyles.black20Bold,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "${selectedRestaurant!.name} Menu",
+                            style: AppStyles.black20Bold,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: _getToneColor(selectedRestaurant!.orderabilityTone),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                selectedRestaurant!.orderabilityLabel,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: _getToneColor(selectedRestaurant!.orderabilityTone),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (selectedRestaurant!.orderabilityReason != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              selectedRestaurant!.orderabilityReason!,
+                              style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     if (loadingMeals)
-                      const Center(child: CircularProgressIndicator(color: AppColors.purple))
+                      const Center(child: CircularProgressIndicator(color: AppColors.purple800))
                     else if (mealsError != null)
                       Center(
                         child: Column(
@@ -656,9 +825,11 @@ class _HomeTabState extends State<HomeTab> {
                                 isSearching = false;
                                 selectedIndex = index;
                               });
-                              if (index == 0 && restaurants.isEmpty) {
+                              if (index == 0) {
+                                _fetchRecommendedMeals();
+                              } else if (index == 1 && restaurants.isEmpty) {
                                 _fetchRestaurants();
-                              } else if (index == 1) {
+                              } else if (index == 2) {
                                 _fetchFavoriteMeals();
                               }
                             },
@@ -691,8 +862,168 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     if (selectedIndex == 0) ...[
+                      if (loadingRecommendations && recommendedMeals.isEmpty)
+                        const Center(child: CircularProgressIndicator(color: AppColors.purple800))
+                      else if (recommendationsError != null)
+                        Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                recommendationsError!, 
+                                style: AppStyles.black16w500,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              if (recommendationsError!.contains("log in") || recommendationsError!.contains("sign in") || recommendationsError!.contains("login"))
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, AppRoutes.loginRouteName);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.purple,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text("Sign In"),
+                                )
+                              else
+                                ElevatedButton(
+                                  onPressed: _fetchRecommendedMeals,
+                                  child: const Text("Retry"),
+                                ),
+                            ],
+                          ),
+                        )
+                      else if (filteredRecMeals.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Text(
+                              isSearching
+                                  ? "No recommendations found matching \"$searchQuery\"."
+                                  : "No recommendations available.",
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        )
+                      else
+                        GridView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: filteredRecMeals.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 12,
+                            mainAxisExtent: screenHeight * 0.28,
+                          ),
+                          itemBuilder: (context, index) {
+                            final item = filteredRecMeals[index];
+                            return InkWell(
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  AppRoutes.detailsRouteName,
+                                  arguments: item,
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.02,
+                                  vertical: screenHeight * 0.01,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: _buildImage(
+                                            item.image,
+                                            width: double.infinity,
+                                            height: screenHeight * 0.14,
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          left: 8,
+                                          top: 8,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.white,
+                                              borderRadius: BorderRadius.circular(5),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                ImageIcon(
+                                                  AssetImage(Assets.imagesRateIcon),
+                                                  color: AppColors.yellow,
+                                                  size: 14,
+                                                ),
+                                                const SizedBox(width: 2),
+                                                Text(
+                                                  "${item.rate}",
+                                                  style: AppStyles.grey13w400.copyWith(fontSize: 11),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        if (item.id != null && item.id!.isNotEmpty)
+                                          Positioned(
+                                            right: 8,
+                                            top: 8,
+                                            child: InkWell(
+                                              onTap: () => _toggleFavorite(item),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(4),
+                                                decoration: const BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  _isFavorite(item.id!)
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color: Colors.red,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    SizedBox(height: screenHeight * 0.01),
+                                    Text(
+                                      item.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppStyles.black13Bold,
+                                    ),
+                                    const Spacer(),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Text("\$ ${item.price.toStringAsFixed(2)}", style: AppStyles.grey13w400),
+                                        ImageIcon(AssetImage(Assets.imagesDotIcon)),
+                                        const Icon(Icons.watch_later_outlined, size: 18),
+                                        Text(item.time, style: AppStyles.grey13w400),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                    ] else if (selectedIndex == 1) ...[
                       if (loadingRestaurants)
-                        const Center(child: CircularProgressIndicator(color: AppColors.purple))
+                        const Center(child: CircularProgressIndicator(color: AppColors.purple800))
                       else if (restaurantsError != null)
                         Center(
                           child: Column(
@@ -785,29 +1116,47 @@ class _HomeTabState extends State<HomeTab> {
                                     SizedBox(height: screenHeight * 0.003),
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
-                                      child: Row(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Container(
-                                            width: 8,
-                                            height: 8,
-                                            decoration: BoxDecoration(
-                                              color: restaurant.isCurrentlyOpen
-                                                  ? const Color(0xFF10B981)
-                                                  : const Color(0xFFEF4444),
-                                              shape: BoxShape.circle,
-                                            ),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                width: 8,
+                                                height: 8,
+                                                decoration: BoxDecoration(
+                                                  color: _getToneColor(restaurant.orderabilityTone),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Expanded(
+                                                child: Text(
+                                                  restaurant.orderabilityLabel,
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: _getToneColor(restaurant.orderabilityTone),
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            restaurant.isCurrentlyOpen ? 'Open' : 'Closed',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: restaurant.isCurrentlyOpen
-                                                  ? const Color(0xFF10B981)
-                                                  : const Color(0xFFEF4444),
+                                          if (restaurant.orderabilityReason != null) ...[
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              restaurant.orderabilityReason!,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                color: Colors.redAccent,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                          ),
+                                          ],
                                         ],
                                       ),
                                     ),
@@ -817,9 +1166,9 @@ class _HomeTabState extends State<HomeTab> {
                             );
                           },
                         ),
-                    ] else if (selectedIndex == 1) ...[
+                    ] else if (selectedIndex == 2) ...[
                       if (loadingFavorites && favoriteMeals.isEmpty)
-                        const Center(child: CircularProgressIndicator(color: AppColors.purple))
+                        const Center(child: CircularProgressIndicator(color: AppColors.purple800))
                       else if (favoritesError != null)
                         Center(
                           child: Column(

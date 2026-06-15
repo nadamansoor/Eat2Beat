@@ -55,7 +55,11 @@ class _CartScreenState extends State<CartScreen> {
         
         final List<FoodModel> items = [];
         for (final row in rows) {
-          final mealId = row['meal_id'] ?? '';
+          final mealId = row['meal_id']?.toString() ?? '';
+          final offerId = row['offer_id']?.toString() ?? '';
+          final isOffer = offerId.isNotEmpty || row['item_type'] == 'offer' || row['is_offer'] == true;
+          
+          final itemId = isOffer ? offerId : mealId;
           final quantity = row['quantity'] is int 
               ? row['quantity'] 
               : int.tryParse(row['quantity']?.toString() ?? '') ?? 1;
@@ -67,11 +71,11 @@ class _CartScreenState extends State<CartScreen> {
           final category = row['category'] ?? 'Food';
 
           items.add(FoodModel(
-            id: mealId,
+            id: itemId,
             name: mealTitle,
             image: mealImg.toString(),
             price: unitPrice,
-            sale: '10% OFF',
+            sale: isOffer ? 'Special Offer' : '10% OFF',
             rate: 4.5,
             time: '20 Min',
             quantity: quantity,
@@ -79,6 +83,8 @@ class _CartScreenState extends State<CartScreen> {
             size: 'L',
             restruanteName: 'Restaurant',
             restauranteIcon: Assets.imagesBurgerKing,
+            isOffer: isOffer,
+            offerId: offerId.isNotEmpty ? offerId : null,
           ));
         }
 
@@ -108,9 +114,9 @@ class _CartScreenState extends State<CartScreen> {
       if (token != null) {
         final apiService = getIt<ApiService>();
         if (newQuantity > 0) {
-          await apiService.setCartItem(token, item.id, newQuantity);
+          await apiService.setCartItem(token, item.id, newQuantity, isOffer: item.isOffer);
         } else {
-          await apiService.removeCartItem(token, item.id);
+          await apiService.removeCartItem(token, item.id, isOffer: item.isOffer);
         }
         await _loadCart();
       }

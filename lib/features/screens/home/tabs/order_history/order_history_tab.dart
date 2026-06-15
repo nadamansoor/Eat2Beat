@@ -163,13 +163,16 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
         // Add each item from old order back into the cart sequentially
         final items = order['items'] as List<dynamic>? ?? [];
         for (final item in items) {
-          final mealId = item['meal_id'] ?? item['id'] ?? '';
+          final offerId = item['offer_id']?.toString() ?? '';
+          final mealId = item['meal_id']?.toString() ?? item['id']?.toString() ?? '';
           final quantity = item['quantity'] is int 
               ? item['quantity'] 
               : int.tryParse(item['quantity']?.toString() ?? '') ?? 1;
           
-          if (mealId.isNotEmpty) {
-            await apiService.setCartItem(token, mealId, quantity);
+          if (offerId.isNotEmpty) {
+            await apiService.setCartItem(token, offerId, quantity, isOffer: true);
+          } else if (mealId.isNotEmpty) {
+            await apiService.setCartItem(token, mealId, quantity, isOffer: false);
           }
         }
         
@@ -180,7 +183,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
           const SnackBar(content: Text('Reordered successfully! Redirecting to Cart...')),
         );
         
-        widget.onSwitchTab?.call(4); // Switch to Cart tab
+        widget.onSwitchTab?.call(3); // Switch to Cart tab
       }
     } catch (e) {
       if (!mounted) return;

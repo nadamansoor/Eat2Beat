@@ -1,5 +1,6 @@
 import 'package:eat2beat/features/models/banner_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class BannerItem extends StatelessWidget {
   final BannerModel banner;
@@ -85,11 +86,17 @@ class BannerItem extends StatelessWidget {
                   Positioned(
                     right: -4, 
                     bottom: -4,
-                    child: Image.asset(
-                      banner.image,
-                      height: 145,
-                      fit: BoxFit.contain,
-                    ),
+                    child: banner.image.endsWith('.svg')
+                        ? SvgPicture.asset(
+                            banner.image,
+                            height: 145,
+                            fit: BoxFit.contain,
+                          )
+                        : Image.asset(
+                            banner.image,
+                            height: 145,
+                            fit: BoxFit.contain,
+                          ),
                   ),
                 ],
               ),

@@ -578,7 +578,7 @@ class ApiService {
     );
   }
 
-  Future<void> setCartItem(String token, String mealId, int quantity) async {
+  Future<void> setCartItem(String token, String mealId, int quantity, {bool isOffer = false}) async {
     final uri = Uri.parse('$_workerBaseUrl/user/cart/set-item');
     final response = await http.post(
       uri,
@@ -588,7 +588,7 @@ class ApiService {
         'Accept': 'application/json',
       },
       body: json.encode({
-        'meal_id': mealId,
+        isOffer ? 'offer_id' : 'meal_id': mealId,
         'quantity': quantity,
       }),
     );
@@ -602,7 +602,7 @@ class ApiService {
     }
   }
 
-  Future<void> removeCartItem(String token, String mealId) async {
+  Future<void> removeCartItem(String token, String mealId, {bool isOffer = false}) async {
     final uri = Uri.parse('$_workerBaseUrl/user/cart/remove-item');
     final response = await http.post(
       uri,
@@ -612,7 +612,7 @@ class ApiService {
         'Accept': 'application/json',
       },
       body: json.encode({
-        'meal_id': mealId,
+        isOffer ? 'offer_id' : 'meal_id': mealId,
       }),
     );
 
@@ -737,5 +737,239 @@ class ApiService {
           : 'Failed to load order history (${response.statusCode})',
     );
   }
+
+  Future<Map<String, dynamic>> getMealReviews(String token, String mealId) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/meals/reviews?meal_id=${Uri.encodeComponent(mealId)}');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load meal reviews (${response.statusCode})',
+    );
+  }
+
+  Future<Map<String, dynamic>?> getMyMealRating(String token, String mealId) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/meals/my-rating?meal_id=${Uri.encodeComponent(mealId)}');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      if (response.body.trim().isEmpty) return null;
+      final decoded = json.decode(response.body);
+      if (decoded == null) return null;
+      return decoded as Map<String, dynamic>;
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load my meal rating (${response.statusCode})',
+    );
+  }
+
+  Future<void> rateMeal(
+    String token, {
+    required String mealId,
+    required double rating,
+    String? reviewText,
+  }) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/meals/rating');
+    final body = <String, dynamic>{
+      'meal_id': mealId,
+      'rating': rating,
+    };
+    if (reviewText != null && reviewText.trim().isNotEmpty) {
+      body['review_text'] = reviewText.trim();
+    }
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(body),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(
+        message: response.body.isNotEmpty
+            ? response.body
+            : 'Failed to submit rating (${response.statusCode})',
+      );
+    }
+  }
+
+  Future<List<dynamic>> getRecommendedMeals(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/recommend');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      if (decoded is Map && decoded['recommendations'] is List) {
+        return decoded['recommendations'] as List<dynamic>;
+      }
+      return [];
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load recommendations (${response.statusCode})',
+    );
+  }
+
+  Future<Map<String, dynamic>> getRestaurantOrderability(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/orderability');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load restaurant orderability (${response.statusCode})',
+    );
+  }
+
+  Future<void> updateRestaurantOrderability(
+    String token, {
+    required bool isAcceptingOrders,
+    String? pauseReason,
+  }) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/orderability/update');
+    final body = <String, dynamic>{
+      'is_accepting_orders': isAcceptingOrders,
+    };
+    if (pauseReason != null) {
+      body['pause_reason'] = pauseReason;
+    }
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(body),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(
+        message: response.body.isNotEmpty
+            ? response.body
+            : 'Failed to update orderability (${response.statusCode})',
+      );
+    }
+  }
+
+  Future<List<dynamic>> getRestaurantOpeningHours(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/opening-hours');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load opening hours (${response.statusCode})',
+    );
+  }
+
+  Future<void> upsertRestaurantOpeningHours(
+    String token,
+    Map<String, dynamic> payload,
+  ) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/opening-hours/upsert');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(payload),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(
+        message: response.body.isNotEmpty
+            ? response.body
+            : 'Failed to update opening hours (${response.statusCode})',
+      );
+    }
+  }
+
+  Future<List<dynamic>> getUserOffers(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/user/offers');
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      if (decoded is List) {
+        return decoded;
+      } else if (decoded is Map && decoded['offers'] is List) {
+        return decoded['offers'] as List<dynamic>;
+      } else if (decoded is Map && decoded['data'] is List) {
+        return decoded['data'] as List<dynamic>;
+      } else if (decoded is Map && decoded['rows'] is List) {
+        return decoded['rows'] as List<dynamic>;
+      }
+      return [];
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load offers (${response.statusCode})',
+    );
+  }
 }
+
 

@@ -15,6 +15,11 @@ class HomeFoodModel {
   final bool? restIsOpen;
   final String? restOpenTime;
   final String? restCloseTime;
+  final bool? isActive;
+  final bool? isAcceptingOrders;
+  final bool? isOpenNow;
+  final bool? isOrderableNow;
+  final String? pauseReason;
 
   HomeFoodModel({
     this.id,
@@ -30,9 +35,21 @@ class HomeFoodModel {
     this.restIsOpen,
     this.restOpenTime,
     this.restCloseTime,
+    this.isActive,
+    this.isAcceptingOrders,
+    this.isOpenNow,
+    this.isOrderableNow,
+    this.pauseReason,
   });
 
-  bool get isCurrentlyOpen => true;
+  bool get isCurrentlyOpen {
+    if (isOpenNow != null) return isOpenNow!;
+    return RestaurantModel.checkIsRestaurantOpen(
+      isOpen: restIsOpen ?? true,
+      openTime: restOpenTime ?? '09:00 AM',
+      closeTime: restCloseTime ?? '11:00 PM',
+    );
+  }
 
   static final List<HomeFoodModel> mealDetails = [
     HomeFoodModel(

@@ -11,6 +11,8 @@ class FoodModel {
   final String size;
   final String restruanteName;
   final String restauranteIcon;
+  final bool isOffer;
+  final String? offerId;
 
   FoodModel({
     required this.restruanteName,
@@ -25,6 +27,8 @@ class FoodModel {
     required this.rate,
     required this.description,
     required this.time,
+    this.isOffer = false,
+    this.offerId,
   });
   double get totalPrice => price * quantity;
 }
