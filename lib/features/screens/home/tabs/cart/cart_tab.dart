@@ -7,6 +7,7 @@ import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/core/services/api_service.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -75,7 +76,7 @@ class _CartScreenState extends State<CartScreen> {
             name: mealTitle,
             image: mealImg.toString(),
             price: unitPrice,
-            sale: isOffer ? 'Special Offer' : '10% OFF',
+            sale: isOffer ? S.of(context).specialOffer : '10% OFF',
             rate: 4.5,
             time: '20 Min',
             quantity: quantity,
@@ -126,7 +127,7 @@ class _CartScreenState extends State<CartScreen> {
         isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update quantity: $e')),
+        SnackBar(content: Text(S.of(context).failedUpdateQuantity(e.toString()))),
       );
     }
   }
@@ -186,7 +187,7 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                       SizedBox(width: screenWidth * 0.02),
                       Text(
-                        "Cart",
+                        S.of(context).cart,
                         style: AppStyles.black24Bold,
                       ),
                     ],
@@ -207,7 +208,7 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              "Please login to view your cart",
+                              S.of(context).pleaseLoginCart,
                               style: AppStyles.black16Bold,
                             ),
                             const SizedBox(height: 24),
@@ -222,9 +223,9 @@ class _CartScreenState extends State<CartScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                child: Text("Login"),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                child: Text(S.of(context).login),
                               ),
                             ),
                           ],
@@ -250,7 +251,7 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              "Your cart is empty",
+                              S.of(context).cartEmpty,
                               style: AppStyles.black16Bold,
                             ),
                           ],
@@ -458,7 +459,7 @@ class _CartScreenState extends State<CartScreen> {
           Expanded(
             child: TextField(
               decoration: InputDecoration(
-                hintText: "Add a coupon",
+                hintText: S.of(context).addCoupon,
                 hintStyle: AppStyles.grey13w400,
                 border: InputBorder.none,
               ),
@@ -494,13 +495,13 @@ class _CartScreenState extends State<CartScreen> {
       ),
       child: Column(
         children: [
-          _buildSummaryRow("Subtotal", subtotal),
+          _buildSummaryRow(S.of(context).subtotal, subtotal),
           SizedBox(height: screenHeight * 0.01),
-          _buildSummaryRow("Delivery Charges", deliveryCharges),
+          _buildSummaryRow(S.of(context).deliveryCharges, deliveryCharges),
           SizedBox(height: screenHeight * 0.01),
           const Divider(color: AppColors.grey, height: 1),
           SizedBox(height: screenHeight * 0.01),
-          _buildTotalRow("Total", total),
+          _buildTotalRow(S.of(context).total, total),
         ],
       ),
     );
@@ -562,21 +563,21 @@ class _CartScreenState extends State<CartScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                title: const Text('Login Required'),
-                content: const Text(
-                  'Please login first to complete your order.',
+                title: Text(S.of(context).loginRequired),
+                content: Text(
+                  S.of(context).loginRequiredText,
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text(S.of(context).cancel),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, AppRoutes.loginRouteName).then((_) => _loadCart());
                     },
-                    child: const Text('Login'),
+                    child: Text(S.of(context).login),
                   ),
                 ],
               ),
@@ -586,7 +587,7 @@ class _CartScreenState extends State<CartScreen> {
 
           if (cartItems.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Your cart is empty')),
+              SnackBar(content: Text(S.of(context).cartEmpty)),
             );
             return;
           }
@@ -612,7 +613,7 @@ class _CartScreenState extends State<CartScreen> {
           elevation: 0,
         ),
         child: Text(
-          "Order Now",
+          S.of(context).orderNow,
           style: AppStyles.white16Bold,
         ),
       ),

@@ -7,6 +7,7 @@ import 'package:eat2beat/features/screens/home/tabs/offers/offers_tab.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/services/theme_notifier.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 // ... (rest of imports remain)
@@ -110,11 +111,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        buildNavBarItem(Assets.imagesHomeIcon, "Home", 0),
-                        buildNavBarItem(Assets.imagesOfferIcon, "Offers", 1),
-                        buildNavBarItem(Assets.imagesInactiveOrdrs, "Orders", 2),
+                        buildNavBarItem(Assets.imagesHomeIcon, S.of(context).home, 0),
+                        buildNavBarItem(Assets.imagesOfferIcon, S.of(context).offers, 1),
+                        buildNavBarItem(Assets.imagesInactiveOrdrs, S.of(context).orders, 2),
                         // cart tab — same style as the others
-                        buildNavBarItem(Assets.imagesCarrtIcon, "Cart", 3),
+                        buildNavBarItem(Assets.imagesCarrtIcon, S.of(context).cart, 3),
                       ],
                     ),
                   ),

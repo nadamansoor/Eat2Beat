@@ -6,6 +6,7 @@ import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/widgets/custom_button.dart';
 import 'package:eat2beat/core/widgets/custom_text_field.dart';
 import 'package:eat2beat/core/widgets/leading_widget.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 
 class ForgetPassScreen extends StatefulWidget {
@@ -54,15 +55,15 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                   children: [
                     const LeadingWidget(),
                     SizedBox(height: screenHeight * 0.04),
-                    Text("Forgot Password?", style: AppStyles.black24Bold),
+                    Text(S.of(context).forgotPasswordTitle, style: AppStyles.black24Bold),
                     SizedBox(height: screenHeight * 0.01),
                     Text(
-                      "Don't worry! It occurs. Please enter the email address linked with your account.",
+                      S.of(context).forgotPasswordDesc,
                       style: AppStyles.grey16w400,
                     ),
                     SizedBox(height: screenHeight * 0.05),
                     CustomTextFormField(
-                      hintText: "Enter Your Email",
+                      hintText: S.of(context).enterEmail,
                       controller: emailController,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -77,7 +78,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                     ),
                     SizedBox(height: screenHeight * 0.05),
                     CustomButton(
-                      text: "Send Reset Link",
+                      text: S.of(context).sendResetLink,
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
                           final email = emailController.text.trim();
@@ -112,7 +113,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                             scaffoldMessenger.showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  "A password reset link has been sent to $email. Please check your Gmail.",
+                                  S.of(context).resetLinkSent(email),
                                 ),
                                 backgroundColor: AppColors.purple,
                                 duration: const Duration(seconds: 5),
@@ -165,7 +166,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Remember Password ?",
+                          S.of(context).rememberPassword,
                           style: AppStyles.black16w500,
                         ),
                         SizedBox(width: screenWidth * 0.01),
@@ -176,7 +177,7 @@ class _ForgetPassScreenState extends State<ForgetPassScreen> {
                             ).pushReplacementNamed(AppRoutes.loginRouteName);
                           },
                           child: Text(
-                            "Login",
+                            S.of(context).login,
                             style: AppStyles.blue16w500.copyWith(
                               fontWeight: FontWeight.bold,
                             ),

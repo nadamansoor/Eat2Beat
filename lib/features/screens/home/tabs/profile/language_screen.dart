@@ -1,3 +1,4 @@
+import 'package:eat2beat/core/services/language_notifier.dart';
 import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
@@ -6,8 +7,8 @@ import 'package:eat2beat/core/widgets/circleIcon.dart';
 import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 
-class ThemeScreen extends StatelessWidget {
-  const ThemeScreen({super.key});
+class LanguageScreen extends StatelessWidget {
+  const LanguageScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +16,10 @@ class ThemeScreen extends StatelessWidget {
     final height = MediaQuery.of(context).size.height;
 
     return ListenableBuilder(
-      listenable: ThemeNotifier(),
+      listenable: LanguageNotifier(),
       builder: (context, child) {
-        final themeNotifier = ThemeNotifier();
-        final isDark = themeNotifier.isDarkMode;
+        final languageNotifier = LanguageNotifier();
+        final currentLanguageCode = languageNotifier.locale.languageCode;
 
         return Scaffold(
           backgroundColor: AppColors.light,
@@ -49,7 +50,7 @@ class ThemeScreen extends StatelessWidget {
                             onTap: () => Navigator.pop(context),
                           ),
                           Text(
-                            S.of(context).themeSelection,
+                            S.of(context).languageSelection,
                             style: AppStyles.black20Bold,
                           ),
                           const SizedBox(width: 48), // Balanced space for app bar symmetry
@@ -58,23 +59,23 @@ class ThemeScreen extends StatelessWidget {
 
                       SizedBox(height: height * 0.05),
 
-                      /// Light Theme Box
-                      _buildThemeItem(
-                        title: S.of(context).lightTheme,
-                        isSelected: !isDark,
+                      /// English
+                      _buildLanguageItem(
+                        title: "English",
+                        isSelected: currentLanguageCode == 'en',
                         onTap: () {
-                          themeNotifier.setDarkMode(false);
+                          languageNotifier.setLocale('en');
                         },
                       ),
 
                       const SizedBox(height: 16),
 
-                      /// Dark Theme Box
-                      _buildThemeItem(
-                        title: S.of(context).darkTheme,
-                        isSelected: isDark,
+                      /// Arabic
+                      _buildLanguageItem(
+                        title: "العربية (Arabic)",
+                        isSelected: currentLanguageCode == 'ar',
                         onTap: () {
-                          themeNotifier.setDarkMode(true);
+                          languageNotifier.setLocale('ar');
                         },
                       ),
                     ],
@@ -88,7 +89,7 @@ class ThemeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildThemeItem({
+  Widget _buildLanguageItem({
     required String title,
     required bool isSelected,
     required VoidCallback onTap,
@@ -133,7 +134,7 @@ class ThemeScreen extends StatelessWidget {
                       child: Container(
                         width: 10,
                         height: 10,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: AppColors.purple,
                         ),

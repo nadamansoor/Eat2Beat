@@ -4,6 +4,7 @@ import 'package:eat2beat/core/widgets/custom_password.dart';
 import 'package:eat2beat/core/widgets/custom_text.dart';
 import 'package:eat2beat/features/auth/presentation/cubits/cubit_signup/cubit/signup_cubit.dart';
 import 'package:eat2beat/features/auth/presentation/views/widgets/have_an_acc.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -67,9 +68,9 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                         SizedBox(height: 120),
                         Center(
                           child: Text(
-                            'Hello! Register to get\nstarted',
+                            S.of(context).registerHeader,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF191919),
                               fontSize: 28,
                               fontFamily: 'Urbanist',
@@ -83,7 +84,7 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                           onSaved: (value) {
                             name = value!;
                           },
-                          hintText: 'Username',
+                          hintText: S.of(context).username,
                           textInputType: TextInputType.name,
                         ),
                         SizedBox(height: 16),
@@ -91,7 +92,7 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                           onSaved: (value) {
                             email = value!;
                           },
-                          hintText: 'Email',
+                          hintText: S.of(context).email,
                           textInputType: TextInputType.emailAddress,
                         ),
                         SizedBox(height: 16),
@@ -116,14 +117,15 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                         // ✅ Role Selector
                         Row(
                           children:
-                              ['user', 'restaurant'].map((role) {
+                              ['user', 'restaurant', 'charity'].map((role) {
                                 final isSelected = selectedRole == role;
+                                final int index = ['user', 'restaurant', 'charity'].indexOf(role);
                                 return Expanded(
                                   child: GestureDetector(
                                     onTap: () => setState(() => selectedRole = role),
                                     child: Container(
-                                      margin: EdgeInsets.only(
-                                        right: role == 'user' ? 8 : 0,
+                                      margin: EdgeInsetsDirectional.only(
+                                        end: index < 2 ? 8 : 0,
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 14,
@@ -145,23 +147,29 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                                           Icon(
                                             role == 'user'
                                                 ? Icons.person_outline
-                                                : Icons.admin_panel_settings_outlined,
+                                                : role == 'restaurant'
+                                                    ? Icons.admin_panel_settings_outlined
+                                                    : Icons.volunteer_activism_outlined,
                                             color:
                                                 isSelected
                                                     ? Colors.white
                                                     : const Color(0xFF7B61FF),
-                                            size: 20,
+                                            size: 18,
                                           ),
-                                          SizedBox(width: 8),
+                                          const SizedBox(width: 4),
                                           Text(
-                                            role == 'user' ? 'User' : 'Restaurant',
+                                            role == 'user'
+                                                ? S.of(context).userRole
+                                                : role == 'restaurant'
+                                                    ? S.of(context).adminRole
+                                                    : S.of(context).charityRole,
                                             style: TextStyle(
                                               color:
                                                   isSelected
                                                       ? Colors.white
                                                       : const Color(0xFF7B61FF),
                                               fontWeight: FontWeight.w600,
-                                              fontSize: 15,
+                                              fontSize: 13,
                                             ),
                                           ),
                                         ],
@@ -181,8 +189,14 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                         ),
                         SizedBox(height: 30),
                         CustomButton(
-                          text: 'Register',
+                          text: S.of(context).register,
                           onPressed: () {
+                            if (selectedRole == 'charity') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(S.of(context).charityPortalSoon)),
+                              );
+                              return;
+                            }
                             if (FormKey.currentState!.validate()) {
                               FormKey.currentState!.save();
                               if (isTermsAccepted) {
@@ -212,7 +226,7 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                               } else {
                                 BuildErrorBar(
                                   context,
-                                  'you must accept the terms and conditions',
+                                  S.of(context).acceptTermsFirst,
                                 );
                               }
                             } else {
@@ -250,7 +264,7 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
           onSaved: (value) {
             restaurantName = value!;
           },
-          hintText: 'Restaurant Name',
+          hintText: S.of(context).restaurantName,
           textInputType: TextInputType.name,
         ),
         SizedBox(height: 12),
@@ -258,7 +272,7 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
           onSaved: (value) {
             ownerFullName = value!;
           },
-          hintText: 'Owner Full Name',
+          hintText: S.of(context).ownerFullName,
           textInputType: TextInputType.name,
         ),
         SizedBox(height: 12),
@@ -266,7 +280,7 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
           onSaved: (value) {
             phone = value!;
           },
-          hintText: 'Phone Number',
+          hintText: S.of(context).phoneNumber,
           textInputType: TextInputType.phone,
         ),
         SizedBox(height: 12),
@@ -274,7 +288,7 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
           onSaved: (value) {
             address = value!;
           },
-          hintText: 'Restaurant Address',
+          hintText: S.of(context).restaurantAddress,
           textInputType: TextInputType.streetAddress,
         ),
         SizedBox(height: 12),
@@ -282,7 +296,7 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
           onSaved: (value) {
             nationalId = value!;
           },
-          hintText: 'National ID ',
+          hintText: S.of(context).nationalId,
           textInputType: TextInputType.text,
         ),
         SizedBox(height: 20),

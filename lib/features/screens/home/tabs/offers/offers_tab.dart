@@ -8,6 +8,7 @@ import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/core/services/api_service.dart';
 import 'package:eat2beat/features/models/offers_model.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -68,7 +69,7 @@ class _OffersTabState extends State<OffersTab> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load offers: $e')),
+          SnackBar(content: Text(S.of(context).failedLoadOffers(e.toString()))),
         );
       }
     }
@@ -107,6 +108,9 @@ class _OffersTabState extends State<OffersTab> {
                      json['restaurant']?['rest_img_url']?.toString() ?? 
                      json['restaurant']?['image']?.toString() ?? 
                      '';
+    final restaurantId = json['restaurant_id']?.toString() ?? 
+                         json['restaurants_id']?.toString() ?? 
+                         '';
     
     final qty = (json['quantity'] as num?)?.toInt() ?? 1;
     final desc = json['description']?.toString() ?? '';
@@ -121,12 +125,13 @@ class _OffersTabState extends State<OffersTab> {
     
     return FoodModel(
       id: id,
+      restaurantId: restaurantId.isNotEmpty ? restaurantId : null,
       name: title,
       image: imageUrl,
       price: price,
-      sale: saleText.isNotEmpty ? saleText : 'Special Offer',
+      sale: saleText.isNotEmpty ? saleText : S.of(context).specialOffer,
       rate: rate,
-      time: '20 Min',
+      time: S.of(context).twentyMin,
       quantity: qty,
       description: desc,
       size: 'L',
@@ -198,9 +203,9 @@ class _OffersTabState extends State<OffersTab> {
 
                         const SizedBox(height: 15),
 
-                        const Text(
-                          'Popular Today',
-                          style: TextStyle(
+                        Text(
+                          S.of(context).popularToday,
+                          style: const TextStyle(
                             fontSize: 22, 
                             fontWeight: FontWeight.bold,
                             fontStyle: FontStyle.normal,
@@ -222,9 +227,9 @@ class _OffersTabState extends State<OffersTab> {
                                     color: AppColors.grey,
                                   ),
                                   const SizedBox(height: 16),
-                                  const Text(
-                                    "Login required to view offers",
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  Text(
+                                    S.of(context).loginRequiredOffers,
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 24),
                                   ElevatedButton(
@@ -238,9 +243,9 @@ class _OffersTabState extends State<OffersTab> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    child: const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                      child: Text("Login"),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                      child: Text(S.of(context).login),
                                     ),
                                   ),
                                 ],
@@ -255,13 +260,13 @@ class _OffersTabState extends State<OffersTab> {
                             ),
                           )
                         else if (_offers.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 40),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 40),
                             child: Center(
                               child: Text(
-                                "No offers available now",
-                                style: TextStyle(color: Colors.grey, fontSize: 16),
-                              ),
+                                 S.of(context).noOffersAvailable,
+                                 style: const TextStyle(color: Colors.grey, fontSize: 16),
+                               ),
                             ),
                           )
                         else

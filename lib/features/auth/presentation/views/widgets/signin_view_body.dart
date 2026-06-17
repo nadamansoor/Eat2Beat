@@ -9,6 +9,7 @@ import 'package:eat2beat/core/widgets/custom_password.dart';
 import 'package:eat2beat/core/widgets/custom_text.dart';
 import 'package:eat2beat/features/auth/presentation/cubits/cubitsignin/signin_cubit.dart';
 import 'package:eat2beat/features/auth/presentation/views/widgets/or_divider.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -63,9 +64,9 @@ class _signinViewBodyState extends State<signinViewBody> {
                     SizedBox(height: 120),
                     Center(
                       child: Text(
-                        'Welcome back! Glad\nto see you, Again!',
+                        S.of(context).welcomeBack,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Color(0xFF191919),
                           fontSize: 28,
                           fontFamily: 'Urbanist',
@@ -77,7 +78,7 @@ class _signinViewBodyState extends State<signinViewBody> {
                     SizedBox(height: 36),
                     CustomFormTextField(
                       onSaved: (value) { email = value!; },
-                      hintText: 'Enter your Email',
+                      hintText: S.of(context).enterEmail,
                       textInputType: TextInputType.emailAddress,
                     ),
                     SizedBox(height: 16),
@@ -86,14 +87,15 @@ class _signinViewBodyState extends State<signinViewBody> {
                     ),
                     SizedBox(height: 16),
                   Row(
-                    children: ['user', 'restaurant'].map((role) {
+                    children: ['user', 'restaurant', 'charity'].map((role) {
                       final isSelected = selectedRole == role;
+                      final int index = ['user', 'restaurant', 'charity'].indexOf(role);
                       return Expanded(
                         child: GestureDetector(
                           onTap: () => setState(() => selectedRole = role),
                           child: Container(
-                            margin: EdgeInsets.only(
-                              right: role == 'user' ? 8 : 0,
+                            margin: EdgeInsetsDirectional.only(
+                              end: index < 2 ? 8 : 0,
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
@@ -112,21 +114,27 @@ class _signinViewBodyState extends State<signinViewBody> {
                                 Icon(
                                   role == 'user'
                                       ? Icons.person_outline
-                                      : Icons.admin_panel_settings_outlined,
+                                      : role == 'restaurant'
+                                          ? Icons.admin_panel_settings_outlined
+                                          : Icons.volunteer_activism_outlined,
                                   color: isSelected
                                       ? Colors.white
                                       : const Color(0xFF7B61FF),
-                                  size: 20,
+                                  size: 18,
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 4),
                                 Text(
-                                  role == 'user' ? 'User' : 'Restaurant',
+                                  role == 'user'
+                                      ? S.of(context).userRole
+                                      : role == 'restaurant'
+                                          ? S.of(context).adminRole
+                                          : S.of(context).charityRole,
                                   style: TextStyle(
                                     color: isSelected
                                         ? Colors.white
                                         : const Color(0xFF7B61FF),
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 15,
+                                    fontSize: 13,
                                   ),
                                 ),
                               ],
@@ -145,7 +153,7 @@ class _signinViewBodyState extends State<signinViewBody> {
                         Navigator.pushNamed(context, AppRoutes.forgetRouteName);
                       },
                       child: Text(
-                        'Forgot Password?',
+                        S.of(context).forgotPassword,
                         textAlign: TextAlign.center,
                         style: AppStyles.black13Bold.copyWith(
                           color: AppColors.purple50,
@@ -157,6 +165,12 @@ class _signinViewBodyState extends State<signinViewBody> {
                     SizedBox(height: 33),
                     CustomButton(
                       onPressed: () {
+                        if (selectedRole == 'charity') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(S.of(context).charityPortalSoon)),
+                          );
+                          return;
+                        }
                         if (FormKey.currentState!.validate()) {
                           FormKey.currentState!.save();
                           context.read<SigninCubit>().SignIn(email, password, selectedRole);
@@ -165,11 +179,11 @@ class _signinViewBodyState extends State<signinViewBody> {
                           setState(() {});
                         }
                       },
-                      text: 'Login',
+                      text: S.of(context).login,
                     ),
                     SizedBox(height: 33),
                     OrDivider(
-                      hintText: 'Or Login with',
+                      hintText: S.of(context).orLoginWith,
                     ),
                     SizedBox(height: 16),
                     Row(
@@ -187,7 +201,7 @@ class _signinViewBodyState extends State<signinViewBody> {
                           onPressed: () {
                             if (selectedRole != 'user') {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Google Login is available for User role only')),
+                                SnackBar(content: Text(S.of(context).googleLoginUserOnly)),
                               );
                               return;
                             }

@@ -6,6 +6,7 @@ import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/widgets/circleIcon.dart';
 import 'package:eat2beat/core/services/user_profile_notifier.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -92,11 +93,11 @@ class _AccountScreenState extends State<AccountScreen> {
                           if (!context.mounted) return;
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Profile saved successfully!')),
+                            SnackBar(content: Text(S.of(context).profileSaved)),
                           );
                         },
                         child: Text(
-                          "Save",
+                          S.of(context).save,
                           style: AppStyles.purple.copyWith(
                             color: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
                           ),
@@ -150,22 +151,22 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: ListView(
                       children: [
                         buildInput(
-                          title: "Name",
+                          title: S.of(context).name,
                           controller: nameController,
                         ),
                         buildInput(
-                          title: "Email",
+                          title: S.of(context).email,
                           controller: emailController,
                           keyboardType: TextInputType.emailAddress,
                         ),
                         buildInput(
-                          title: "Phone",
+                          title: S.of(context).phone,
                           controller: phone1Controller,
                           keyboardType: TextInputType.phone,
                           hintText: "01000000000",
                         ),
                         buildInput(
-                          title: "Phone 2",
+                          title: S.of(context).phone2,
                           controller: phone2Controller,
                           keyboardType: TextInputType.phone,
                           hintText: "01000000000",

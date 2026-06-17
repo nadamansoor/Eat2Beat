@@ -1,6 +1,18 @@
 import 'package:eat2beat/features/models/banner_model.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+String getBannerTitle(BuildContext context, String originalTitle) {
+  if (originalTitle.contains('35%')) {
+    return S.of(context).banner1;
+  } else if (originalTitle.contains('20%')) {
+    return S.of(context).banner2;
+  } else if (originalTitle.contains('Buy 1')) {
+    return S.of(context).banner3;
+  }
+  return originalTitle;
+}
 
 class BannerItem extends StatelessWidget {
   final BannerModel banner;
@@ -34,7 +46,7 @@ class BannerItem extends StatelessWidget {
                             fit: BoxFit.scaleDown,
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              banner.title,
+                              getBannerTitle(context, banner.title),
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w700,
@@ -58,9 +70,9 @@ class BannerItem extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                          child: const Text(
-                            'Buy now',
-                            style: TextStyle(
+                          child: Text(
+                            S.of(context).buyNow,
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,

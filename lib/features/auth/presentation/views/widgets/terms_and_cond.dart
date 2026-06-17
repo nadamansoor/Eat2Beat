@@ -1,3 +1,4 @@
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 
 class TermsandConditions extends StatefulWidget {
@@ -14,6 +15,7 @@ class TermsandConditionsState extends State<TermsandConditions> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Row(
       children: [
             Checkbox(             
@@ -31,30 +33,30 @@ class TermsandConditionsState extends State<TermsandConditions> {
         TextSpan(
           children: [
             TextSpan(
-              text: 'by signing up, you agree to our',
-              style: TextStyle(
+              text: s.termsAgreementPrefix,
+              style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
               ),
             ),
             TextSpan(
-              text: ' conditions ',
-              style: TextStyle(
+              text: s.termsAgreementConditions,
+              style: const TextStyle(
                 color: Colors.green,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
             TextSpan(
-              text: ' and ',
-              style: TextStyle(
+              text: s.termsAgreementAnd,
+              style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
               ),
             ),
             TextSpan(
-              text: 'privacy policy of the app',
-              style: TextStyle(
+              text: s.termsAgreementPolicy,
+              style: const TextStyle(
                 color: Colors.green,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,

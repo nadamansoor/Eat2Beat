@@ -1,6 +1,7 @@
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/features/auth/presentation/views/sign_up_view.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -16,14 +17,14 @@ class dontHaveAcount extends StatelessWidget {
         TextSpan(                 
           children: [                  
              TextSpan(
-              text: 'Don’t have an account?',
+              text: S.of(context).dontHaveAccount,
               style: AppStyles.black16Bold.copyWith(
                 color: Color(0xFF949D9E),
               )
             ),
           
             TextSpan(           
-              text: ' Register Now',
+              text: S.of(context).registerNow,
               style:  TextStyle(
                 color: AppColors.blue,
                 fontWeight: FontWeight.bold,

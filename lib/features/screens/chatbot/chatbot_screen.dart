@@ -6,6 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:eat2beat/features/models/home_model.dart';
+import 'package:eat2beat/core/utils/app_routes.dart';
+import 'package:eat2beat/generated/l10n.dart';
 
 // ─────────────────────────────────────────────
 // Model
@@ -14,11 +18,13 @@ class ChatMessage {
   final String text;
   final bool isBot;
   final DateTime time;
+  final List<HomeFoodModel>? products;
 
   const ChatMessage({
     required this.text,
     required this.isBot,
     required this.time,
+    this.products,
   });
 }
 
@@ -46,48 +52,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   String? _sessionId;
 
   // ── Local fallback responses ──
-  static const Map<String, List<String>> _responses = {
-    'greeting': [
-      'Hello! Welcome to EAT2Beat! 🍽️ How can I help you today?',
-      'Hi there! I\'m your EAT2Beat assistant. What can I do for you?',
-    ],
-    'menu': [
-      'You can view our full menu by navigating to the Home tab. We have delicious organic meals! 🥗',
-      'Check out our Menu section for a variety of healthy, freshly prepared meals.',
-    ],
-    'order': [
-      'To place an order, browse our menu and add items to your cart, then proceed to checkout! 🛒',
-      'Ordering is easy! Just add items to your cart and we\'ll deliver within 30 minutes.',
-    ],
-    'delivery': [
-      'We deliver in 30 minutes or less! 🚀 Our delivery team works 24/7.',
-      'Fast delivery is our specialty. Expect your food hot and fresh in about 30 minutes.',
-    ],
-    'charity': [
-      'We partner with local NGOs to donate surplus food. Visit our Donation tab to learn more! 💝',
-      'EAT2Beat is committed to reducing food waste. Check out our Donation section.',
-    ],
-    'payment': [
-      'We accept all major credit cards, PayPal, and cash on delivery. 💳',
-      'Multiple payment options available: Credit Card, PayPal, or Cash on Delivery.',
-    ],
-    'contact': [
-      'You can reach us at support@eat2beat.com or call 1-800-EAT2BEAT. 📞',
-      'Need help? Contact our support team via email or phone!',
-    ],
-    'hours': [
-      'We\'re open 24/7! Order anytime, we\'re always here to serve you. ⏰',
-      'EAT2Beat never sleeps! Place your order any time, day or night.',
-    ],
-    'thanks': [
-      'You\'re welcome! Is there anything else I can help with? 😊',
-      'Happy to help! Let me know if you need anything else!',
-    ],
-    'default': [
-      'I\'m not sure I understand. Try asking about our menu, orders, delivery, or charity work. 🤖',
-      'I can help with questions about menu, ordering, delivery, charity, and more. What would you like to know?',
-    ],
-  };
+
 
   static const Map<String, List<String>> _keywords = {
     'greeting': ['hello', 'hi', 'hey', 'good morning', 'good evening', 'good afternoon'],
@@ -108,7 +73,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void initState() {
     super.initState();
     _loadSessionId();
-    _addBotMessage(_randomResponse('greeting'));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _addBotMessage(_randomResponse('greeting'));
+      }
+    });
   }
 
   @override
@@ -145,8 +114,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     setState(() => _isSending = true);
     _scrollToBottom();
 
-    _getBotResponse(text).then((reply) {
-      _addBotMessage(reply);
+    _getBotResponse(text).then((responseObj) {
+      _addBotMessage(responseObj.text, products: responseObj.products);
     }).catchError((_) {
       _addBotMessage(_getLocalFallbackResponse(text));
     }).whenComplete(() {
@@ -158,19 +127,23 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   // ─────────────────────────────────────────────
   // API call — mirrors Angular getBotResponse()
   // ─────────────────────────────────────────────
-  Future<String> _getBotResponse(String input) async {
+  Future<_BotResponse> _getBotResponse(String input) async {
     // 1. Get Firebase ID token
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return 'Please log in first to use the chatbot.';
+    if (user == null) {
+      return _BotResponse(text: S.of(context).loginToUseChatbot);
+    }
 
     String idToken;
     try {
       idToken = await user.getIdToken() ?? '';
     } catch (_) {
-      return 'Failed to get authentication token. Please try again.';
+      return _BotResponse(text: S.of(context).failedGetToken);
     }
 
-    if (idToken.isEmpty) return 'Please log in first to use the chatbot.';
+    if (idToken.isEmpty) {
+      return _BotResponse(text: S.of(context).loginToUseChatbot);
+    }
 
     // 2. POST to /deepsearch/chat
     try {
@@ -188,9 +161,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
       if (response.statusCode != 200) {
         final body = response.body.trim();
-        return body.isNotEmpty
-            ? 'Chat service error (${response.statusCode}): $body'
-            : 'Chat service error (${response.statusCode}).';
+        final errorMsg = body.isNotEmpty
+            ? S.of(context).chatServiceError(response.statusCode.toString(), body)
+            : S.of(context).chatServiceError(response.statusCode.toString(), '');
+        return _BotResponse(text: errorMsg);
       }
 
       // 3. Parse response
@@ -200,13 +174,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         _captureSessionId(payload);
         final chat = _extractReply(payload) ?? jsonEncode(payload);
         final deep = _extractDeepSearch(payload);
-        return deep != null ? '$chat\n\n$deep' : chat;
+        final parsedProducts = _extractProducts(payload);
+        final fullText = deep != null ? '$chat\n\n$deep' : chat;
+        return _BotResponse(text: fullText, products: parsedProducts);
       }
 
       final text = response.body.trim();
-      return text.isNotEmpty ? text : _getLocalFallbackResponse(input);
+      final finalMsg = text.isNotEmpty ? text : _getLocalFallbackResponse(input);
+      return _BotResponse(text: finalMsg);
     } catch (_) {
-      return _getLocalFallbackResponse(input);
+      return _BotResponse(text: _getLocalFallbackResponse(input));
     }
   }
 
@@ -283,17 +260,59 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   String _randomResponse(String category) {
-    final list = _responses[category] ?? _responses['default']!;
+    final responsesMap = {
+      'greeting': [
+        S.of(context).botGreeting1,
+        S.of(context).botGreeting2,
+      ],
+      'menu': [
+        S.of(context).botMenu1,
+        S.of(context).botMenu2,
+      ],
+      'order': [
+        S.of(context).botOrder1,
+        S.of(context).botOrder2,
+      ],
+      'delivery': [
+        S.of(context).botDelivery1,
+        S.of(context).botDelivery2,
+      ],
+      'charity': [
+        S.of(context).botCharity1,
+        S.of(context).botCharity2,
+      ],
+      'payment': [
+        S.of(context).botPayment1,
+        S.of(context).botPayment2,
+      ],
+      'contact': [
+        S.of(context).botContact1,
+        S.of(context).botContact2,
+      ],
+      'hours': [
+        S.of(context).botHours1,
+        S.of(context).botHours2,
+      ],
+      'thanks': [
+        S.of(context).botThanks1,
+        S.of(context).botThanks2,
+      ],
+      'default': [
+        S.of(context).botDefault1,
+        S.of(context).botDefault2,
+      ],
+    };
+    final list = responsesMap[category] ?? responsesMap['default']!;
     return list[Random().nextInt(list.length)];
   }
 
   // ─────────────────────────────────────────────
   // Message list helpers
   // ─────────────────────────────────────────────
-  void _addBotMessage(String text) {
+  void _addBotMessage(String text, {List<HomeFoodModel>? products}) {
     if (!mounted) return;
     setState(() {
-      _messages.add(ChatMessage(text: text, isBot: true, time: DateTime.now()));
+      _messages.add(ChatMessage(text: text, isBot: true, time: DateTime.now(), products: products));
     });
   }
 
@@ -384,7 +403,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     color: isDark ? Colors.white : AppColors.purple, size: 24),
                 const SizedBox(width: 8),
                 Text(
-                  'Chatbot',
+                  S.of(context).chatbot,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -437,14 +456,385 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
           ],
         ),
-        child: Text(
-          msg.text,
-          style: TextStyle(
-            color: isBot 
-                ? (isDark ? Colors.white : Colors.black87)
-                : (isDark ? const Color(0xff45337D) : Colors.white),
-            fontSize: 14,
-            height: 1.5,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: _buildBubbleContent(msg, isDark),
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // Rich Message Parsing and Rendering Helpers
+  // ─────────────────────────────────────────────
+
+  bool _isImageUrl(String url) {
+    final cleanUrl = url.split('?').first.toLowerCase();
+    return cleanUrl.endsWith('.png') ||
+        cleanUrl.endsWith('.jpg') ||
+        cleanUrl.endsWith('.jpeg') ||
+        cleanUrl.endsWith('.gif') ||
+        cleanUrl.endsWith('.webp') ||
+        cleanUrl.endsWith('.bmp');
+  }
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri? uri = Uri.tryParse(urlString);
+    if (uri != null) {
+      try {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } catch (e) {
+        try {
+          await launchUrl(uri);
+        } catch (err) {
+          debugPrint('Could not launch $urlString: $err');
+        }
+      }
+    }
+  }
+
+  HomeFoodModel _parseProductMap(Map<String, dynamic> po) {
+    final id = po['id']?.toString() ?? po['meal_id']?.toString() ?? po['product_id']?.toString();
+    final restaurantId = po['restaurant_id']?.toString() ?? 
+                         po['restaurants_id']?.toString() ?? 
+                         po['restaurantId']?.toString() ?? 
+                         po['restaurant']?['id']?.toString() ?? 
+                         po['restaurant']?['restaurant_id']?.toString() ?? 
+                         '';
+    final title = po['title']?.toString() ?? po['name']?.toString() ?? 'Meal';
+    
+    double price = 0.0;
+    final rawPrice = po['price'];
+    if (rawPrice is num) {
+      price = rawPrice.toDouble();
+    } else if (rawPrice != null) {
+      price = double.tryParse(rawPrice.toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+    }
+    
+    double rate = 4.0;
+    final rawRate = po['rating'] ?? po['rate'] ?? po['stars'];
+    if (rawRate is num) {
+      rate = rawRate.toDouble();
+    } else if (rawRate != null) {
+      rate = double.tryParse(rawRate.toString()) ?? 4.0;
+    }
+    
+    String image = po['image']?.toString() ?? 
+                   po['image_url']?.toString() ?? 
+                   po['img_url']?.toString() ?? 
+                   po['thumbnail']?.toString() ?? 
+                   '';
+                   
+    final link = po['link']?.toString() ?? '';
+    if (image.isEmpty && link.isNotEmpty && _isImageUrl(link)) {
+      image = link;
+    }
+    
+    final description = po['description']?.toString() ?? po['details']?.toString() ?? 'Delicious meal from Eat2Beat';
+    final size = po['size']?.toString() ?? 'M';
+    final restName = po['restaurant_name']?.toString() ?? 
+                     po['rest_name']?.toString() ?? 
+                     po['restaurant']?['name']?.toString() ?? 
+                     po['restaurant']?['restaurant_name']?.toString() ?? 
+                     'Restaurant';
+    final restIcon = po['restaurant_icon']?.toString() ?? 
+                     po['rest_icon']?.toString() ?? 
+                     po['restaurant']?['logo_url']?.toString() ?? 
+                     po['restaurant']?['img_url']?.toString() ?? 
+                     po['restaurant']?['rest_img_url']?.toString() ?? 
+                     '';
+    final time = po['time']?.toString() ?? po['prep_time']?.toString() ?? po['delivery_time']?.toString() ?? '20 Min';
+
+    return HomeFoodModel(
+      id: id,
+      restaurantId: restaurantId.isNotEmpty ? restaurantId : null,
+      title: title,
+      price: price,
+      rate: rate,
+      image: image.isNotEmpty ? image : 'assets/images/food.png',
+      description: description,
+      size: size,
+      restName: restName,
+      restIcon: restIcon.isNotEmpty ? restIcon : 'assets/images/burger_king.png',
+      time: time,
+    );
+  }
+
+  List<HomeFoodModel>? _extractProducts(dynamic payload) {
+    if (payload is! Map) return null;
+    final deep = (payload as Map<String, dynamic>)['deep_search'];
+    if (deep is! Map) return null;
+
+    final deepObj = deep as Map<String, dynamic>;
+    final products = deepObj['products'];
+    if (products is List && products.isNotEmpty) {
+      final List<HomeFoodModel> list = [];
+      for (final p in products) {
+        if (p is! Map) continue;
+        list.add(_parseProductMap(Map<String, dynamic>.from(p)));
+      }
+      return list;
+    }
+    return null;
+  }
+
+  HomeFoodModel? _getMatchingProduct(String url, List<HomeFoodModel>? products) {
+    if (products == null) return null;
+    final cleanUrl = url.trim().toLowerCase();
+    for (final p in products) {
+      final cleanImg = p.image.trim().toLowerCase();
+      if (cleanImg.isNotEmpty && (cleanUrl.contains(cleanImg) || cleanImg.contains(cleanUrl))) {
+        return p;
+      }
+    }
+    return null;
+  }
+
+  List<_MessageContent> _parseMessageText(String text) {
+    final List<_MessageContent> contents = [];
+    final RegExp exp = RegExp(
+      r'(!\[[^\]]*\]\([^\s)]+\))|(\[[^\]]+\]\([^\s)]+\))|(https?://[^\s)]+)',
+      caseSensitive: false,
+    );
+
+    final matches = exp.allMatches(text);
+    if (matches.isEmpty) {
+      contents.add(_TextContent(text));
+      return contents;
+    }
+
+    int lastMatchEnd = 0;
+    for (final match in matches) {
+      final beforeText = text.substring(lastMatchEnd, match.start);
+      if (beforeText.isNotEmpty) {
+        contents.add(_TextContent(beforeText));
+      }
+
+      final matchText = match.group(0)!;
+      if (matchText.startsWith('![')) {
+        final altStart = matchText.indexOf('[') + 1;
+        final altEnd = matchText.indexOf(']');
+        final urlStart = matchText.indexOf('(') + 1;
+        final urlEnd = matchText.lastIndexOf(')');
+        if (altEnd > altStart && urlEnd > urlStart) {
+          final alt = matchText.substring(altStart, altEnd);
+          final url = matchText.substring(urlStart, urlEnd);
+          contents.add(_ImageContent(url, alt: alt));
+        } else {
+          contents.add(_TextContent(matchText));
+        }
+      } else if (matchText.startsWith('[')) {
+        final textStart = matchText.indexOf('[') + 1;
+        final textEnd = matchText.indexOf(']');
+        final urlStart = matchText.indexOf('(') + 1;
+        final urlEnd = matchText.lastIndexOf(')');
+        if (textEnd > textStart && urlEnd > urlStart) {
+          final linkText = matchText.substring(textStart, textEnd);
+          final url = matchText.substring(urlStart, urlEnd);
+          contents.add(_LinkContent(linkText, url));
+        } else {
+          contents.add(_TextContent(matchText));
+        }
+      } else {
+        String url = matchText;
+        String trailing = '';
+        while (url.isNotEmpty && (url.endsWith('.') || url.endsWith(',') || url.endsWith('?') || url.endsWith(')'))) {
+          trailing = url.substring(url.length - 1) + trailing;
+          url = url.substring(0, url.length - 1);
+        }
+
+        if (_isImageUrl(url)) {
+          contents.add(_ImageContent(url));
+        } else {
+          contents.add(_LinkContent(url, url));
+        }
+
+        if (trailing.isNotEmpty) {
+          contents.add(_TextContent(trailing));
+        }
+      }
+
+      lastMatchEnd = match.end;
+    }
+
+    final afterText = text.substring(lastMatchEnd);
+    if (afterText.isNotEmpty) {
+      contents.add(_TextContent(afterText));
+    }
+
+    return contents;
+  }
+
+  List<Widget> _buildBubbleContent(ChatMessage msg, bool isDark) {
+    final contents = _parseMessageText(msg.text);
+    final List<Widget> widgets = [];
+    List<_MessageContent> inlineGroup = [];
+
+    void flushInlineGroup() {
+      if (inlineGroup.isEmpty) return;
+
+      final List<InlineSpan> spans = [];
+      for (final content in inlineGroup) {
+        if (content is _TextContent) {
+          spans.add(
+            TextSpan(
+              text: content.text,
+              style: TextStyle(
+                color: msg.isBot 
+                    ? (isDark ? Colors.white : Colors.black87)
+                    : (isDark ? const Color(0xff45337D) : Colors.white),
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+          );
+        } else if (content is _LinkContent) {
+          final matchingProd = _getMatchingProduct(content.url, msg.products);
+          spans.add(
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: GestureDetector(
+                onTap: () {
+                  if (matchingProd != null) {
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.detailsRouteName,
+                      arguments: matchingProd,
+                    );
+                  } else {
+                    _launchURL(content.url);
+                  }
+                },
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Text(
+                    content.text,
+                    style: TextStyle(
+                      color: msg.isBot
+                          ? (isDark ? Colors.cyanAccent : const Color(0xff573BB0))
+                          : (isDark ? const Color(0xff8966FA) : Colors.cyanAccent),
+                      decoration: TextDecoration.underline,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+      }
+
+      widgets.add(
+        Text.rich(
+          TextSpan(children: spans),
+        ),
+      );
+      inlineGroup.clear();
+    }
+
+    for (final content in contents) {
+      if (content is _ImageContent) {
+        flushInlineGroup();
+        widgets.add(_buildImageWidget(content.url, isBot: msg.isBot, isDark: isDark, alt: content.alt, products: msg.products));
+      } else {
+        inlineGroup.add(content);
+      }
+    }
+
+    flushInlineGroup();
+
+    if (widgets.length == 1) {
+      return [widgets.first];
+    } else {
+      return widgets.map((w) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: w,
+      )).toList();
+    }
+  }
+
+  Widget _buildImageWidget(String url, {required bool isBot, required bool isDark, String alt = '', List<HomeFoodModel>? products}) {
+    final matchingProd = _getMatchingProduct(url, products);
+    return GestureDetector(
+      onTap: () {
+        if (matchingProd != null) {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.detailsRouteName,
+            arguments: matchingProd,
+          );
+        } else {
+          _launchURL(url);
+        }
+      },
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              url,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  height: 150,
+                  width: double.infinity,
+                  color: isDark ? const Color(0xff5B429A) : const Color(0xffE6DFFF),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+                    ),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xff5B429A) : const Color(0xffE6DFFF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.broken_image, color: Colors.redAccent),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          alt.isNotEmpty ? alt : url,
+                          style: TextStyle(
+                            color: isBot 
+                                ? (isDark ? Colors.white70 : Colors.black54)
+                                : (isDark ? const Color(0xff45337D) : Colors.white70),
+                            decoration: TextDecoration.underline,
+                            fontSize: 12,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -511,7 +901,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 fontSize: 14,
               ),
               decoration: InputDecoration(
-                hintText: 'Type a message...',
+                hintText: S.of(context).typeMessage,
                 hintStyle: TextStyle(
                   color: isDark ? Colors.white70 : Colors.grey,
                   fontSize: 14,
@@ -598,4 +988,36 @@ class _TypingDotState extends State<_TypingDot>
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────
+// Content Models
+// ─────────────────────────────────────────────
+abstract class _MessageContent {}
+
+class _TextContent extends _MessageContent {
+  final String text;
+  _TextContent(this.text);
+}
+
+class _ImageContent extends _MessageContent {
+  final String url;
+  final String alt;
+  _ImageContent(this.url, {this.alt = ''});
+}
+
+class _LinkContent extends _MessageContent {
+  final String text;
+  final String url;
+  _LinkContent(this.text, this.url);
+}
+
+// ─────────────────────────────────────────────
+// Bot Response Class
+// ─────────────────────────────────────────────
+class _BotResponse {
+  final String text;
+  final List<HomeFoodModel>? products;
+
+  _BotResponse({required this.text, this.products});
 }

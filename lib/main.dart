@@ -29,6 +29,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:eat2beat/core/services/user_profile_notifier.dart';
 import 'package:eat2beat/core/services/theme_notifier.dart';
+import 'package:eat2beat/core/services/language_notifier.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,7 @@ void main() async {
   // await Prefs.init();
   await UserProfileNotifier().init();
   await ThemeNotifier().init();
+  await LanguageNotifier().init();
   setupGetIt();
   runApp(const MyApp());
 }
@@ -54,33 +56,37 @@ class MyApp extends StatelessWidget {
       listenable: ThemeNotifier(),
       builder: (context, child) {
         final isDark = ThemeNotifier().isDarkMode;
-        return MaterialApp(
-          themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-          theme: ThemeData(
-            fontFamily: 'Cairo',
-            brightness: Brightness.light,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: AppColors.purple,
-              brightness: Brightness.light,
-            ),
-          ),
-          darkTheme: ThemeData(
-            fontFamily: 'Cairo',
-            brightness: Brightness.dark,
-            scaffoldBackgroundColor: const Color(0xff8966FA),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: AppColors.purple,
-              brightness: Brightness.dark,
-            ),
-          ),
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: S.delegate.supportedLocales,
-          locale: const Locale('en'),
+        return ListenableBuilder(
+          listenable: LanguageNotifier(),
+          builder: (context, child) {
+            final locale = LanguageNotifier().locale;
+            return MaterialApp(
+              themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
+              theme: ThemeData(
+                fontFamily: 'Cairo',
+                brightness: Brightness.light,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: AppColors.purple,
+                  brightness: Brightness.light,
+                ),
+              ),
+              darkTheme: ThemeData(
+                fontFamily: 'Cairo',
+                brightness: Brightness.dark,
+                scaffoldBackgroundColor: const Color(0xff8966FA),
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: AppColors.purple,
+                  brightness: Brightness.dark,
+                ),
+              ),
+              localizationsDelegates: const [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: S.delegate.supportedLocales,
+              locale: locale,
           debugShowCheckedModeBanner: false,
           navigatorObservers: [
             ThemeNavigatorObserver(),
@@ -118,6 +124,8 @@ class MyApp extends StatelessWidget {
             AppRoutes.profileRouteName: (context) => const ProfileScreen(),
             AppRoutes.adminRouteName: (_) => const AdminRouteName(),
             AppRoutes.pendingRestaurantRouteName: (_) => const PendingRestaurantScreen(),
+          },
+        );
           },
         );
       },

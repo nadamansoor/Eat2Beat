@@ -4,6 +4,9 @@ import 'package:eat2beat/core/errors/exceptions.dart';
 
 class ApiService {
   final String _workerBaseUrl = 'https://e.eat2beatt.workers.dev';
+  List<dynamic>? _cachedRestaurants;
+
+  List<dynamic>? get cachedRestaurants => _cachedRestaurants;
 
   Future<Map<String, dynamic>> getProfile(
     String token,
@@ -411,7 +414,10 @@ class ApiService {
     throw CustomExceptions(message: 'Missing restaurant_id or failed to fetch');
   }
 
-  Future<List<dynamic>> getUserRestaurants(String token) async {
+  Future<List<dynamic>> getUserRestaurants(String token, {bool forceRefresh = false}) async {
+    if (!forceRefresh && _cachedRestaurants != null && _cachedRestaurants!.isNotEmpty) {
+      return _cachedRestaurants!;
+    }
     final uri = Uri.parse('$_workerBaseUrl/user/restaurants?limit=50');
     final response = await http.get(
       uri,
@@ -424,6 +430,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       if (data is List) {
+        _cachedRestaurants = data;
         return data;
       }
       return [];

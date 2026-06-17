@@ -7,6 +7,7 @@ import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/widgets/custom_button.dart';
 import 'package:eat2beat/core/widgets/leading_widget.dart';
 import 'package:eat2beat/core/widgets/otp_widget.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -73,13 +74,13 @@ class _OtpScreenState extends State<OtpScreen> {
           return AlertDialog(
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Text("OTP Code", style: AppStyles.black24Bold),
-            content: Text("The code you have entered isn't correct", style: AppStyles.grey16w400),
+            title: Text(Localizations.localeOf(context).languageCode == 'ar' ? "رمز OTP" : "OTP Code", style: AppStyles.black24Bold),
+            content: Text(Localizations.localeOf(context).languageCode == 'ar' ? "الرمز الذي أدخلته غير صحيح" : "The code you have entered isn't correct", style: AppStyles.grey16w400),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  "Try again",
+                  Localizations.localeOf(context).languageCode == 'ar' ? "حاول ثانية" : "Try again",
                   style: AppStyles.black16w500.copyWith(color: AppColors.purple),
                 ),
               )
@@ -117,14 +118,14 @@ class _OtpScreenState extends State<OtpScreen> {
                     height: screenHeight * 0.04,
                   ),
                   Text(
-                    "OTP Verification",
+                    S.of(context).otpVerificationTitle,
                     style: AppStyles.black24Bold,
                   ),
                   SizedBox(
                     height: screenHeight * 0.01,
                   ),
                   Text(
-                    "Enter the verification code we just sent to:\n$email",
+                    S.of(context).enterVerificationCode(email),
                     style: AppStyles.grey16w400,
                   ),
                   SizedBox(
@@ -140,13 +141,13 @@ class _OtpScreenState extends State<OtpScreen> {
                     height: screenHeight * 0.05,
                   ),
                   CustomButton(
-                    text: "Verify",
+                    text: S.of(context).verify,
                     onPressed: () {
                       final pin = pinController.text;
                       if (pin.length < 4) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Please enter the complete 4-digit code"),
+                          SnackBar(
+                            content: Text(S.of(context).enterCompleteOtp),
                             backgroundColor: Colors.redAccent,
                           ),
                         );
@@ -159,7 +160,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Didn't receive code ?",
+                      Text(S.of(context).didntReceiveCode,
                           style: AppStyles.black16w500),
                       SizedBox(width: screenWidth * 0.01),
                       InkWell(
@@ -171,14 +172,14 @@ class _OtpScreenState extends State<OtpScreen> {
                           pinController.clear();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text("New verification code sent: $newOtp"),
+                              content: Text(S.of(context).newOtpSent(newOtp)),
                               backgroundColor: AppColors.purple,
                               duration: const Duration(seconds: 6),
                             ),
                           );
                         },
                         child: Text(
-                          "Resend",
+                          S.of(context).resend,
                           style: AppStyles.blue16w500.copyWith(
                             fontWeight: FontWeight.bold,
                           ),

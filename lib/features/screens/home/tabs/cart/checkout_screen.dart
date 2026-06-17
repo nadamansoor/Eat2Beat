@@ -9,6 +9,7 @@ import 'package:eat2beat/core/services/user_profile_notifier.dart';
 import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/core/services/api_service.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -82,8 +83,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _placeOrder() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in your delivery details!'),
+        SnackBar(
+          content: Text(S.of(context).fillDeliveryDetails),
         ),
       );
       return;
@@ -99,8 +100,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _isProcessing = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You must be logged in to place an order'),
+        SnackBar(
+          content: Text(S.of(context).loginToPlaceOrder),
         ),
       );
       return;
@@ -146,12 +147,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: const Text('Order Failed'),
-          content: Text('Failed to place order. Please try again.\n\n$e'),
+          title: Text(S.of(context).orderFailed),
+          content: Text(S.of(context).failedPlaceOrder(e.toString())),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: Text(S.of(context).ok),
             ),
           ],
         ),
@@ -199,7 +200,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         SizedBox(width: screenWidth * 0.20),
                         Text(
-                          "Checkout",
+                          S.of(context).checkout,
                           style: AppStyles.black24Bold,
                         ),
                       ],
@@ -224,7 +225,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                     SizedBox(height: screenHeight * 0.02),
                     CustomButton(
-                      text: _selectedPaymentMethod == 0 ? "Place Order (Cash)" : "Place Order (Card)",
+                      text: _selectedPaymentMethod == 0 ? S.of(context).placeOrderCash : S.of(context).placeOrderCard,
                       backgroundColor: AppColors.white,
                       textColor: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
                       isLoading: _isProcessing,
@@ -283,50 +284,50 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               SizedBox(width: screenWidth * 0.02),
               Text(
-                "Delivery Details",
+                S.of(context).deliveryDetails,
                 style: AppStyles.black13Bold,
               ),
             ],
           ),
           SizedBox(height: screenHeight * 0.02),
           
-          Text("Full Name", style: AppStyles.grey13w400),
+          Text(S.of(context).fullName, style: AppStyles.grey13w400),
           SizedBox(height: screenHeight * 0.005),
           CustomTextFormField(
-            hintText: "Enter your name",
+            hintText: S.of(context).enterName,
             controller: _nameController,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Please enter your name';
+                return S.of(context).enterName;
               }
               return null;
             },
           ),
           SizedBox(height: screenHeight * 0.015),
 
-          Text("Phone Number", style: AppStyles.grey13w400),
+          Text(S.of(context).phoneNumber, style: AppStyles.grey13w400),
           SizedBox(height: screenHeight * 0.005),
           CustomTextFormField(
-            hintText: "Enter phone number",
+            hintText: S.of(context).enterPhoneNumber,
             controller: _phoneController,
             keyBoardType: TextInputType.phone,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Please enter your phone number';
+                return S.of(context).pleaseEnterPhone;
               }
               return null;
             },
           ),
           SizedBox(height: screenHeight * 0.015),
 
-          Text("Delivery Address", style: AppStyles.grey13w400),
+          Text(S.of(context).deliveryAddress, style: AppStyles.grey13w400),
           SizedBox(height: screenHeight * 0.005),
           CustomTextFormField(
-            hintText: "Street name, Building, Apartment",
+            hintText: S.of(context).addressPlaceholder,
             controller: _addressController,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Please enter your address';
+                return S.of(context).pleaseEnterAddress;
               }
               return null;
             },
@@ -339,10 +340,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("City", style: AppStyles.grey13w400),
+                    Text(S.of(context).city, style: AppStyles.grey13w400),
                     SizedBox(height: screenHeight * 0.005),
                     CustomTextFormField(
-                      hintText: "Cairo",
+                      hintText: Localizations.localeOf(context).languageCode == 'ar' ? "القاهرة" : "Cairo",
                       controller: _cityController,
                     ),
                   ],
@@ -353,10 +354,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Area", style: AppStyles.grey13w400),
+                    Text(S.of(context).area, style: AppStyles.grey13w400),
                     SizedBox(height: screenHeight * 0.005),
                     CustomTextFormField(
-                      hintText: "Maadi",
+                      hintText: Localizations.localeOf(context).languageCode == 'ar' ? "المعادي" : "Maadi",
                       controller: _areaController,
                     ),
                   ],
@@ -395,7 +396,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               SizedBox(width: screenWidth * 0.02),
               Text(
-                "Payment Method",
+                S.of(context).paymentMethod,
                 style: AppStyles.black13Bold,
               ),
             ],
@@ -406,7 +407,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             children: [
               Expanded(
                 child: _buildPaymentOption(
-                  title: "Cash",
+                  title: S.of(context).cash,
                   isSelected: _selectedPaymentMethod == 0,
                   onTap: () {
                     setState(() {
@@ -420,7 +421,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               SizedBox(width: screenWidth * 0.03),
               Expanded(
                 child: _buildPaymentOption(
-                  title: "Card",
+                  title: S.of(context).card,
                   isSelected: _selectedPaymentMethod == 1,
                   onTap: () {
                     setState(() {
@@ -446,7 +447,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Card Number", style: AppStyles.grey13w400),
+                  Text(S.of(context).cardNumber, style: AppStyles.grey13w400),
                   SizedBox(height: screenHeight * 0.005),
                   CustomTextFormField(
                     hintText: "0000 0000 0000 0000",
@@ -460,7 +461,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Expiry", style: AppStyles.grey13w400),
+                            Text(S.of(context).expiry, style: AppStyles.grey13w400),
                             SizedBox(height: screenHeight * 0.005),
                             CustomTextFormField(
                               hintText: "MM/YY",
@@ -474,7 +475,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("CVV", style: AppStyles.grey13w400),
+                            Text(S.of(context).cvv, style: AppStyles.grey13w400),
                             SizedBox(height: screenHeight * 0.005),
                             CustomTextFormField(
                               hintText: "123",
@@ -551,14 +552,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Order Summary",
+            S.of(context).orderSummary,
             style: AppStyles.black13Bold,
           ),
           SizedBox(height: screenHeight * 0.015),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Subtotal", style: AppStyles.grey13w400),
+              Text(S.of(context).subtotal, style: AppStyles.grey13w400),
               Text("\$${widget.subtotal.toStringAsFixed(2)}", style: AppStyles.black13Bold),
             ],
           ),
@@ -566,7 +567,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Delivery Charges", style: AppStyles.grey13w400),
+              Text(S.of(context).deliveryCharges, style: AppStyles.grey13w400),
               Text("\$${widget.deliveryCharges.toStringAsFixed(2)}", style: AppStyles.black13Bold),
             ],
           ),
@@ -593,7 +594,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "Total",
+            S.of(context).total,
             style: AppStyles.black16Bold,
           ),
           Text(
@@ -704,9 +705,9 @@ class _SuccessOverlayState extends State<SuccessOverlay> with SingleTickerProvid
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              "Thank You!",
-              style: TextStyle(
+            Text(
+              S.of(context).thankYou,
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
@@ -715,7 +716,7 @@ class _SuccessOverlayState extends State<SuccessOverlay> with SingleTickerProvid
             ),
             const SizedBox(height: 12),
             Text(
-              "Your delicious meal is on its way.\nOrder ID: #${widget.orderId}",
+              S.of(context).orderOnTheWay(widget.orderId),
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
@@ -724,9 +725,9 @@ class _SuccessOverlayState extends State<SuccessOverlay> with SingleTickerProvid
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Our driver is on the way to pick up your meal!",
-              style: TextStyle(
+            Text(
+              S.of(context).driverOnTheWay,
+              style: const TextStyle(
                 fontSize: 12,
                 color: Colors.grey,
                 fontStyle: FontStyle.italic,
@@ -746,9 +747,9 @@ class _SuccessOverlayState extends State<SuccessOverlay> with SingleTickerProvid
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text(
-                  "Track Order",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                child: Text(
+                  S.of(context).trackOrder,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

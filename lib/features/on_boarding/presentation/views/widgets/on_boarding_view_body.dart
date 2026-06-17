@@ -1,5 +1,6 @@
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'on_boarding_page_view.dart';
 import 'on_boarding_view_item.dart';
@@ -14,33 +15,6 @@ class OnBoardingViewBody extends StatefulWidget {
 class _OnBoardingViewBodyState extends State<OnBoardingViewBody> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-
-  final List<PageViewItem> pages = const [
-    PageViewItem(
-      image: Assets.imagesIllustration,
-      title: "Turn Leftovers into\nOpportunities",
-      description:
-          "Together, we can make a real impact.\n"
-          "Turning leftover food into meaningful meals\n"
-          "that feed people, not landfills.",
-    ),
-    PageViewItem(
-      image: Assets.imagesOnboarding2,
-      title: "Save Meal ,Save Money",
-      description:
-          "Enjoy delicious meals at a lower price while\n"
-          "helping restaurants reduce food waste ,\n"
-          "It's a win win.",
-    ),
-    PageViewItem(
-      image: Assets.imagesOnboarding3,
-      title: "Feed Hearts, Not Waste",
-      description:
-          "Reduce food waste by connecting surplus\n"
-          "meals with charities  every act of giving\n"
-          "brings hope to someone's day.",
-    ),
-  ];
 
   void _onSkipPressed() {
     Navigator.pushReplacementNamed(context, AppRoutes.loginRouteName);
@@ -76,6 +50,25 @@ class _OnBoardingViewBodyState extends State<OnBoardingViewBody> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
+    final List<PageViewItem> pages = [
+      PageViewItem(
+        image: Assets.imagesIllustration,
+        title: s.onboardingTitle1,
+        description: s.onboardingDesc1,
+      ),
+      PageViewItem(
+        image: Assets.imagesOnboarding2,
+        title: s.onboardingTitle2,
+        description: s.onboardingDesc2,
+      ),
+      PageViewItem(
+        image: Assets.imagesOnboarding3,
+        title: s.onboardingTitle3,
+        description: s.onboardingDesc3,
+      ),
+    ];
+
     return Stack(
       children: [
         OnBoardingPageView(
@@ -103,9 +96,9 @@ class _OnBoardingViewBodyState extends State<OnBoardingViewBody> {
                   children: [
                     TextButton(
                       onPressed: _onSkipPressed,
-                      child: const Text(
-                        "Skip",
-                        style: TextStyle(
+                      child: Text(
+                        s.skip,
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.grey,
                         ),

@@ -2,7 +2,22 @@ import 'package:eat2beat/features/models/offers_model.dart';
 import 'package:eat2beat/features/screens/home/tabs/offers/offer_details.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
+
+String translateSaleText(BuildContext context, String sale) {
+  if (sale == 'Special Offer') {
+    return S.of(context).specialOffer;
+  }
+  if (sale.contains('% OFF')) {
+    final pct = sale.replaceAll('% OFF', '').trim();
+    if (Localizations.localeOf(context).languageCode == 'ar') {
+      return 'خصم $pct٪';
+    }
+    return '$pct% OFF';
+  }
+  return sale;
+}
 
 class FoodCard extends StatelessWidget {
   final FoodModel item;
@@ -118,7 +133,7 @@ class FoodCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      item.sale,
+                      translateSaleText(context, item.sale),
                       style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold),
                     ),
                   ),

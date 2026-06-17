@@ -4,6 +4,7 @@ import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import '../../../../models/home_model.dart';
+import 'package:eat2beat/features/models/restaurant_model.dart';
 import '../../../../../core/utils/app_images.dart';
 import '../../../../../core/utils/app_styles.dart';
 import '../../../../../core/widgets/leading_widget.dart';
@@ -11,6 +12,7 @@ import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/core/services/api_service.dart';
 import 'package:eat2beat/features/screens/home/tabs/cart/checkout_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:intl/intl.dart';
 
 class DetailsScreen extends StatefulWidget {
@@ -44,13 +46,124 @@ class _DetailsScreenState extends State<DetailsScreen> {
   String? ratingSuccessMessage;
   String? ratingErrorMessage;
 
+  String? resolvedRestName;
+  String? resolvedRestIcon;
+  bool restaurantLoading = false;
+
+  bool? resolvedRestIsOpen;
+  String? resolvedRestOpenTime;
+  String? resolvedRestCloseTime;
+  bool? resolvedIsActive;
+  bool? resolvedIsAcceptingOrders;
+  bool? resolvedIsOpenNow;
+  bool? resolvedIsOrderableNow;
+  String? resolvedPauseReason;
+
+  bool get dynamicIsCurrentlyOpen {
+    final curIsOpenNow = resolvedIsOpenNow ?? model.isOpenNow;
+    if (curIsOpenNow != null) return curIsOpenNow;
+    return RestaurantModel.checkIsRestaurantOpen(
+      isOpen: resolvedRestIsOpen ?? model.restIsOpen ?? true,
+      openTime: resolvedRestOpenTime ?? model.restOpenTime ?? '09:00 AM',
+      closeTime: resolvedRestCloseTime ?? model.restCloseTime ?? '11:00 PM',
+    );
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
       _isInitialized = true;
       model = ModalRoute.of(context)?.settings.arguments as HomeFoodModel;
+      resolvedRestName = model.restName;
+      resolvedRestIcon = model.restIcon;
+
+      // Try resolving synchronously from cache first
+      final rId = model.restaurantId;
+      if (rId != null && rId.isNotEmpty) {
+        final cached = getIt<ApiService>().cachedRestaurants;
+        if (cached != null) {
+          for (final r in cached) {
+            final id = r['id']?.toString() ?? r['restaurant_id']?.toString() ?? '';
+            if (id == rId) {
+              final restModel = RestaurantModel.fromJson(r);
+              final name = restModel.name;
+              final imgUrl = restModel.image;
+              if (name.isNotEmpty) resolvedRestName = name;
+              if (imgUrl.isNotEmpty) resolvedRestIcon = imgUrl;
+              resolvedRestIsOpen = restModel.isOpen;
+              resolvedRestOpenTime = restModel.openTime;
+              resolvedRestCloseTime = restModel.closeTime;
+              resolvedIsActive = restModel.isActive;
+              resolvedIsAcceptingOrders = restModel.isAcceptingOrders;
+              resolvedIsOpenNow = restModel.isOpenNow;
+              resolvedIsOrderableNow = restModel.isOrderableNow;
+              resolvedPauseReason = restModel.pauseReason;
+              break;
+            }
+          }
+        }
+      }
+
+      _resolveRestaurantDetails();
       _initMealReviewsAndRatings();
+    }
+  }
+
+  Future<void> _resolveRestaurantDetails() async {
+    final rId = model.restaurantId;
+    if (rId == null || rId.isEmpty) return;
+    
+    if (resolvedRestName != 'Restaurant' && resolvedRestName != null && resolvedRestName!.isNotEmpty && 
+        resolvedRestIcon != null && resolvedRestIcon!.isNotEmpty && resolvedRestIcon != 'assets/images/burger_king.png') {
+      return;
+    }
+
+    setState(() {
+      restaurantLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final token = await user.getIdToken();
+        if (token != null) {
+          final apiService = getIt<ApiService>();
+          final rawRestaurants = await apiService.getUserRestaurants(token);
+          for (final r in rawRestaurants) {
+            final id = r['id']?.toString() ?? r['restaurant_id']?.toString() ?? '';
+            if (id == rId) {
+              final restModel = RestaurantModel.fromJson(r);
+              final name = restModel.name;
+              final imgUrl = restModel.image;
+              if (mounted) {
+                setState(() {
+                  if (name.isNotEmpty) resolvedRestName = name;
+                  if (imgUrl.isNotEmpty) resolvedRestIcon = imgUrl;
+                  resolvedRestIsOpen = restModel.isOpen;
+                  resolvedRestOpenTime = restModel.openTime;
+                  resolvedRestCloseTime = restModel.closeTime;
+                  resolvedIsActive = restModel.isActive;
+                  resolvedIsAcceptingOrders = restModel.isAcceptingOrders;
+                  resolvedIsOpenNow = restModel.isOpenNow;
+                  resolvedIsOrderableNow = restModel.isOrderableNow;
+                  resolvedPauseReason = restModel.pauseReason;
+                  restaurantLoading = false;
+                });
+              }
+              return;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error resolving restaurant details: $e');
+    }
+
+    if (mounted) {
+      setState(() {
+        restaurantLoading = false;
+      });
     }
   }
 
@@ -126,7 +239,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     } catch (e) {
       setState(() {
         reviewsLoading = false;
-        reviewsErrorMessage = 'Reviews are unavailable right now.';
+        reviewsErrorMessage = S.of(context).reviewsUnavailable;
       });
     }
   }
@@ -170,7 +283,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     if (model.id == null) return;
     if (mySelectedRating < 1 || mySelectedRating > 5) {
       setState(() {
-        ratingErrorMessage = 'Rating must be between 1 and 5.';
+        ratingErrorMessage = S.of(context).ratingRangeError;
       });
       return;
     }
@@ -195,7 +308,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           reviewText: reviewTextController.text,
         );
         setState(() {
-          ratingSuccessMessage = 'Rating submitted successfully.';
+          ratingSuccessMessage = S.of(context).ratingSuccess;
           hasExistingRating = true;
           ratingSubmitting = false;
         });
@@ -204,7 +317,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       }
     } catch (e) {
       setState(() {
-        ratingErrorMessage = 'Failed to submit rating: $e';
+        ratingErrorMessage = S.of(context).ratingSubmitFailed(e.toString());
         ratingSubmitting = false;
       });
     }
@@ -222,12 +335,17 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Future<void> _addToCart({bool navigateToCheckout = false}) async {
-    final bool canOrder = model.isOrderableNow ?? model.isCurrentlyOpen;
+    final curIsOrderableNow = resolvedIsOrderableNow ?? model.isOrderableNow;
+    final bool canOrder = curIsOrderableNow ?? dynamicIsCurrentlyOpen;
     if (!canOrder) {
-      String errMsg = 'The restaurant is currently closed or not accepting orders.';
-      if (model.isAcceptingOrders == false) {
-        final reason = model.pauseReason?.trim() ?? '';
-        errMsg = 'Ordering is paused${reason.isNotEmpty ? ": $reason" : ""}.';
+      String errMsg = S.of(context).closedOrNotAccepting;
+      final curIsAcceptingOrders = resolvedIsAcceptingOrders ?? model.isAcceptingOrders;
+      if (curIsAcceptingOrders == false) {
+        final curPauseReason = resolvedPauseReason ?? model.pauseReason;
+        final reason = curPauseReason?.trim() ?? '';
+        errMsg = reason.isNotEmpty
+            ? S.of(context).orderingPausedWithReason(reason)
+            : S.of(context).orderingPaused;
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -242,9 +360,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
     if (model.id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'This mock meal cannot be ordered',
+            S.of(context).mockMealError,
           ),
         ),
       );
@@ -257,21 +375,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
         context: context,
         builder: (context) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Login Required'),
-          content: const Text(
-            'Please login first to complete your order.',
+          title: Text(S.of(context).loginRequired),
+          content: Text(
+            S.of(context).loginRequiredText,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).cancel),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, AppRoutes.loginRouteName);
               },
-              child: const Text('Login'),
+              child: Text(S.of(context).login),
             ),
           ],
         ),
@@ -328,7 +446,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Added to Cart (Qty: $quantity)',
+                S.of(context).addedToCartQty(quantity),
               ),
               duration: const Duration(seconds: 2),
             ),
@@ -339,7 +457,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
       if (!mounted) return;
       Navigator.pop(context); // Pop loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add to cart: $e')),
+        SnackBar(content: Text(S.of(context).failedAddToCart(e.toString()))),
       );
     }
   }
@@ -427,35 +545,49 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       Text(model.title, style: AppStyles.black20Bold),
                       Row(
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: _buildImage(
-                              model.restIcon,
-                              width: 32,
-                              height: 32,
-                              fit: BoxFit.cover,
+                          if (restaurantLoading && (resolvedRestName == null || resolvedRestName == 'Restaurant'))
+                            const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.purple),
+                            )
+                          else ...[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: _buildImage(
+                                resolvedRestIcon ?? model.restIcon,
+                                width: 32,
+                                height: 32,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: screenWidth * 0.02,),
-                          Text(model.restName, style: AppStyles.black16w500,),
+                            SizedBox(width: screenWidth * 0.02,),
+                            Text(resolvedRestName ?? model.restName, style: AppStyles.black16w500,),
+                          ],
                           SizedBox(width: screenWidth * 0.02,),
                           Builder(
                             builder: (context) {
+                              final curIsOrderableNow = resolvedIsOrderableNow ?? model.isOrderableNow;
+                              final curIsAcceptingOrders = resolvedIsAcceptingOrders ?? model.isAcceptingOrders;
+                              final curIsOpenNow = resolvedIsOpenNow ?? model.isOpenNow;
+                              final curPauseReason = resolvedPauseReason ?? model.pauseReason;
+
                               Color statusColor = const Color(0xFF9499A5);
-                              String statusText = 'Not orderable';
-                              if (model.isOrderableNow == true) {
-                                statusText = 'Open Now';
+                              String statusText = S.of(context).notOrderable;
+                              if (curIsOrderableNow == true) {
+                                statusText = S.of(context).openNow;
                                 statusColor = const Color(0xFF10B981);
-                              } else if (model.isAcceptingOrders == false) {
-                                final reason = model.pauseReason?.trim() ?? '';
-                                statusText = 'Paused${reason.isNotEmpty ? " ($reason)" : ""}';
+                              } else if (curIsAcceptingOrders == false) {
+                                final reason = curPauseReason?.trim() ?? '';
+                                statusText = "${S.of(context).paused}${reason.isNotEmpty ? " ($reason)" : ""}";
                                 statusColor = const Color(0xFFEF4444);
-                              } else if (model.isOpenNow == false) {
-                                statusText = 'Closed now';
+                              } else if (curIsOpenNow == false) {
+                                statusText = S.of(context).closedNow;
                                 statusColor = const Color(0xFFF59E0B);
                               } else {
-                                statusText = model.isCurrentlyOpen ? 'Open Now' : 'Closed now';
-                                statusColor = model.isCurrentlyOpen ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+                                final bool open = dynamicIsCurrentlyOpen;
+                                statusText = open ? S.of(context).openNow : S.of(context).closedNow;
+                                statusColor = open ? const Color(0xFF10B981) : const Color(0xFFEF4444);
                               }
                               return Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -497,25 +629,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.03),
-                      Row(
-                        children: [
-                          Text("Size ", style: AppStyles.black16w500,),
-                          SizedBox(width: screenWidth * 0.01,),
-                          Container(
-                            alignment: Alignment.center,
-                            width: screenWidth * 0.085,
-                            height: screenHeight*0.044,
-                            padding: EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: AppColors.purple50,
-                              borderRadius: BorderRadius.circular(110),
-                            ),
-                            child: Text(model.size , style: AppStyles.black16w500,),
-                          )
-                        ],
-                      ),
-                      SizedBox(height: screenHeight * 0.03),
-                      Text("Ingredients", style: AppStyles.black16Bold,),
+
+                      Text(S.of(context).ingredients, style: AppStyles.black16Bold,),
                       SizedBox(height: screenHeight * 0.01),
                       Text(model.description, style: AppStyles.grey13w400,),
                       SizedBox(height: screenHeight * 0.03),
@@ -526,7 +641,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Reviews", style: AppStyles.black16Bold),
+                          Text(S.of(context).reviews, style: AppStyles.black16Bold),
                         ],
                       ),
                       SizedBox(height: screenHeight * 0.02),
@@ -550,12 +665,12 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                hasExistingRating ? "Update your rating" : "Rate this meal", 
+                                hasExistingRating ? S.of(context).updateYourRating : S.of(context).rateThisMeal, 
                                 style: AppStyles.black16w500
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "Choose a score from 1 to 5 and add an optional review.",
+                                S.of(context).rateInstructions,
                                 style: AppStyles.grey13w400,
                               ),
                               const SizedBox(height: 12),
@@ -617,7 +732,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     fontSize: 14,
                                   ),
                                   decoration: InputDecoration(
-                                    hintText: "Optional review...",
+                                    hintText: S.of(context).optionalReview,
                                     hintStyle: TextStyle(
                                       color: ThemeNotifier().isDarkMode ? Colors.white54 : Colors.black45,
                                     ),
@@ -691,7 +806,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                             child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                           )
                                         : Text(
-                                            hasExistingRating ? 'Update Rating' : 'Submit Rating',
+                                            hasExistingRating ? S.of(context).updateRating : S.of(context).submitRating,
                                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                                           ),
                                   ),
@@ -720,8 +835,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                             children: [
                               Text(
                                 model.id == null
-                                    ? "Reviews are only available for online menu meals."
-                                    : "Sign in with a user account to view & write reviews.",
+                                    ? S.of(context).reviewsOnlyOnline
+                                    : S.of(context).signInToReview,
                                 style: AppStyles.black13w400,
                                 textAlign: TextAlign.center,
                               ),
@@ -740,7 +855,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                       elevation: 0,
                                     ),
-                                    child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    child: Text(S.of(context).signIn, style: const TextStyle(fontWeight: FontWeight.bold)),
                                   ),
                                 ),
                               ],
@@ -770,7 +885,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 24.0),
                             child: Text(
-                              "No reviews yet for this dish.",
+                              S.of(context).noReviewsYet,
                               style: TextStyle(
                                 fontStyle: FontStyle.italic,
                                 color: ThemeNotifier().isDarkMode ? Colors.white54 : Colors.black54,
@@ -782,7 +897,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                       else
                         Column(
                           children: reviews.map((rev) {
-                            final String userName = rev['user_name']?.toString() ?? 'User';
+                            final String userName = rev['user_name']?.toString() ?? S.of(context).userRole;
                             final double userRate = rev['rating'] is num 
                                 ? (rev['rating'] as num).toDouble() 
                                 : (double.tryParse(rev['rating']?.toString() ?? '') ?? 0.0);
@@ -865,7 +980,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                                     )
                                   else
                                     Text(
-                                      "No written review provided.",
+                                      S.of(context).noWrittenReview,
                                       style: TextStyle(
                                         fontSize: 13,
                                         fontStyle: FontStyle.italic,
@@ -963,7 +1078,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 children: [
                   Expanded(
                     child: CustomButton(
-                        text: "Add To Cart",
+                        text: S.of(context).addToCart,
                         backgroundColor: ThemeNotifier().isDarkMode ? const Color(0xff45337D) : AppColors.lightPurple,
                         textColor: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
                         onPressed: () => _addToCart(navigateToCheckout: false),
@@ -974,7 +1089,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
                   Expanded(
                     child: CustomButton(
-                        text: "Order Now",
+                        text: S.of(context).orderNow,
                         backgroundColor: ThemeNotifier().isDarkMode ? AppColors.purple800 : AppColors.purple,
                         onPressed: () => _addToCart(navigateToCheckout: true),
                     ),

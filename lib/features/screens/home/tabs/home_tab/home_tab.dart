@@ -13,6 +13,8 @@ import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
 import 'package:eat2beat/core/services/api_service.dart';
 import 'package:eat2beat/features/models/restaurant_model.dart';
+import 'package:eat2beat/generated/l10n.dart';
+import 'package:eat2beat/core/utils/localization_helper.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -29,23 +31,11 @@ class _HomeTabState extends State<HomeTab> {
   String searchQuery = '';
 
   List<String> categories = [
+    "All Meals",
     "Recommended",
     "Restaurants",
-    "Favorites",
-    "New",
-    "Near2You",
-    "Popular",
     "Top Rated",
-    "Trending",
-    "Offers",
-    "Pizza",
-    "Burgers",
-    "Seafood",
-    "Desserts",
-    "Coffee",
-    "Healthy",
-    "Asian",
-    "Egyptian Food",
+    "Favorites",
   ];
 
   List<RestaurantModel> restaurants = [];
@@ -66,10 +56,18 @@ class _HomeTabState extends State<HomeTab> {
   bool loadingRecommendations = false;
   String? recommendationsError;
 
+  List<HomeFoodModel> topRatedMeals = [];
+  bool loadingTopRated = false;
+  String? topRatedError;
+
+  List<HomeFoodModel> allMeals = [];
+  bool loadingAllMeals = false;
+  String? allMealsError;
+
   @override
   void initState() {
     super.initState();
-    _fetchRecommendedMeals();
+    _fetchAllMeals();
     _fetchFavoriteMealIds();
   }
 
@@ -89,6 +87,10 @@ class _HomeTabState extends State<HomeTab> {
       final List<HomeFoodModel> mappedMeals = [];
       for (final m in rawMeals) {
         final id = m['id']?.toString() ?? m['meal_id']?.toString() ?? '';
+        final restaurantId = m['restaurant_id']?.toString() ?? 
+                             m['restaurants_id']?.toString() ?? 
+                             m['restaurant']?['id']?.toString() ?? 
+                             '';
         final title = m['title']?.toString() ?? m['name']?.toString() ?? 'Meal';
         final description = m['description']?.toString() ?? '';
         final priceVal = m['price'];
@@ -134,6 +136,7 @@ class _HomeTabState extends State<HomeTab> {
 
         mappedMeals.add(HomeFoodModel(
           id: id,
+          restaurantId: restaurantId.isNotEmpty ? restaurantId : null,
           restName: restName,
           restIcon: restIcon,
           size: 'M',
@@ -161,6 +164,150 @@ class _HomeTabState extends State<HomeTab> {
       setState(() {
         recommendationsError = e.toString().replaceFirst("Exception: ", "");
         loadingRecommendations = false;
+      });
+    }
+  }
+
+  Future<void> _fetchAllMeals() async {
+    if (loadingAllMeals) return;
+    setState(() {
+      loadingAllMeals = true;
+      allMealsError = null;
+    });
+    try {
+      final authRepo = getIt<AuthRepo>();
+      final token = await authRepo.getIdToken();
+      
+      List<HomeFoodModel> compiledMeals = [];
+      
+      // 1. Add static meals
+      compiledMeals.addAll(HomeFoodModel.mealDetails);
+      
+      // 2. Fetch meals from API if token is available
+      if (token != null) {
+        // Fetch all restaurants first
+        final rawRestaurants = await getIt<ApiService>().getUserRestaurants(token);
+        final List<RestaurantModel> parsedRestaurants = rawRestaurants.map((r) => RestaurantModel.fromJson(r)).toList();
+        
+        // Fetch meals for all restaurants in parallel
+        final futures = parsedRestaurants.map((restaurant) async {
+          try {
+            final rawMeals = await getIt<ApiService>().getRestaurantMeals(token, restaurant.id);
+            final List<HomeFoodModel> mappedMeals = [];
+            for (final m in rawMeals) {
+              final id = m['id']?.toString() ?? m['meal_id']?.toString() ?? '';
+              final title = m['title']?.toString() ?? m['name']?.toString() ?? 'Meal';
+              final description = m['description']?.toString() ?? '';
+              final priceVal = m['price'];
+              double price = 0.0;
+              if (priceVal is num) {
+                price = priceVal.toDouble();
+              } else if (priceVal is String && priceVal.isNotEmpty) {
+                price = double.tryParse(priceVal) ?? 0.0;
+              }
+              final mealImgUrl = m['meal_img_url']?.toString() ?? m['image']?.toString() ?? '';
+              
+              final rateVal = m['rate'] ?? m['rating'] ?? m['avg_rating'] ?? m['average_rating'];
+              double rate = 0.0;
+              if (rateVal is num) {
+                rate = rateVal.toDouble();
+              } else if (rateVal is String && rateVal.isNotEmpty) {
+                rate = double.tryParse(rateVal) ?? 0.0;
+              }
+              
+              final isActiveVal = m['is_active'] ?? m['isActive'];
+              final bool? isActive = isActiveVal == null ? restaurant.isActive : (isActiveVal == true || isActiveVal == 1 || isActiveVal?.toString() == 'true' || isActiveVal?.toString() == '1');
+
+              final isAcceptingOrdersVal = m['is_accepting_orders'] ?? m['isAcceptingOrders'];
+              final bool? isAcceptingOrders = isAcceptingOrdersVal == null ? restaurant.isAcceptingOrders : (isAcceptingOrdersVal == true || isAcceptingOrdersVal == 1 || isAcceptingOrdersVal?.toString() == 'true' || isAcceptingOrdersVal?.toString() == '1');
+
+              final isOpenNowVal = m['is_open_now'] ?? m['isOpenNow'];
+              final bool? isOpenNow = isOpenNowVal == null ? restaurant.isOpenNow : (isOpenNowVal == true || isOpenNowVal == 1 || isOpenNowVal?.toString() == 'true' || isOpenNowVal?.toString() == '1');
+
+              final isOrderableNowVal = m['is_orderable_now'] ?? m['isOrderableNow'];
+              final bool? isOrderableNow = isOrderableNowVal == null ? restaurant.isOrderableNow : (isOrderableNowVal == true || isOrderableNowVal == 1 || isOrderableNowVal?.toString() == 'true' || isOrderableNowVal?.toString() == '1');
+
+              final pauseReason = m['pause_reason']?.toString() ?? m['pauseReason']?.toString() ?? restaurant.pauseReason;
+
+              mappedMeals.add(HomeFoodModel(
+                id: id,
+                restaurantId: restaurant.id,
+                restName: restaurant.name,
+                restIcon: restaurant.image.isNotEmpty ? restaurant.image : Assets.imagesBurgerKing,
+                size: 'M',
+                title: title,
+                image: mealImgUrl.isNotEmpty ? mealImgUrl : Assets.imagesFood,
+                price: price,
+                rate: rate,
+                description: description,
+                time: '20 Min',
+                restIsOpen: restaurant.isOpen,
+                restOpenTime: restaurant.openTime,
+                restCloseTime: restaurant.closeTime,
+                isActive: isActive,
+                isAcceptingOrders: isAcceptingOrders,
+                isOpenNow: isOpenNow,
+                isOrderableNow: isOrderableNow,
+                pauseReason: pauseReason,
+              ));
+            }
+            return mappedMeals;
+          } catch (_) {
+            return <HomeFoodModel>[];
+          }
+        }).toList();
+        
+        final results = await Future.wait(futures);
+        for (final meals in results) {
+          compiledMeals.addAll(meals);
+        }
+      }
+      
+      // Filter out duplicates
+      final Map<String, HomeFoodModel> uniqueMealsMap = {};
+      for (final meal in compiledMeals) {
+        final key = (meal.id != null && meal.id!.isNotEmpty) ? meal.id! : meal.title;
+        if (!uniqueMealsMap.containsKey(key) || uniqueMealsMap[key]!.rate < meal.rate) {
+          uniqueMealsMap[key] = meal;
+        }
+      }
+      
+      setState(() {
+        allMeals = uniqueMealsMap.values.toList();
+        loadingAllMeals = false;
+      });
+    } catch (e) {
+      setState(() {
+        allMealsError = e.toString().replaceFirst("Exception: ", "");
+        loadingAllMeals = false;
+      });
+    }
+  }
+
+  Future<void> _fetchTopRatedMeals() async {
+    if (loadingTopRated) return;
+    setState(() {
+      loadingTopRated = true;
+      topRatedError = null;
+    });
+    try {
+      if (allMeals.isEmpty) {
+        await _fetchAllMeals();
+      }
+      
+      final sortedMeals = allMeals
+          .where((meal) => meal.rate >= 3.0)
+          .toList();
+      sortedMeals.sort((a, b) => b.rate.compareTo(a.rate));
+      
+      setState(() {
+        topRatedMeals = sortedMeals;
+        loadingTopRated = false;
+      });
+    } catch (e) {
+      setState(() {
+        topRatedError = e.toString().replaceFirst("Exception: ", "");
+        loadingTopRated = false;
       });
     }
   }
@@ -209,6 +356,10 @@ class _HomeTabState extends State<HomeTab> {
         if (id.isEmpty) continue;
         updatedFavIds.add(id);
 
+        final restaurantId = m['restaurant_id']?.toString() ?? 
+                             m['restaurants_id']?.toString() ?? 
+                             m['restaurant']?['id']?.toString() ?? 
+                             '';
         final title = m['title']?.toString() ?? m['name']?.toString() ?? 'Meal';
         final description = m['description']?.toString() ?? '';
         final priceVal = m['price'];
@@ -268,6 +419,7 @@ class _HomeTabState extends State<HomeTab> {
 
         mappedMeals.add(HomeFoodModel(
           id: id,
+          restaurantId: restaurantId.isNotEmpty ? restaurantId : null,
           restName: restName,
           restIcon: restIcon,
           size: 'M',
@@ -310,7 +462,7 @@ class _HomeTabState extends State<HomeTab> {
     setState(() {
       if (isFav) {
         favoriteMealIds.remove(mealId);
-        if (selectedIndex == 2) {
+        if (selectedIndex == 4) {
           favoriteMeals.removeWhere((m) => m.id == mealId);
         }
       } else {
@@ -331,7 +483,7 @@ class _HomeTabState extends State<HomeTab> {
         await getIt<ApiService>().favoriteMeal(token, mealId);
       }
       
-      if (!isFav && selectedIndex == 2) {
+      if (!isFav && selectedIndex == 4) {
         _fetchFavoriteMeals();
       }
     } catch (e) {
@@ -464,6 +616,7 @@ class _HomeTabState extends State<HomeTab> {
 
         mappedMeals.add(HomeFoodModel(
           id: id,
+          restaurantId: restaurant.id,
           restName: restaurant.name,
           restIcon: restaurant.image.isNotEmpty ? restaurant.image : Assets.imagesBurgerKing,
           size: 'M',
@@ -510,6 +663,23 @@ class _HomeTabState extends State<HomeTab> {
     return const Color(0xFF9499A5);
   }
 
+  String _getCategoryTitle(BuildContext context, String key) {
+    switch (key) {
+      case "All Meals":
+        return S.of(context).allMeals;
+      case "Recommended":
+        return S.of(context).recommended;
+      case "Restaurants":
+        return S.of(context).restaurants;
+      case "Top Rated":
+        return S.of(context).topRated;
+      case "Favorites":
+        return S.of(context).favorites;
+      default:
+        return key;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -528,6 +698,18 @@ class _HomeTabState extends State<HomeTab> {
         .toList();
 
     final filteredFavMeals = favoriteMeals
+        .where((item) => item.title
+            .toLowerCase()
+            .contains(searchQuery.toLowerCase()))
+        .toList();
+
+    final filteredTopRatedMeals = topRatedMeals
+        .where((item) => item.title
+            .toLowerCase()
+            .contains(searchQuery.toLowerCase()))
+        .toList();
+
+    final filteredAllMeals = allMeals
         .where((item) => item.title
             .toLowerCase()
             .contains(searchQuery.toLowerCase()))
@@ -585,7 +767,7 @@ class _HomeTabState extends State<HomeTab> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Hello", style: AppStyles.black13w400),
+                    Text(S.of(context).hello, style: AppStyles.black13w400),
                     Text(profile.name, style: AppStyles.black16Bold),
                   ],
                 )
@@ -609,7 +791,7 @@ class _HomeTabState extends State<HomeTab> {
                   SizedBox(height: MediaQuery.of(context).padding.top + kToolbarHeight),
 
                   CustomTextFormField(
-                    hintText: "Search",
+                    hintText: S.of(context).search,
                     controller: searchController,
                     onChanged: onSearch,
                     prefixIcon: Icon(Icons.search,
@@ -710,7 +892,7 @@ class _HomeTabState extends State<HomeTab> {
                             const SizedBox(height: 8),
                             ElevatedButton(
                               onPressed: () => _fetchRestaurantMeals(selectedRestaurant!),
-                              child: const Text("Retry"),
+                              child: Text(S.of(context).retry),
                             ),
                           ],
                         ),
@@ -721,8 +903,8 @@ class _HomeTabState extends State<HomeTab> {
                           padding: const EdgeInsets.all(24.0),
                           child: Text(
                             isSearching
-                                ? "No meals found matching \"$searchQuery\"."
-                                : "No meals available in this restaurant.",
+                                ? S.of(context).noMealsFound(searchQuery)
+                                : S.of(context).noMealsAvailable,
                             style: const TextStyle(fontSize: 16),
                           ),
                         ),
@@ -877,10 +1059,14 @@ class _HomeTabState extends State<HomeTab> {
                                 selectedIndex = index;
                               });
                               if (index == 0) {
+                                _fetchAllMeals();
+                              } else if (index == 1) {
                                 _fetchRecommendedMeals();
-                              } else if (index == 1 && restaurants.isEmpty) {
+                              } else if (index == 2 && restaurants.isEmpty) {
                                 _fetchRestaurants();
-                              } else if (index == 2) {
+                              } else if (index == 3) {
+                                _fetchTopRatedMeals();
+                              } else if (index == 4) {
                                 _fetchFavoriteMeals();
                               }
                             },
@@ -900,7 +1086,7 @@ class _HomeTabState extends State<HomeTab> {
                                     : null,
                               ),
                               child: Text(
-                                categories[index],
+                                _getCategoryTitle(context, categories[index]),
                                 style: selectedIndex == index
                                     ? AppStyles.black16w500
                                         .copyWith(color: Colors.white)
@@ -913,6 +1099,166 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                     SizedBox(height: screenHeight * 0.02),
                     if (selectedIndex == 0) ...[
+                      if (loadingAllMeals && allMeals.isEmpty)
+                        const Center(child: CircularProgressIndicator(color: AppColors.purple800))
+                      else if (allMealsError != null)
+                        Center(
+                          child: Column(
+                            children: [
+                              Text(allMealsError!, style: AppStyles.black16w500),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: _fetchAllMeals,
+                                child: const Text("Retry"),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (filteredAllMeals.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Text(
+                              isSearching
+                                  ? S.of(context).noMealsFound(searchQuery)
+                                  : S.of(context).noMealsAvailable,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        )
+                      else
+                        GridView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: filteredAllMeals.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 12,
+                            mainAxisExtent: (screenHeight * 0.28).clamp(220.0, 280.0),
+                          ),
+                          itemBuilder: (context, index) {
+                            final item = filteredAllMeals[index];
+                            return InkWell(
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  AppRoutes.detailsRouteName,
+                                  arguments: item,
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.02,
+                                  vertical: screenHeight * 0.01,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: _buildImage(
+                                            item.image,
+                                            width: double.infinity,
+                                            height: screenHeight * 0.12,
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                        if (item.rate > 0)
+                                          Positioned(
+                                            left: 8,
+                                            top: 8,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.white,
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ImageIcon(
+                                                    AssetImage(Assets.imagesRateIcon),
+                                                    color: AppColors.yellow,
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    "${item.rate}",
+                                                    style: AppStyles.grey13w400.copyWith(fontSize: 11),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        if (item.id != null && item.id!.isNotEmpty)
+                                          Positioned(
+                                            right: 8,
+                                            top: 8,
+                                            child: InkWell(
+                                              onTap: () => _toggleFavorite(item),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(4),
+                                                decoration: const BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  _isFavorite(item.id!)
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color: Colors.red,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    SizedBox(height: screenHeight * 0.01),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        getLocalizedText(context, item.title),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppStyles.black13Bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        getLocalizedText(context, item.description),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        "\$ ${item.price.toStringAsFixed(2)}",
+                                        style: AppStyles.grey13w400.copyWith(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                    ] else if (selectedIndex == 1) ...[
                       if (loadingRecommendations && recommendedMeals.isEmpty)
                         const Center(child: CircularProgressIndicator(color: AppColors.purple800))
                       else if (recommendationsError != null)
@@ -934,12 +1280,12 @@ class _HomeTabState extends State<HomeTab> {
                                     backgroundColor: AppColors.purple,
                                     foregroundColor: Colors.white,
                                   ),
-                                  child: const Text("Sign In"),
+                                  child: Text(S.of(context).signIn),
                                 )
                               else
                                 ElevatedButton(
                                   onPressed: _fetchRecommendedMeals,
-                                  child: const Text("Retry"),
+                                  child: Text(S.of(context).retry),
                                 ),
                             ],
                           ),
@@ -950,8 +1296,8 @@ class _HomeTabState extends State<HomeTab> {
                             padding: const EdgeInsets.all(24.0),
                             child: Text(
                               isSearching
-                                  ? "No recommendations found matching \"$searchQuery\"."
-                                  : "No recommendations available.",
+                                  ? S.of(context).noRecsFound(searchQuery)
+                                  : S.of(context).noRecsAvailable,
                               style: const TextStyle(fontSize: 16),
                             ),
                           ),
@@ -1055,7 +1401,7 @@ class _HomeTabState extends State<HomeTab> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                       child: Text(
-                                        item.title,
+                                        getLocalizedText(context, item.title),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppStyles.black13Bold,
@@ -1065,7 +1411,7 @@ class _HomeTabState extends State<HomeTab> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                       child: Text(
-                                        item.description,
+                                        getLocalizedText(context, item.description),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -1088,7 +1434,7 @@ class _HomeTabState extends State<HomeTab> {
                             );
                           },
                         ),
-                    ] else if (selectedIndex == 1) ...[
+                    ] else if (selectedIndex == 2) ...[
                       if (loadingRestaurants)
                         const Center(child: CircularProgressIndicator(color: AppColors.purple800))
                       else if (restaurantsError != null)
@@ -1099,7 +1445,7 @@ class _HomeTabState extends State<HomeTab> {
                               const SizedBox(height: 8),
                               ElevatedButton(
                                 onPressed: _fetchRestaurants,
-                                child: const Text("Retry"),
+                                child: Text(S.of(context).retry),
                               ),
                             ],
                           ),
@@ -1110,8 +1456,8 @@ class _HomeTabState extends State<HomeTab> {
                             padding: const EdgeInsets.all(24.0),
                             child: Text(
                               isSearching
-                                  ? "No restaurants found matching \"$searchQuery\"."
-                                  : "No restaurants available.",
+                                  ? S.of(context).noRestFound(searchQuery)
+                                  : S.of(context).noRestAvailable,
                               style: const TextStyle(fontSize: 16),
                             ),
                           ),
@@ -1164,7 +1510,7 @@ class _HomeTabState extends State<HomeTab> {
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
                                       child: Text(
-                                        restaurant.name,
+                                        getLocalizedText(context, restaurant.name),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppStyles.black16Bold,
@@ -1174,7 +1520,7 @@ class _HomeTabState extends State<HomeTab> {
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
                                       child: Text(
-                                        restaurant.description.isNotEmpty ? restaurant.description : 'Restaurant',
+                                        restaurant.description.isNotEmpty ? getLocalizedText(context, restaurant.description) : 'Restaurant',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppStyles.grey13w400,
@@ -1233,7 +1579,167 @@ class _HomeTabState extends State<HomeTab> {
                             );
                           },
                         ),
-                    ] else if (selectedIndex == 2) ...[
+                    ] else if (selectedIndex == 3) ...[
+                      if (loadingTopRated && topRatedMeals.isEmpty)
+                        const Center(child: CircularProgressIndicator(color: AppColors.purple800))
+                      else if (topRatedError != null)
+                        Center(
+                          child: Column(
+                            children: [
+                              Text(topRatedError!, style: AppStyles.black16w500),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: _fetchTopRatedMeals,
+                                child: Text(S.of(context).retry),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (filteredTopRatedMeals.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Text(
+                              isSearching
+                                  ? S.of(context).noMealsFound(searchQuery)
+                                  : S.of(context).noMealsAvailable,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        )
+                      else
+                        GridView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: filteredTopRatedMeals.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 12,
+                            mainAxisExtent: (screenHeight * 0.28).clamp(220.0, 280.0),
+                          ),
+                          itemBuilder: (context, index) {
+                            final item = filteredTopRatedMeals[index];
+                            return InkWell(
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  AppRoutes.detailsRouteName,
+                                  arguments: item,
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.02,
+                                  vertical: screenHeight * 0.01,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: _buildImage(
+                                            item.image,
+                                            width: double.infinity,
+                                            height: screenHeight * 0.12,
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                        if (item.rate > 0)
+                                          Positioned(
+                                            left: 8,
+                                            top: 8,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.white,
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  ImageIcon(
+                                                    AssetImage(Assets.imagesRateIcon),
+                                                    color: AppColors.yellow,
+                                                    size: 14,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    "${item.rate}",
+                                                    style: AppStyles.grey13w400.copyWith(fontSize: 11),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        if (item.id != null && item.id!.isNotEmpty)
+                                          Positioned(
+                                            right: 8,
+                                            top: 8,
+                                            child: InkWell(
+                                              onTap: () => _toggleFavorite(item),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(4),
+                                                decoration: const BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  _isFavorite(item.id!)
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color: Colors.red,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    SizedBox(height: screenHeight * 0.01),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        getLocalizedText(context, item.title),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppStyles.black13Bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        getLocalizedText(context, item.description),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                      child: Text(
+                                        "\$ ${item.price.toStringAsFixed(2)}",
+                                        style: AppStyles.grey13w400.copyWith(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                    ] else if (selectedIndex == 4) ...[
                       if (loadingFavorites && favoriteMeals.isEmpty)
                         const Center(child: CircularProgressIndicator(color: AppColors.purple800))
                       else if (favoritesError != null)
@@ -1265,15 +1771,15 @@ class _HomeTabState extends State<HomeTab> {
                                 const SizedBox(height: 16),
                                 Text(
                                   isSearching
-                                      ? "No Favorites Found"
-                                      : "No Favorites Yet",
+                                      ? S.of(context).noFavsFound
+                                      : S.of(context).noFavsYet,
                                   style: AppStyles.black20Bold,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   isSearching
-                                      ? "No favorite meals match \"$searchQuery\"."
-                                      : "Start exploring our menu and heart the dishes you love!",
+                                      ? S.of(context).noFavsMatch(searchQuery)
+                                      : S.of(context).startExploring,
                                   style: AppStyles.grey13w400,
                                   textAlign: TextAlign.center,
                                 ),
@@ -1380,7 +1886,7 @@ class _HomeTabState extends State<HomeTab> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                       child: Text(
-                                        item.title,
+                                        getLocalizedText(context, item.title),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppStyles.black13Bold,
@@ -1390,7 +1896,7 @@ class _HomeTabState extends State<HomeTab> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                       child: Text(
-                                        item.description,
+                                        getLocalizedText(context, item.description),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -1420,8 +1926,8 @@ class _HomeTabState extends State<HomeTab> {
                             padding: const EdgeInsets.all(24.0),
                             child: Text(
                               isSearching
-                                  ? "No meals found matching \"$searchQuery\"."
-                                  : "No meals available.",
+                                  ? S.of(context).noMealsFound(searchQuery)
+                                  : S.of(context).noMealsAvailable,
                               style: const TextStyle(fontSize: 16),
                             ),
                           ),
@@ -1496,7 +2002,7 @@ class _HomeTabState extends State<HomeTab> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                       child: Text(
-                                        item.title,
+                                        getLocalizedText(context, item.title),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppStyles.black13Bold,
@@ -1506,7 +2012,7 @@ class _HomeTabState extends State<HomeTab> {
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                       child: Text(
-                                        item.description,
+                                        getLocalizedText(context, item.description),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(

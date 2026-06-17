@@ -1,5 +1,6 @@
 class FoodModel {
   final String id;
+  final String? restaurantId;
   final String name;
   final String image;
   final double price;
@@ -17,6 +18,7 @@ class FoodModel {
   FoodModel({
     required this.restruanteName,
     required this.restauranteIcon,
+    this.restaurantId,
     required this.size,
     required this.id,
     required this.name,

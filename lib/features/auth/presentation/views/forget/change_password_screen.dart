@@ -3,6 +3,7 @@ import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/widgets/custom_button.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -35,16 +36,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 children: [
                   Image.asset(Assets.imagesSuccessmark),
                   SizedBox(height: screenHeight*0.04,),
-                  Text("Password Changed!", style: AppStyles.black24Bold,),
+                  Text(S.of(context).passwordChangedTitle, style: AppStyles.black24Bold,),
                   SizedBox(height: screenHeight*0.02,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Your password has been\n   changed successfully.", style: AppStyles.grey16w400,),
+                      Text(S.of(context).passwordChangedDesc, style: AppStyles.grey16w400,),
                     ],
                   ),
                   SizedBox(height: screenHeight*0.05,),
-                  CustomButton(text: "Back to Login",
+                  CustomButton(text: S.of(context).backToLogin,
                       onPressed: () =>
                           Navigator.pushReplacementNamed(context, AppRoutes.loginRouteName),
                   )

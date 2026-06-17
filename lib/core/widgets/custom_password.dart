@@ -1,4 +1,5 @@
 import 'package:eat2beat/core/widgets/custom_text.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 
 class CustomPasswordField extends StatefulWidget {
@@ -27,7 +28,7 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
             color: Color(0xFF8C8C8C),):Icon(Icons.visibility_outlined),
           ),
 
-          hintText: 'Password',            
+          hintText: S.of(context).password,            
           textInputType: TextInputType.visiblePassword,
         );
   }

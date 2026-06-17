@@ -9,6 +9,8 @@ import 'package:eat2beat/core/widgets/circleIcon.dart';
 import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
 import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/core/services/user_profile_notifier.dart';
+import 'package:eat2beat/generated/l10n.dart';
+import 'package:eat2beat/features/screens/home/tabs/profile/language_screen.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 
@@ -64,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         buildMenuItem(
                           icon: Icons.person_outline,
-                          title: "My Account",
+                          title: S.of(context).myAccount,
                           onTap: () {
                             Navigator.push(
                               context,
@@ -76,7 +78,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         buildMenuItem(
                           icon: Icons.palette_outlined,
-                          title: "Theme",
+                          title: S.of(context).theme,
                           onTap: () {
                             Navigator.push(
                               context,
@@ -87,8 +89,20 @@ class ProfileScreen extends StatelessWidget {
                           },
                         ),
                         buildMenuItem(
+                          icon: Icons.language,
+                          title: S.of(context).language,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LanguageScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        buildMenuItem(
                           icon: Icons.logout,
-                          title: "Log out",
+                          title: S.of(context).logout,
                           iconColor: Colors.red,
                           onTap: () async {
                             final navigator = Navigator.of(context);

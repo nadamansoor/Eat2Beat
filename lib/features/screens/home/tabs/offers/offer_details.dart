@@ -1,6 +1,6 @@
 import 'package:eat2beat/core/services/theme_notifier.dart';
-import 'dart:ui';
 import 'package:eat2beat/features/models/offers_model.dart';
+import 'package:eat2beat/features/models/restaurant_model.dart';
 import 'package:eat2beat/core/utils/app_colors.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/services/get_it_services.dart';
@@ -11,7 +11,22 @@ import 'package:flutter/material.dart';
 import 'package:eat2beat/core/utils/app_images.dart';
 import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/widgets/custom_button.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:intl/intl.dart';
+
+String translateSaleText(BuildContext context, String sale) {
+  if (sale == 'Special Offer') {
+    return S.of(context).specialOffer;
+  }
+  if (sale.contains('% OFF')) {
+    final pct = sale.replaceAll('% OFF', '').trim();
+    if (Localizations.localeOf(context).languageCode == 'ar') {
+      return 'خصم $pct٪';
+    }
+    return '$pct% OFF';
+  }
+  return sale;
+}
 
 class OfferDetailsScreen extends StatefulWidget {
   final FoodModel item;
@@ -44,10 +59,86 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
   String? ratingSuccessMessage;
   String? ratingErrorMessage;
 
+  String? resolvedRestName;
+  String? resolvedRestIcon;
+  bool restaurantLoading = false;
+
   @override
   void initState() {
     super.initState();
+    resolvedRestName = widget.item.restruanteName;
+    resolvedRestIcon = widget.item.restauranteIcon;
+
+    // Try resolving synchronously from cache first
+    final rId = widget.item.restaurantId;
+    if (rId != null && rId.isNotEmpty) {
+      final cached = getIt<ApiService>().cachedRestaurants;
+      if (cached != null) {
+        for (final r in cached) {
+          final id = r['id']?.toString() ?? r['restaurant_id']?.toString() ?? '';
+          if (id == rId) {
+            final restModel = RestaurantModel.fromJson(r);
+            final name = restModel.name;
+            final imgUrl = restModel.image;
+            if (name.isNotEmpty) resolvedRestName = name;
+            if (imgUrl.isNotEmpty) resolvedRestIcon = imgUrl;
+            break;
+          }
+        }
+      }
+    }
+
+    _resolveRestaurantDetails();
     _initMealReviewsAndRatings();
+  }
+
+  Future<void> _resolveRestaurantDetails() async {
+    final rId = widget.item.restaurantId;
+    if (rId == null || rId.isEmpty) return;
+    
+    if (resolvedRestName != 'Restaurant' && resolvedRestName != null && resolvedRestName!.isNotEmpty && 
+        resolvedRestIcon != null && resolvedRestIcon!.isNotEmpty && resolvedRestIcon != 'assets/images/burger_king.png') {
+      return;
+    }
+
+    setState(() {
+      restaurantLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final token = await user.getIdToken();
+        if (token != null) {
+          final apiService = getIt<ApiService>();
+          final rawRestaurants = await apiService.getUserRestaurants(token);
+          for (final r in rawRestaurants) {
+            final id = r['id']?.toString() ?? r['restaurant_id']?.toString() ?? '';
+            if (id == rId) {
+              final restModel = RestaurantModel.fromJson(r);
+              final name = restModel.name;
+              final imgUrl = restModel.image;
+              if (mounted) {
+                setState(() {
+                  if (name.isNotEmpty) resolvedRestName = name;
+                  if (imgUrl.isNotEmpty) resolvedRestIcon = imgUrl;
+                  restaurantLoading = false;
+                });
+              }
+              return;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error resolving restaurant details: $e');
+    }
+
+    if (mounted) {
+      setState(() {
+        restaurantLoading = false;
+      });
+    }
   }
 
   @override
@@ -123,7 +214,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
     } catch (e) {
       setState(() {
         reviewsLoading = false;
-        reviewsErrorMessage = 'Reviews are unavailable right now.';
+        reviewsErrorMessage = S.of(context).reviewsUnavailable;
       });
     }
   }
@@ -167,7 +258,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
     if (widget.item.id.isEmpty) return;
     if (mySelectedRating < 1 || mySelectedRating > 5) {
       setState(() {
-        ratingErrorMessage = 'Rating must be between 1 and 5.';
+        ratingErrorMessage = S.of(context).ratingRangeError;
       });
       return;
     }
@@ -192,7 +283,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
           reviewText: reviewTextController.text,
         );
         setState(() {
-          ratingSuccessMessage = 'Rating submitted successfully.';
+          ratingSuccessMessage = S.of(context).ratingSuccess;
           hasExistingRating = true;
           ratingSubmitting = false;
         });
@@ -201,7 +292,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
       }
     } catch (e) {
       setState(() {
-        ratingErrorMessage = 'Failed to submit rating: $e';
+        ratingErrorMessage = S.of(context).ratingSubmitFailed(e.toString());
         ratingSubmitting = false;
       });
     }
@@ -225,21 +316,21 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
         context: context,
         builder: (context) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Login Required'),
-          content: const Text(
-            'Please login first to complete your order.',
+          title: Text(S.of(context).loginRequired),
+          content: Text(
+            S.of(context).loginRequiredText,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(S.of(context).cancel),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, AppRoutes.loginRouteName);
               },
-              child: const Text('Login'),
+              child: Text(S.of(context).login),
             ),
           ],
         ),
@@ -307,7 +398,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Added to Cart (Qty: $quantity)',
+                S.of(context).addedToCartQty(quantity),
               ),
               duration: const Duration(seconds: 2),
             ),
@@ -318,7 +409,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
       if (!mounted) return;
       Navigator.pop(context); // Pop loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add to cart: $e')),
+        SnackBar(content: Text(S.of(context).failedAddToCart(e.toString()))),
       );
     }
   }
@@ -433,7 +524,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: Text(
-                                  item.sale,
+                                  translateSaleText(context, item.sale),
                                   style: const TextStyle(
                                     color: Colors.green,
                                     fontWeight: FontWeight.w600,
@@ -442,20 +533,27 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(height: screenHeight * 0.01),
                           Row(
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(50),
-                                child: _buildImage(
-                                  item.restauranteIcon,
-                                  width: 32,
-                                  height: 32,
-                                  fit: BoxFit.cover,
+                              if (restaurantLoading && (resolvedRestName == null || resolvedRestName == 'Restaurant'))
+                                const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.purple),
+                                )
+                              else ...[
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: _buildImage(
+                                    resolvedRestIcon ?? item.restauranteIcon,
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: screenWidth * 0.02,),
-                              Text(item.restruanteName, style: AppStyles.black16w500,),
+                                SizedBox(width: screenWidth * 0.02,),
+                                Text(resolvedRestName ?? item.restruanteName, style: AppStyles.black16w500,),
+                              ],
                             ],
                           ),
                           SizedBox(height: screenHeight * 0.01),
@@ -473,25 +571,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                             ],
                           ),
                           SizedBox(height: screenHeight * 0.03),
-                          Row(
-                            children: [
-                              Text("Size ", style: AppStyles.black16w500,),
-                              SizedBox(width: screenWidth * 0.01,),
-                              Container(
-                                alignment: Alignment.center,
-                                width: screenWidth * 0.085,
-                                height: screenHeight * 0.044,
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: AppColors.purple50,
-                                  borderRadius: BorderRadius.circular(110),
-                                ),
-                                child: Text(item.size, style: AppStyles.black16w500,),
-                              )
-                            ],
-                          ),
-                          SizedBox(height: screenHeight * 0.03),
-                          Text("Ingredients", style: AppStyles.black16Bold,),
+                          Text(S.of(context).ingredients, style: AppStyles.black16Bold,),
                           SizedBox(height: screenHeight * 0.01),
                           Text(item.description, style: AppStyles.grey13w400,),
                           SizedBox(height: screenHeight * 0.03),
@@ -502,7 +582,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("Reviews", style: AppStyles.black16Bold),
+                              Text(S.of(context).reviews, style: AppStyles.black16Bold),
                             ],
                           ),
                           SizedBox(height: screenHeight * 0.02),
@@ -526,12 +606,12 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    hasExistingRating ? "Update your rating" : "Rate this meal", 
+                                    hasExistingRating ? S.of(context).updateYourRating : S.of(context).rateThisMeal, 
                                     style: AppStyles.black16w500
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    "Choose a score from 1 to 5 and add an optional review.",
+                                    S.of(context).rateInstructions,
                                     style: AppStyles.grey13w400,
                                   ),
                                   const SizedBox(height: 12),
@@ -593,7 +673,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                         fontSize: 14,
                                       ),
                                       decoration: InputDecoration(
-                                        hintText: "Optional review...",
+                                        hintText: S.of(context).optionalReview,
                                         hintStyle: TextStyle(
                                           color: ThemeNotifier().isDarkMode ? Colors.white54 : Colors.black45,
                                         ),
@@ -667,7 +747,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                               )
                                             : Text(
-                                                hasExistingRating ? 'Update Rating' : 'Submit Rating',
+                                                hasExistingRating ? S.of(context).updateRating : S.of(context).submitRating,
                                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                                               ),
                                       ),
@@ -696,8 +776,8 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                 children: [
                                   Text(
                                     widget.item.id.isEmpty
-                                        ? "Reviews are only available for online menu meals."
-                                        : "Sign in with a user account to view & write reviews.",
+                                        ? S.of(context).reviewsOnlyOnline
+                                        : S.of(context).signInToReview,
                                     style: AppStyles.black13w400,
                                     textAlign: TextAlign.center,
                                   ),
@@ -716,7 +796,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                           elevation: 0,
                                         ),
-                                        child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        child: Text(S.of(context).signIn, style: const TextStyle(fontWeight: FontWeight.bold)),
                                       ),
                                     ),
                                   ],
@@ -746,7 +826,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                                 child: Text(
-                                  "No reviews yet for this dish.",
+                                  S.of(context).noReviewsYet,
                                   style: TextStyle(
                                     fontStyle: FontStyle.italic,
                                     color: ThemeNotifier().isDarkMode ? Colors.white54 : Colors.black54,
@@ -841,7 +921,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                                         )
                                       else
                                         Text(
-                                          "No written review provided.",
+                                          S.of(context).noWrittenReview,
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontStyle: FontStyle.italic,
@@ -942,7 +1022,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
                     children: [
                       Expanded(
                         child: CustomButton(
-                          text: "Add To Cart",
+                          text: S.of(context).addToCart,
                           backgroundColor: ThemeNotifier().isDarkMode ? const Color(0xff45337D) : AppColors.lightPurple,
                           textColor: ThemeNotifier().isDarkMode ? Colors.white : AppColors.purple,
                           onPressed: () => _addToCart(navigateToCheckout: false),
@@ -953,7 +1033,7 @@ class _OfferDetailsScreenState extends State<OfferDetailsScreen> {
 
                       Expanded(
                         child: CustomButton(
-                          text: "Order Now",
+                          text: S.of(context).orderNow,
                           backgroundColor: ThemeNotifier().isDarkMode ? AppColors.purple800 : AppColors.purple,
                           onPressed: () => _addToCart(navigateToCheckout: true),
                         ),

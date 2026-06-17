@@ -3,6 +3,7 @@ import 'restaurant_model.dart';
 
 class HomeFoodModel {
   final String? id;
+  final String? restaurantId;
   final String title;
   final String image;
   late final double price;
@@ -23,6 +24,7 @@ class HomeFoodModel {
 
   HomeFoodModel({
     this.id,
+    this.restaurantId,
     required this.restName,
     required this.restIcon,
     required this.size,

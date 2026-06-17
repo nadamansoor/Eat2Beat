@@ -5,9 +5,27 @@ import 'package:eat2beat/core/utils/app_styles.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:eat2beat/core/services/get_it_services.dart';
 import 'package:eat2beat/core/services/api_service.dart';
+import 'package:eat2beat/generated/l10n.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+String getLocalizedStatus(BuildContext context, String status) {
+  switch (status.toLowerCase()) {
+    case 'pending':
+      return S.of(context).statusPending;
+    case 'preparing':
+      return S.of(context).statusPreparing;
+    case 'on-the-way':
+      return S.of(context).statusOnTheWay;
+    case 'delivered':
+      return S.of(context).statusDelivered;
+    case 'cancelled':
+      return S.of(context).statusCancelled;
+    default:
+      return status;
+  }
+}
 
 class OrderHistoryTab extends StatefulWidget {
   final Function(int)? onSwitchTab;
@@ -92,7 +110,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
         });
       }
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load order history: $e')),
+        SnackBar(content: Text(S.of(context).failedLoadHistory(e.toString()))),
       );
     }
   }
@@ -180,7 +198,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
         Navigator.pop(context); // Close loading dialog
         
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Reordered successfully! Redirecting to Cart...')),
+          SnackBar(content: Text(S.of(context).reorderedSuccess)),
         );
         
         widget.onSwitchTab?.call(3); // Switch to Cart tab
@@ -189,7 +207,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
       if (!mounted) return;
       Navigator.pop(context); // Close loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to reorder: $e')),
+        SnackBar(content: Text(S.of(context).failedReorder(e.toString()))),
       );
     }
   }
@@ -247,7 +265,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                       ),
                       SizedBox(width: screenWidth * 0.02),
                       Text(
-                        "Order History",
+                        S.of(context).orderHistory,
                         style: AppStyles.black24Bold,
                       ),
                     ],
@@ -272,7 +290,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              "Login required to view history",
+                              S.of(context).loginRequiredHistory,
                               style: AppStyles.black16Bold,
                             ),
                             const SizedBox(height: 24),
@@ -287,9 +305,9 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                child: Text("Login"),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                child: Text(S.of(context).login),
                               ),
                             ),
                           ],
@@ -315,12 +333,12 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              "No Orders Yet",
+                              S.of(context).noOrdersYet,
                               style: AppStyles.black16Bold,
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              "Hungry? Explore our menu and place your first order!",
+                              S.of(context).hungryExplore,
                               style: AppStyles.grey13w400,
                               textAlign: TextAlign.center,
                             ),
@@ -336,9 +354,9 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                child: Text("Go to Menu"),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                child: Text(S.of(context).goToMenu),
                               ),
                             ),
                           ],
@@ -367,7 +385,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                                   padding: const EdgeInsets.all(16),
                                   child: Center(
                                     child: Text(
-                                      "All orders loaded",
+                                      S.of(context).allOrdersLoaded,
                                       style: AppStyles.grey13w400,
                                     ),
                                   ),
@@ -414,10 +432,10 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                 value: _timeFilter,
                 isExpanded: true,
                 style: AppStyles.black13Bold,
-                items: const [
-                  DropdownMenuItem(value: 'all', child: Text("Time: All")),
-                  DropdownMenuItem(value: 'today', child: Text("Today")),
-                  DropdownMenuItem(value: 'week', child: Text("This Week")),
+                items: [
+                  DropdownMenuItem(value: 'all', child: Text(S.of(context).orderTimeAll)),
+                  DropdownMenuItem(value: 'today', child: Text(S.of(context).orderToday)),
+                  DropdownMenuItem(value: 'week', child: Text(S.of(context).orderThisWeek)),
                 ],
                 onChanged: (val) {
                   if (val != null) {
@@ -445,13 +463,13 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                 value: _statusFilter,
                 isExpanded: true,
                 style: AppStyles.black13Bold,
-                items: const [
-                  DropdownMenuItem(value: '', child: Text("Status: All")),
-                  DropdownMenuItem(value: 'pending', child: Text("Pending")),
-                  DropdownMenuItem(value: 'preparing', child: Text("Preparing")),
-                  DropdownMenuItem(value: 'on-the-way', child: Text("On the way")),
-                  DropdownMenuItem(value: 'delivered', child: Text("Delivered")),
-                  DropdownMenuItem(value: 'cancelled', child: Text("Cancelled")),
+                items: [
+                  DropdownMenuItem(value: '', child: Text(S.of(context).statusAll)),
+                  DropdownMenuItem(value: 'pending', child: Text(S.of(context).statusPending)),
+                  DropdownMenuItem(value: 'preparing', child: Text(S.of(context).statusPreparing)),
+                  DropdownMenuItem(value: 'on-the-way', child: Text(S.of(context).statusOnTheWay)),
+                  DropdownMenuItem(value: 'delivered', child: Text(S.of(context).statusDelivered)),
+                  DropdownMenuItem(value: 'cancelled', child: Text(S.of(context).statusCancelled)),
                 ],
                 onChanged: (val) {
                   if (val != null) {
@@ -531,7 +549,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Order ID: #$shortId",
+                S.of(context).orderIdLabel(shortId),
                 style: AppStyles.black13Bold.copyWith(color: const Color(0xffFFC833)),
               ),
               Container(
@@ -541,7 +559,7 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  status.toUpperCase(),
+                  getLocalizedStatus(context, status).toUpperCase(),
                   style: TextStyle(
                     color: statusTextColor,
                     fontWeight: FontWeight.w800,
@@ -615,9 +633,9 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Text(
-                        "Total: ",
-                        style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+                      Text(
+                        S.of(context).totalLabel,
+                        style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
                       ),
                       Text(
                         "\$${total.toStringAsFixed(2)}",
@@ -639,9 +657,9 @@ class _OrderHistoryTabState extends State<OrderHistoryTab> {
                   elevation: 0,
                 ),
                 icon: const Icon(Icons.refresh, size: 16),
-                label: const Text(
-                  "Reorder",
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                label: Text(
+                  S.of(context).reorder,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
