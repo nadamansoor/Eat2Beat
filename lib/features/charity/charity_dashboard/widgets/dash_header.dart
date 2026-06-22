@@ -2,6 +2,9 @@ import 'package:eat2beat/features/charity/charity_dashboard/controllers/dash_con
 import 'package:eat2beat/features/charity/charity_dashboard/widgets/profile_screen.dart';
 import 'package:eat2beat/features/charity/charity_resturants/widgets/colors_res.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:eat2beat/features/charity/presentation/cubit/charity_cubit.dart';
 
 class Header extends StatelessWidget {
   final DashboardController ctrl;
@@ -13,11 +16,17 @@ class Header extends StatelessWidget {
     return Row(
       children: [
         GestureDetector(
-          onTap:() => Navigator.of(context).push(
-                  MaterialPageRoute(
-                  builder: (_) => const CharityProfileScreen(),
-                        ),
-                     ),
+          onTap: () {
+            final cubit = context.read<CharityCubit>();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => BlocProvider.value(
+                  value: cubit,
+                  child: const CharityProfileScreen(),
+                ),
+              ),
+            );
+          },
           child: Container(
             width: 52,
             height: 52,
@@ -28,19 +37,22 @@ class Header extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Charity Dashboard',
+              const Text('Charity Dashboard',
                   style: TextStyle(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w800,
                       fontSize: 17)),
-              SizedBox(height: 2),
-              Text('Hope Foundation',
-                  style: TextStyle(
-                      color: AppColors.textSecondary, fontSize: 13)),
+              const SizedBox(height: 2),
+              Text(
+                (ctrl.charityCubit.state is CharityLoaded)
+                    ? (ctrl.charityCubit.state as CharityLoaded).profile.name
+                    : 'Charity Partner',
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 13)),
             ],
           ),
         ),

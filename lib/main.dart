@@ -21,6 +21,8 @@ import 'package:eat2beat/features/screens/home/tabs/home_tab/details_screen.dart
 import 'package:eat2beat/features/screens/home/tabs/offers/offers_tab.dart';
 import 'package:eat2beat/features/screens/home/tabs/profile/profile_screen.dart';
 import 'package:eat2beat/core/utils/app_routes.dart';
+import 'package:eat2beat/features/charity/charity.dart';
+import 'package:eat2beat/features/charity/charity_dashboard/widgets/profile_screen.dart';
 import 'package:eat2beat/features/splash/presenation/views/spalsh_view.dart';
 import 'package:eat2beat/firebase_options.dart';
 import 'package:eat2beat/generated/l10n.dart';
@@ -30,6 +32,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:eat2beat/core/services/user_profile_notifier.dart';
 import 'package:eat2beat/core/services/theme_notifier.dart';
 import 'package:eat2beat/core/services/language_notifier.dart';
+import 'package:eat2beat/core/services/shared_pref_singleton.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +41,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  // await Prefs.init();
+  await Prefs.init();
   await UserProfileNotifier().init();
   await ThemeNotifier().init();
   await LanguageNotifier().init();
@@ -124,6 +127,8 @@ class MyApp extends StatelessWidget {
             AppRoutes.profileRouteName: (context) => const ProfileScreen(),
             AppRoutes.adminRouteName: (_) => const AdminRouteName(),
             AppRoutes.pendingRestaurantRouteName: (_) => const PendingRestaurantScreen(),
+            AppRoutes.charityRouteName: (context) => const CharityDashboardScreen(),
+            AppRoutes.charityProfile: (context) => const CharityProfileScreen(),
           },
         );
           },

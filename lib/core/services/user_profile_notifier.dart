@@ -15,12 +15,15 @@ class UserProfileNotifier extends ChangeNotifier {
   String _phone = "";
   String _phone2 = "";
   String _profileImagePath = "";
+  String _role = "user";
 
+  String get currentUId => _currentUId;
   String get name => _name;
   String get email => _email;
   String get phone => _phone;
   String get phone2 => _phone2;
   String get profileImagePath => _profileImagePath;
+  String get role => _role;
 
   late SharedPreferences _prefs;
 
@@ -28,6 +31,7 @@ class UserProfileNotifier extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     _currentUId = _prefs.getString('current_user_uid') ?? "";
     if (_currentUId.isNotEmpty) {
+      _role = _prefs.getString('${_currentUId}_role') ?? "user";
       await loadProfileForUser(_currentUId);
     }
   }
@@ -36,9 +40,17 @@ class UserProfileNotifier extends ChangeNotifier {
     String uId, {
     String? fallbackName,
     String? fallbackEmail,
+    String? role,
   }) async {
     _currentUId = uId;
     await _prefs.setString('current_user_uid', uId);
+
+    if (role != null) {
+      _role = role;
+      await _prefs.setString('${uId}_role', role);
+    } else {
+      _role = _prefs.getString('${uId}_role') ?? "user";
+    }
 
     final savedName = _prefs.getString('${uId}_name');
     _name = (savedName != null && savedName.trim().isNotEmpty)
@@ -112,6 +124,7 @@ class UserProfileNotifier extends ChangeNotifier {
     _phone = "";
     _phone2 = "";
     _profileImagePath = "";
+    _role = "user";
 
     notifyListeners();
   }

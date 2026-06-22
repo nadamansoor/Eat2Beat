@@ -2,7 +2,9 @@
 import 'package:eat2beat/features/charity/charity_donations/models/don_charity_model.dart';
 import 'package:eat2beat/features/charity/charity_donations/widgets/don_charity_details.dart';
 import 'package:eat2beat/features/charity/charity_resturants/widgets/colors_res.dart';
+import 'package:eat2beat/features/charity/presentation/cubit/charity_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class RecentDonationTile extends StatelessWidget {
   final DonationCharityModel donation;
@@ -23,8 +25,21 @@ class RecentDonationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context,
-          MaterialPageRoute(builder: (_) => DonationDetailPage(donation: donation))),
+      onTap: () {
+        final cubit = context.read<CharityCubit>();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: cubit,
+              child: DonationDetailPage(
+                donation: donation,
+                charityCubit: cubit,
+              ),
+            ),
+          ),
+        );
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(12),

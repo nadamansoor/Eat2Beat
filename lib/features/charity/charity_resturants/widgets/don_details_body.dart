@@ -11,7 +11,6 @@ class DetailBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final r = detail.restaurant;
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       children: [

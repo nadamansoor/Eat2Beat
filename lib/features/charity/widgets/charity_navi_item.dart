@@ -15,6 +15,7 @@ class NavigationBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const activeColor = Color(0xFF7B5EA7); // Charity primary brand color
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -26,7 +27,7 @@ class NavigationBarItem extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFFF6B00).withOpacity(0.1)
+              ? activeColor.withOpacity(0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
@@ -34,16 +35,22 @@ class NavigationBarItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // انيميشن على الأيقونة
             AnimatedScale(
               scale: isSelected ? 1.2 : 1.0,
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              child: Image.asset(
-                isSelected ? item.activeImage : item.inActiveImage,
-                width: 24,
-                height: 24,
-              ),
+              child: item.icon != null
+                  ? Icon(
+                      item.icon,
+                      size: 24,
+                      color: isSelected ? activeColor : Colors.grey,
+                    )
+                  : Image.asset(
+                      isSelected ? item.activeImage! : item.inActiveImage!,
+                      width: 24,
+                      height: 24,
+                      color: isSelected ? activeColor : Colors.grey,
+                    ),
             ),
             const SizedBox(height: 4),
             // انيميشن على النص
@@ -53,7 +60,7 @@ class NavigationBarItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: isSelected ? 12 : 11,
                 color: isSelected
-                    ? Colors.black 
+                    ? activeColor 
                     : Colors.grey,
                 fontWeight:
                     isSelected ? FontWeight.bold : FontWeight.normal,

@@ -10,6 +10,7 @@ class DashboardCubit extends Cubit<DashboardState> {
   final GetDemandDashboardUseCase getDemandDashboardUseCase;
   final ApiService apiService;
   String? _lastRestaurantId;
+  int _lastDays = 7;
 
   DashboardCubit({
     required this.authRepo,
@@ -19,6 +20,7 @@ class DashboardCubit extends Cubit<DashboardState> {
 
   Future<void> loadDashboard({String? restaurantId, int days = 7}) async {
     _lastRestaurantId = restaurantId;
+    _lastDays = days;
     emit(DashboardLoading());
     try {
       final token = await authRepo.getIdToken();
@@ -49,7 +51,7 @@ class DashboardCubit extends Cubit<DashboardState> {
 
       result.fold(
         (failure) => emit(DashboardError(failure.message)),
-        (data) => emit(DashboardLoaded(data: data)),
+        (data) => emit(DashboardLoaded(data: data, days: days)),
       );
     } catch (e) {
       emit(DashboardError(e.toString()));
@@ -58,9 +60,10 @@ class DashboardCubit extends Cubit<DashboardState> {
 
   void refresh() {
     if (_lastRestaurantId != null) {
-      loadDashboard(restaurantId: _lastRestaurantId!);
+      loadDashboard(restaurantId: _lastRestaurantId!, days: _lastDays);
     }
   }
+
 
   void selectForecastDay(int index) {
     final current = state;

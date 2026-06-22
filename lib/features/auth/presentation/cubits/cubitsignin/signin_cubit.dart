@@ -14,11 +14,13 @@ class SigninCubit extends Cubit<SigninState> {
 
   String _mapWorkerRoleToUi(String role) {
     if (role == 'restaurant') return 'admin';
+    if (role == 'charity') return 'charity';
     return 'user';
   }
 
   String _mapUiRoleToWorkerRole(String role) {
     if (role == 'admin' || role == 'restaurant') return 'restaurant';
+    if (role == 'charity') return 'charity';
     return 'user';
   }
 

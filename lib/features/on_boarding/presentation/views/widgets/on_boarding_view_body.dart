@@ -4,6 +4,7 @@ import 'package:eat2beat/generated/l10n.dart';
 import 'package:flutter/material.dart';
 import 'on_boarding_page_view.dart';
 import 'on_boarding_view_item.dart';
+import 'package:eat2beat/core/services/shared_pref_singleton.dart';
 
 class OnBoardingViewBody extends StatefulWidget {
   const OnBoardingViewBody({super.key});
@@ -17,6 +18,7 @@ class _OnBoardingViewBodyState extends State<OnBoardingViewBody> {
   int _currentPage = 0;
 
   void _onSkipPressed() {
+    Prefs.setBool('onboarding_shown', true);
     Navigator.pushReplacementNamed(context, AppRoutes.loginRouteName);
   }
 

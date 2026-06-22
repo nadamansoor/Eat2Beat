@@ -1,7 +1,9 @@
 import 'package:eat2beat/core/utils/app_images.dart';
-import 'package:eat2beat/features/on_boarding/presentation/views/on_boarding_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:eat2beat/core/services/shared_pref_singleton.dart';
+import 'package:eat2beat/core/services/user_profile_notifier.dart';
+import 'package:eat2beat/core/utils/app_routes.dart';
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -43,11 +45,24 @@ class _SplashViewState extends State<SplashView>
     _controller.forward();
 
     Future.delayed(const Duration(seconds: 3), () {
-     Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) =>  OnBoardingView()),
-);
-
+      if (!mounted) return;
+      final bool onboardingShown = Prefs.getBool('onboarding_shown');
+      if (!onboardingShown) {
+        Navigator.pushReplacementNamed(context, AppRoutes.OnboardingRouteName);
+      } else {
+        final profile = UserProfileNotifier();
+        if (profile.currentUId.isNotEmpty) {
+          String route = AppRoutes.homeRouteName;
+          if (profile.role == 'admin') {
+            route = AppRoutes.adminRouteName;
+          } else if (profile.role == 'charity') {
+            route = AppRoutes.charityRouteName;
+          }
+          Navigator.pushReplacementNamed(context, route);
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.loginRouteName);
+        }
+      }
     });
   }
 

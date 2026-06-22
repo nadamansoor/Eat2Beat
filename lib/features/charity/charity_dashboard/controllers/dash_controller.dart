@@ -1,8 +1,10 @@
 import 'package:eat2beat/features/charity/charity_dashboard/model/dash_model.dart';
 import 'package:eat2beat/features/charity/charity_donations/models/don_charity_model.dart';
+import 'package:eat2beat/features/charity/presentation/cubit/charity_cubit.dart';
 import 'package:flutter/foundation.dart';
 
 class DashboardController extends ChangeNotifier {
+  final CharityCubit charityCubit;
   bool _isLoading = true;
   DashboardData? _data;
   String _searchQuery = '';
@@ -11,78 +13,77 @@ class DashboardController extends ChangeNotifier {
   DashboardData? get data => _data;
   String get searchQuery => _searchQuery;
 
-  DashboardController() {
-    _load();
+  DashboardController(this.charityCubit) {
+    _listenToCubit();
   }
 
-  Future<void> refresh() => _load();
-
-  Future<void> _load() async {
-    _isLoading = true;
-    notifyListeners();
-
-    // TODO: replace with real repository calls
-    await Future.delayed(const Duration(milliseconds: 500));
-    _data = const DashboardData(
-      summary: DashboardSummary(
-        activeRestaurants: 12,
-        todaysDonations: 48,
-        mealsReceived: 156,
-      ),
-      recentDonations: [
-        DonationCharityModel(
-          id: '1',
-          itemName: 'Caesar Salad Bowl',
-          restaurantName: 'Good Eats Cafe',
-          imageAsset: 'assets/imgoffers/food1.png',
-          meals: 10,
-          timeLabel: '2 min ago',
-          status: DonationStatus.received,
-        ),
-        DonationCharityModel(
-          id: '2',
-          itemName: 'Classic Beef Burger',
-          restaurantName: 'Burger House',
-          imageAsset: 'assets/imgoffers/food2.png',
-          meals: 8,
-          timeLabel: '15 min ago',
-          status: DonationStatus.received,
-        ),
-        DonationCharityModel(
-          id: '3',
-          itemName: 'Pasta Primavera',
-          restaurantName: 'Pasta Palace',
-          imageAsset: 'assets/imgoffers/food3.png',
-          meals: 6,
-          timeLabel: '45 min ago',
-          status: DonationStatus.pending,
-        ),
-        DonationCharityModel(
-          id: '4',
-          itemName: 'Lentil Stew',
-          restaurantName: 'Healthy Bites',
-          imageAsset: 'assets/imgoffers/food4.png',
-          meals: 4,
-          timeLabel: '1 hr ago',
-          status: DonationStatus.received,
-        ),
-      ],
-    );
-    _isLoading = false;
-    notifyListeners();
+  void _listenToCubit() {
+    _updateState(charityCubit.state);
+    charityCubit.stream.listen((state) {
+      _updateState(state);
+    });
   }
+
+  void _updateState(CharityState state) {
+    if (state is CharityLoading || state is CharityInitial) {
+      _isLoading = true;
+      notifyListeners();
+    } else if (state is CharityLoaded) {
+      _isLoading = false;
+      
+      final summary = DashboardSummary(
+        totalRequests: state.stats.totalRequests,
+        approved: state.stats.totalApproved,
+        pending: state.stats.totalPending,
+        rejected: state.stats.totalRejected,
+        confirmed: state.stats.totalConfirmed,
+      );
+
+      final recent = state.pickupRequests.take(5).map((req) {
+        DonationStatus status;
+        if (req.status == 'approved') {
+          status = DonationStatus.received;
+        } else if (req.status == 'pending') {
+          status = DonationStatus.pending;
+        } else {
+          status = DonationStatus.cancelled;
+        }
+        return DonationCharityModel(
+          id: req.id,
+          itemName: req.description ?? 'Donation Request',
+          restaurantName: req.restaurantName ?? 'Partner Restaurant',
+          imageAsset: req.donationImgUrl ?? '',
+          meals: 1,
+          timeLabel: req.createdAt,
+          status: status,
+          pickupAddress: req.pickupLocation ?? '',
+          notes: req.description ?? '',
+        );
+      }).toList();
+
+      _data = DashboardData(
+        summary: summary,
+        recentDonations: recent,
+      );
+      notifyListeners();
+    } else if (state is CharityError) {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refresh() => charityCubit.loadAllData();
+
   void setSearchQuery(String q) {
     _searchQuery = q;
     notifyListeners();
   }
 
   void onNotificationTap() {
-    // TODO: push notifications page
     debugPrint('Notifications tapped');
   }
 
   void onViewAllDonations(dynamic context) {
-    // TODO: navigate to donations tab or page
     debugPrint('View all tapped');
   }
 }

@@ -1,4 +1,5 @@
-
+import 'package:eat2beat/features/charity/presentation/cubit/charity_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
 import '../../charity_resturants/widgets/colors_res.dart';
@@ -30,26 +31,43 @@ class ProfileCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Hope Foundation',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                ),
-              ),
-              SizedBox(height: 3),
-              Text(
-                'Charity Organization',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+          Expanded(
+            child: BlocBuilder<CharityCubit, CharityState>(
+              builder: (context, state) {
+                String name = 'Hope Foundation';
+                String description = 'Charity Organization';
+                if (state is CharityLoaded) {
+                  if (state.profile.name.isNotEmpty) {
+                    name = state.profile.name;
+                  }
+                  if (state.profile.description != null &&
+                      state.profile.description!.isNotEmpty) {
+                    description = state.profile.description!;
+                  }
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),

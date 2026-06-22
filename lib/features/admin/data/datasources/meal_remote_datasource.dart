@@ -13,6 +13,8 @@ abstract class MealRemoteDataSource {
     required String expiryTime,
     required String category,
     required String mealImgBase64,
+    String? cuisine,
+    List<String>? tags,
   });
 
   Future<MealModel> updateMeal({
@@ -37,6 +39,23 @@ abstract class MealRemoteDataSource {
     required String token,
     required String imgUrl,
   });
+
+  Future<void> addOffer({
+    required String token,
+    String? mealId,
+    required String title,
+    String? description,
+    String? offerImgUrl,
+    required double originalPrice,
+    required double offerPrice,
+    int? quantity,
+    required bool isActive,
+    String? category,
+    String? cuisine,
+    List<String>? tags,
+    String? startsAt,
+    String? expiresAt,
+  });
 }
 
 class MealRemoteDataSourceImpl implements MealRemoteDataSource {
@@ -60,6 +79,8 @@ class MealRemoteDataSourceImpl implements MealRemoteDataSource {
     required String expiryTime,
     required String category,
     required String mealImgBase64,
+    String? cuisine,
+    List<String>? tags,
   }) async {
     final body = {
       'title': name,
@@ -69,9 +90,46 @@ class MealRemoteDataSourceImpl implements MealRemoteDataSource {
       'expiry_time': expiryTime,
       'meal_img_base64': mealImgBase64,
       'category': category,
+      if (cuisine != null) 'cuisine': cuisine,
+      if (tags != null) 'tags': tags,
     };
     final rawMeal = await apiService.addMeal(token, body);
     return MealModel.fromJson(rawMeal);
+  }
+
+  @override
+  Future<void> addOffer({
+    required String token,
+    String? mealId,
+    required String title,
+    String? description,
+    String? offerImgUrl,
+    required double originalPrice,
+    required double offerPrice,
+    int? quantity,
+    required bool isActive,
+    String? category,
+    String? cuisine,
+    List<String>? tags,
+    String? startsAt,
+    String? expiresAt,
+  }) async {
+    final body = <String, dynamic>{
+      if (mealId != null) 'meal_id': mealId,
+      'title': title,
+      if (description != null) 'description': description,
+      if (offerImgUrl != null) 'offer_img_url': offerImgUrl,
+      'original_price': originalPrice,
+      'offer_price': offerPrice,
+      'quantity': quantity,
+      'is_active': isActive,
+      if (category != null) 'category': category,
+      if (cuisine != null) 'cuisine': cuisine,
+      if (tags != null) 'tags': tags,
+      if (startsAt != null) 'starts_at': startsAt,
+      if (expiresAt != null) 'expires_at': expiresAt,
+    };
+    await apiService.createRestaurantOffer(token, body);
   }
 
   @override

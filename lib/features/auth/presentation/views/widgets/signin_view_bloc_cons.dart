@@ -21,10 +21,13 @@ class SigninViewConsumer extends StatelessWidget {
             state.userEntity.UId,
             fallbackName: state.userEntity.name,
             fallbackEmail: state.userEntity.email,
+            role: state.role,
           );
           String route = AppRoutes.homeRouteName;
           if (state.role == 'admin') {
             route = AppRoutes.adminRouteName;
+          } else if (state.role == 'charity') {
+            route = AppRoutes.charityRouteName;
           }
           Navigator.pushNamedAndRemoveUntil(
               context, route, (route) => false);

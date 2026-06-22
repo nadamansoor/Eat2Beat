@@ -8,6 +8,7 @@ class UploadTextField extends StatelessWidget {
   final TextEditingController? controller;
   final int maxLines;
   final TextInputType? keyboardType;
+  final ValueChanged<String>? onChanged;
 
   const UploadTextField({
     super.key,
@@ -15,6 +16,7 @@ class UploadTextField extends StatelessWidget {
     this.controller,
     this.maxLines = 1,
     this.keyboardType,
+    this.onChanged,
   });
 
   @override
@@ -30,6 +32,7 @@ class UploadTextField extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
+        onChanged: onChanged,
         style: const TextStyle(
           fontSize: 14,
           color: kText,

@@ -191,12 +191,6 @@ class _SignUpViewbodyState extends State<SignUpViewbody> {
                         CustomButton(
                           text: S.of(context).register,
                           onPressed: () {
-                            if (selectedRole == 'charity') {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(S.of(context).charityPortalSoon)),
-                              );
-                              return;
-                            }
                             if (FormKey.currentState!.validate()) {
                               FormKey.currentState!.save();
                               if (isTermsAccepted) {

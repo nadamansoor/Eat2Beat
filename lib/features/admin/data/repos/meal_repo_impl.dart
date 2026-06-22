@@ -32,6 +32,8 @@ class MealRepoImpl implements MealRepo {
     required String expiryTime,
     required String category,
     required String mealImgBase64,
+    String? cuisine,
+    List<String>? tags,
   }) async {
     try {
       final meal = await remoteDataSource.addMeal(
@@ -43,6 +45,8 @@ class MealRepoImpl implements MealRepo {
         expiryTime: expiryTime,
         category: category,
         mealImgBase64: mealImgBase64,
+        cuisine: cuisine,
+        tags: tags,
       );
       return right(meal);
     } on CustomExceptions catch (e) {
@@ -113,6 +117,48 @@ class MealRepoImpl implements MealRepo {
       return left(ServerFailure(e.message));
     } catch (e) {
       return left(ServerFailure('An error occurred while updating restaurant image. Please try again.'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addOffer({
+    required String token,
+    String? mealId,
+    required String title,
+    String? description,
+    String? offerImgUrl,
+    required double originalPrice,
+    required double offerPrice,
+    int? quantity,
+    required bool isActive,
+    String? category,
+    String? cuisine,
+    List<String>? tags,
+    String? startsAt,
+    String? expiresAt,
+  }) async {
+    try {
+      await remoteDataSource.addOffer(
+        token: token,
+        mealId: mealId,
+        title: title,
+        description: description,
+        offerImgUrl: offerImgUrl,
+        originalPrice: originalPrice,
+        offerPrice: offerPrice,
+        quantity: quantity,
+        isActive: isActive,
+        category: category,
+        cuisine: cuisine,
+        tags: tags,
+        startsAt: startsAt,
+        expiresAt: expiresAt,
+      );
+      return right(null);
+    } on CustomExceptions catch (e) {
+      return left(ServerFailure(e.message));
+    } catch (e) {
+      return left(ServerFailure('An error occurred while adding the offer. Please try again.'));
     }
   }
 }

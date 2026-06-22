@@ -34,22 +34,23 @@ class RestaurantListTile extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                restaurant.imageAsset,
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 60,
-                  height: 60,
-                  color: AppColors.primaryLight,
-                  child: const Icon(
-                    Icons.restaurant,
-                    color: AppColors.primary,
-                    size: 28,
-                  ),
-                ),
-              ),
+              child: restaurant.imageAsset.startsWith('http')
+                  ? Image.network(
+                      restaurant.imageAsset,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _buildFallbackImage(),
+                    )
+                  : Image.asset(
+                      restaurant.imageAsset.isNotEmpty
+                          ? restaurant.imageAsset
+                          : 'assets/images/food.png',
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _buildFallbackImage(),
+                    ),
             ),
             const SizedBox(width: 12),
 
@@ -90,6 +91,19 @@ class RestaurantListTile extends StatelessWidget {
             StatusBadge(status: restaurant.status),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackImage() {
+    return Container(
+      width: 60,
+      height: 60,
+      color: AppColors.primaryLight,
+      child: const Icon(
+        Icons.restaurant,
+        color: AppColors.primary,
+        size: 28,
       ),
     );
   }

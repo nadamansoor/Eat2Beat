@@ -2,23 +2,32 @@ import 'dart:convert';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eat2beat/features/admin/domain/usecases/add_meal_usecase.dart';
+import 'package:eat2beat/features/admin/domain/usecases/add_offer_usecase.dart';
+import 'package:eat2beat/features/admin/domain/usecases/get_restaurant_meals_usecase.dart';
+import 'package:eat2beat/features/admin/domain/entities/meal_entity.dart';
 import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
 import 'add_meal_state.dart';
 
 class AddMealCubit extends Cubit<AddMealState> {
   final AuthRepo authRepo;
   final AddMealUseCase addMealUseCase;
+  final AddOfferUseCase addOfferUseCase;
+  final GetRestaurantMealsUseCase getMealsUseCase;
   final ImagePicker _picker = ImagePicker();
 
   String? _pickedImageBase64;
   String? _pickedImagePath;
+  List<MealEntity> _meals = [];
 
   String? get pickedImagePath => _pickedImagePath;
   String? get pickedImageBase64 => _pickedImageBase64;
+  List<MealEntity> get meals => _meals;
 
   AddMealCubit({
     required this.authRepo,
     required this.addMealUseCase,
+    required this.addOfferUseCase,
+    required this.getMealsUseCase,
   }) : super(AddMealInitial());
 
   /// Detect MIME type from file extension (supports jpg, jpeg, png, webp).
@@ -64,6 +73,8 @@ class AddMealCubit extends Cubit<AddMealState> {
     required int quantity,
     required String expiryTime,
     required String category,
+    String? cuisine,
+    List<String>? tags,
   }) async {
     if (_pickedImageBase64 == null) {
       emit(AddMealError(message: 'Please pick a meal image before publishing.'));
@@ -86,11 +97,78 @@ class AddMealCubit extends Cubit<AddMealState> {
       expiryTime: expiryTime,
       category: category,
       mealImgBase64: _pickedImageBase64!,
+      cuisine: cuisine,
+      tags: tags,
     );
 
     result.fold(
       (failure) => emit(AddMealError(message: failure.message)),
       (_) => emit(AddMealSuccess()),
+    );
+  }
+
+  Future<void> fetchMeals() async {
+    emit(AddMealsLoading());
+    final token = await authRepo.getIdToken();
+    if (token == null) {
+      emit(AddMealError(message: 'Authentication failed. Please sign in again.'));
+      return;
+    }
+
+    final result = await getMealsUseCase(token);
+    result.fold(
+      (failure) => emit(AddMealError(message: failure.message)),
+      (mealsList) {
+        _meals = mealsList;
+        emit(AddMealMealsLoaded(mealsList));
+      },
+    );
+  }
+
+  Future<void> addOffer({
+    String? mealId,
+    required String title,
+    String? description,
+    String? offerImgUrl,
+    required double originalPrice,
+    required double offerPrice,
+    int? quantity,
+    required bool isActive,
+    String? category,
+    String? cuisine,
+    List<String>? tags,
+    String? startsAt,
+    String? expiresAt,
+  }) async {
+    emit(AddMealLoading());
+    final token = await authRepo.getIdToken();
+    if (token == null) {
+      emit(AddMealError(message: 'Authentication failed. Please sign in again.'));
+      return;
+    }
+
+    final imgUrlToSend = _pickedImageBase64 ?? offerImgUrl;
+
+    final result = await addOfferUseCase(
+      token: token,
+      mealId: mealId,
+      title: title,
+      description: description,
+      offerImgUrl: imgUrlToSend,
+      originalPrice: originalPrice,
+      offerPrice: offerPrice,
+      quantity: quantity,
+      isActive: isActive,
+      category: category,
+      cuisine: cuisine,
+      tags: tags,
+      startsAt: startsAt,
+      expiresAt: expiresAt,
+    );
+
+    result.fold(
+      (failure) => emit(AddMealError(message: failure.message)),
+      (_) => emit(AddOfferSuccess()),
     );
   }
 

@@ -1,6 +1,9 @@
-
 import 'package:eat2beat/features/charity/charity_dashboard/widgets/profile_data_model.dart';
 import 'package:eat2beat/features/charity/charity_resturants/widgets/colors_res.dart';
+import 'package:eat2beat/features/auth/domain/repo/auth_repo.dart';
+import 'package:eat2beat/core/services/get_it_services.dart';
+import 'package:eat2beat/core/services/user_profile_notifier.dart';
+import 'package:eat2beat/core/utils/app_routes.dart';
 import 'package:flutter/material.dart';
 
 class MenuItemTile extends StatelessWidget {
@@ -44,11 +47,19 @@ class MenuItemTile extends StatelessWidget {
                 style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: clear session and navigate to login
-              // Navigator.pushNamedAndRemoveUntil(
-              //   context, AppRoutes.loginRouteName, (_) => false);
+              final navigator = Navigator.of(context);
+              try {
+                await getIt<AuthRepo>().signOut();
+              } catch (e) {
+                // Ignore sign out errors
+              }
+              navigator.pushNamedAndRemoveUntil(
+                AppRoutes.loginRouteName,
+                (route) => false,
+              );
+              await UserProfileNotifier().clearActiveSession();
             },
             child: const Text('Logout',
                 style: TextStyle(

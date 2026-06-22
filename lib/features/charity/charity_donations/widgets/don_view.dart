@@ -5,7 +5,9 @@ import 'package:eat2beat/features/charity/charity_donations/widgets/don_empty_st
 import 'package:eat2beat/features/charity/charity_donations/widgets/don_list_title.dart';
 import 'package:eat2beat/features/charity/charity_donations/widgets/don_search_field.dart';
 import 'package:eat2beat/features/charity/charity_resturants/widgets/colors_res.dart';
+import 'package:eat2beat/features/charity/presentation/cubit/charity_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class DonationsView extends StatelessWidget {
@@ -81,24 +83,111 @@ class DonationsView extends StatelessWidget {
           const SizedBox(height: 12),
 
           Expanded(
-            child: ctrl.filtered.isEmpty
-                ? const EmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 24),
-                    itemCount: ctrl.filtered.length,
-                    itemBuilder: (context, i) {
-                      final d = ctrl.filtered[i];
-                      return DonationListTile(
-                        donation: d,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DonationDetailPage(donation: d),
-                          ),
+            child: ctrl.isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                    ),
+                  )
+                : ctrl.filtered.isEmpty
+                    ? const EmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        itemCount: ctrl.filtered.length,
+                        itemBuilder: (context, i) {
+                          final d = ctrl.filtered[i];
+                          return DonationListTile(
+                            donation: d,
+                            onViewItems: () {
+                              final cubit = ctrl.charityCubit;
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider.value(
+                                    value: cubit,
+                                    child: DonationDetailPage(
+                                      donation: d,
+                                      charityCubit: cubit,
+                                      showRequestButton: true,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            onRequestPickup: () {
+                              _showRequestPickupDialog(context, ctrl.charityCubit, d);
+                            },
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRequestPickupDialog(
+      BuildContext context, CharityCubit charityCubit, DonationCharityModel donation) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Request Pickup',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17)),
+        content: Text(
+            'Are you sure you want to request a pickup for surplus food from "${donation.restaurantName}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(dialogCtx); // Pop the confirmation dialog
+              // Show loading
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
+              );
+              try {
+                await charityCubit.requestPickupDonation(donation.id);
+                if (context.mounted) {
+                  Navigator.pop(context); // Pop loading
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                      title: const Text('Success',
+                          style: TextStyle(
+                              color: Colors.green, fontWeight: FontWeight.w700)),
+                      content:
+                          const Text('Pickup request submitted successfully!'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('OK',
+                              style: TextStyle(fontWeight: FontWeight.w700)),
                         ),
-                      );
-                    },
-                  ),
+                      ],
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  Navigator.pop(context); // Pop loading
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to request pickup: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Request',
+                style: TextStyle(
+                    color: AppColors.primary, fontWeight: FontWeight.w700)),
           ),
         ],
       ),

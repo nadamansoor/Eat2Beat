@@ -17,6 +17,8 @@ class AddMealUseCase {
     required String expiryTime,
     required String category,
     required String mealImgBase64,
+    String? cuisine,
+    List<String>? tags,
   }) {
     return repository.addMeal(
       token: token,
@@ -27,6 +29,8 @@ class AddMealUseCase {
       expiryTime: expiryTime,
       category: category,
       mealImgBase64: mealImgBase64,
+      cuisine: cuisine,
+      tags: tags,
     );
   }
 }

@@ -21,11 +21,17 @@ class signupviewBlocConsumer extends StatelessWidget {
                 state.userEntity.UId,
                 fallbackName: state.userEntity.name,
                 fallbackEmail: state.userEntity.email,
+                role: state.role,
               );
               if (state.role == 'admin') {
                 Navigator.pushReplacementNamed(
                   context,
                   AppRoutes.adminRouteName,
+                );
+              } else if (state.role == 'charity') {
+                Navigator.pushReplacementNamed(
+                  context,
+                  AppRoutes.charityRouteName,
                 );
               } else {
                 Navigator.pushReplacementNamed(

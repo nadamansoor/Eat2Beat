@@ -1,5 +1,4 @@
 import 'package:eat2beat/features/admin/presentation/view/analytics/color_const.dart';
-import 'package:eat2beat/features/admin/presentation/view/analytics/entities/dashboard_entity.dart';
 import 'package:flutter/material.dart';
 
 // ─────────────────────────────────────────────
@@ -7,16 +6,16 @@ import 'package:flutter/material.dart';
 // ─────────────────────────────────────────────
 class MetricCardsRow extends StatelessWidget {
   final int todayVisitors;
-  final OrderLevel orderLevel;
-  final double sevenDayAvg;
-  final int visitorsLast7;
+  final int todayOrders;
+  final double conversionRate;
+  final int totalOrders;
 
   const MetricCardsRow({
     super.key,
     required this.todayVisitors,
-    required this.orderLevel,
-    required this.sevenDayAvg,
-    required this.visitorsLast7,
+    required this.todayOrders,
+    required this.conversionRate,
+    required this.totalOrders,
   });
 
   @override
@@ -28,7 +27,7 @@ class MetricCardsRow extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              "Today's Forecast",
+              "Today's Forecast & Stats",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
@@ -48,7 +47,7 @@ class MetricCardsRow extends StatelessWidget {
         ),
         const SizedBox(height: 2),
         const Text(
-          'Key metrics for the dashboard',
+          'Key metrics for your restaurant',
           style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 12),
@@ -59,21 +58,22 @@ class MetricCardsRow extends StatelessWidget {
                 icon: Icons.group_outlined,
                 iconColor: AppColors.primary,
                 iconBg: AppColors.primaryLight,
-                title: "Today's Visitors",
+                title: "Expected Visitors",
                 value: '$todayVisitors',
                 valueColor: AppColors.primary,
-                subtitle: 'Today Visitors',
+                subtitle: 'predicted_visitors',
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: _MetricCard(
-                icon: Icons.bar_chart_rounded,
+                icon: Icons.shopping_bag_outlined,
                 iconColor: AppColors.orange,
                 iconBg: AppColors.orangeLight,
-                title: 'Order Level',
-                valueWidget: _OrderLevelBadge(level: orderLevel),
-                subtitle: 'Auto Classification',
+                title: 'Predicted Orders',
+                value: '$todayOrders',
+                valueColor: AppColors.orange,
+                subtitle: 'predicted_orders',
               ),
             ),
           ],
@@ -83,25 +83,25 @@ class MetricCardsRow extends StatelessWidget {
           children: [
             Expanded(
               child: _MetricCard(
-                icon: Icons.trending_up_rounded,
+                icon: Icons.percent_rounded,
                 iconColor: AppColors.green,
                 iconBg: AppColors.greenLight,
-                title: '7-Day Average',
-                value: '${sevenDayAvg.toInt()}',
+                title: 'Conversion Rate',
+                value: '${(conversionRate * 100).toStringAsFixed(1)}%',
                 valueColor: AppColors.green,
-                subtitle: 'rolling_mean_7',
+                subtitle: 'conversion_rate',
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: _MetricCard(
-                icon: Icons.sync_rounded,
+                icon: Icons.receipt_long_outlined,
                 iconColor: AppColors.orange,
                 iconBg: AppColors.orangeLight,
-                title: 'Visitors Last 7 Days',
-                value: '$visitorsLast7',
+                title: 'Total Period Orders',
+                value: '$totalOrders',
                 valueColor: AppColors.orange,
-                subtitle: 'lag_7',
+                subtitle: 'total_orders',
               ),
             ),
           ],
@@ -116,9 +116,8 @@ class _MetricCard extends StatelessWidget {
   final Color iconColor;
   final Color iconBg;
   final String title;
-  final String? value;
-  final Color? valueColor;
-  final Widget? valueWidget;
+  final String value;
+  final Color valueColor;
   final String subtitle;
 
   const _MetricCard({
@@ -126,9 +125,8 @@ class _MetricCard extends StatelessWidget {
     required this.iconColor,
     required this.iconBg,
     required this.title,
-    this.value,
-    this.valueColor,
-    this.valueWidget,
+    required this.value,
+    required this.valueColor,
     required this.subtitle,
   });
 
@@ -158,72 +156,31 @@ class _MetricCard extends StatelessWidget {
             child: Icon(icon, color: iconColor, size: 18),
           ),
           const SizedBox(height: 8),
-          Text(title,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              title,
               style: const TextStyle(
-                  fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
-          const SizedBox(height: 6),
-          if (valueWidget != null)
-            valueWidget!
-          else
-            Text(
-              value ?? '',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                color: valueColor ?? AppColors.textPrimary,
-                letterSpacing: -0.5,
+                fontSize: 11,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          const SizedBox(height: 4),
-          Text(subtitle,
-              style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
-        ],
-      ),
-    );
-  }
-}
-
-class _OrderLevelBadge extends StatelessWidget {
-  final OrderLevel level;
-
-  const _OrderLevelBadge({required this.level});
-
-  @override
-  Widget build(BuildContext context) {
-    Color color;
-    Color bg;
-    switch (level) {
-      case OrderLevel.low:
-        color = AppColors.green;
-        bg = AppColors.greenLight;
-        break;
-      case OrderLevel.medium:
-        color = AppColors.orange;
-        bg = AppColors.orangeLight;
-        break;
-      case OrderLevel.high:
-        color = AppColors.red;
-        bg = AppColors.redLight;
-        break;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: color, width: 1.5),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            level.label,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: color),
           ),
-          const SizedBox(width: 6),
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: valueColor,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
           ),
         ],
       ),

@@ -85,37 +85,35 @@ class _OrdersPageState extends State<OrdersPage> {
                       _activeStatus = state.statusFilter;
                     }
 
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Time buttons
-                        Row(
-                          children: [
-                            _buildTimeBtn(
-                              context,
-                              'today',
-                              'Today',
-                              _activeTime,
-                            ),
-                            const SizedBox(width: 6),
-                            _buildTimeBtn(
-                              context,
-                              'week',
-                              'This Week',
-                              _activeTime,
-                            ),
-                            const SizedBox(width: 6),
-                            _buildTimeBtn(
-                              context,
-                              'all',
-                              'All Time',
-                              _activeTime,
-                            ),
-                          ],
-                        ),
-                        // Status dropdown
-                        _buildStatusDropdown(context, _activeStatus),
-                      ],
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _buildTimeBtn(
+                            context,
+                            'today',
+                            'Today',
+                            _activeTime,
+                          ),
+                          const SizedBox(width: 6),
+                          _buildTimeBtn(
+                            context,
+                            'week',
+                            'This Week',
+                            _activeTime,
+                          ),
+                          const SizedBox(width: 6),
+                          _buildTimeBtn(
+                            context,
+                            'all',
+                            'All Time',
+                            _activeTime,
+                          ),
+                          const SizedBox(width: 6),
+                          _buildStatusDropdown(context, _activeStatus),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -279,24 +277,28 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Widget _buildStatusDropdown(BuildContext context, OrderStatus? activeStatus) {
+    final isSelected = activeStatus != null;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      padding: const EdgeInsets.only(left: 14, right: 8, top: 4, bottom: 4),
       decoration: BoxDecoration(
-        color: kCard,
+        color: isSelected
+            ? kPrimary.withOpacity(0.12)
+            : Colors.transparent,
+        border: Border.all(color: isSelected ? kPrimary : kBorder),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: kBorder),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<OrderStatus?>(
           value: activeStatus,
+          isDense: true,
           dropdownColor: kCard,
           icon: Icon(
             Icons.keyboard_arrow_down_rounded,
-            color: activeStatus != null ? kPrimary : kMuted,
+            color: isSelected ? kPrimary : kMuted,
             size: 18,
           ),
           style: TextStyle(
-            color: activeStatus != null ? kPrimary : Colors.white,
+            color: isSelected ? kPrimary : kMuted,
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
@@ -312,14 +314,17 @@ class _OrdersPageState extends State<OrdersPage> {
           items: [
             const DropdownMenuItem<OrderStatus?>(
               value: null,
-              child: Text('All Status', style: TextStyle(color: kText)),
+              child: Text('All Status', style: TextStyle(color: kText, fontSize: 12)),
             ),
             ...OrderStatus.values.map(
               (s) => DropdownMenuItem<OrderStatus?>(
                 value: s,
                 child: Text(
                   s.label,
-                  style: TextStyle(color: activeStatus == s ? kPrimary : kText),
+                  style: TextStyle(
+                    color: activeStatus == s ? kPrimary : kText,
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ),

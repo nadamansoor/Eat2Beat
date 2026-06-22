@@ -21,19 +21,33 @@ class HeroCard extends StatelessWidget {
           // thumbnail
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              r.imageAsset,
-              width: 72,
-              height: 72,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 72,
-                height: 72,
-                color: AppColors.primaryLight,
-                child: const Icon(Icons.restaurant,
-                    color: AppColors.primary, size: 30),
-              ),
-            ),
+            child: r.imageAsset.startsWith('http')
+                ? Image.network(
+                    r.imageAsset,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 72,
+                      height: 72,
+                      color: AppColors.primaryLight,
+                      child: const Icon(Icons.restaurant,
+                          color: AppColors.primary, size: 30),
+                    ),
+                  )
+                : Image.asset(
+                    r.imageAsset.isNotEmpty ? r.imageAsset : 'assets/images/food.png',
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 72,
+                      height: 72,
+                      color: AppColors.primaryLight,
+                      child: const Icon(Icons.restaurant,
+                          color: AppColors.primary, size: 30),
+                    ),
+                  ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -198,19 +212,33 @@ class DonationTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              donation.imageAsset,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 50,
-                height: 50,
-                color: AppColors.primaryLight,
-                child: const Icon(Icons.fastfood_outlined,
-                    color: AppColors.primary, size: 22),
-              ),
-            ),
+            child: donation.imageAsset.startsWith('http')
+                ? Image.network(
+                    donation.imageAsset,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 50,
+                      height: 50,
+                      color: AppColors.primaryLight,
+                      child: const Icon(Icons.fastfood_outlined,
+                          color: AppColors.primary, size: 22),
+                    ),
+                  )
+                : Image.asset(
+                    donation.imageAsset.isNotEmpty ? donation.imageAsset : 'assets/images/food.png',
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 50,
+                      height: 50,
+                      color: AppColors.primaryLight,
+                      child: const Icon(Icons.fastfood_outlined,
+                          color: AppColors.primary, size: 22),
+                    ),
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(

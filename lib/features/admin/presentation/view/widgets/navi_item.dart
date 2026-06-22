@@ -1,4 +1,5 @@
 import 'package:eat2beat/features/admin/presentation/view/widgets/bottom_navi_bar.dart';
+import 'package:eat2beat/features/admin/presentation/view/admin_home/const.dart';
 import 'package:flutter/material.dart';
 
 class NavigationBarItem extends StatelessWidget {
@@ -26,7 +27,7 @@ class NavigationBarItem extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFFF6B00).withOpacity(0.1)
+              ? kPrimary.withOpacity(0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
@@ -39,11 +40,19 @@ class NavigationBarItem extends StatelessWidget {
               scale: isSelected ? 1.2 : 1.0,
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              child: Image.asset(
-                isSelected ? item.activeImage : item.inActiveImage,
-                width: 24,
-                height: 24,
-              ),
+              child: item.icon != null
+                  ? Icon(
+                      item.icon,
+                      size: 24,
+                      color: isSelected
+                          ? kPrimary
+                          : Colors.grey,
+                    )
+                  : Image.asset(
+                      isSelected ? item.activeImage! : item.inActiveImage!,
+                      width: 24,
+                      height: 24,
+                    ),
             ),
             const SizedBox(height: 4),
             // Text animation
@@ -53,7 +62,7 @@ class NavigationBarItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: isSelected ? 12 : 11,
                 color: isSelected
-                    ? Colors.black 
+                    ? kPrimary 
                     : Colors.grey,
                 fontWeight:
                     isSelected ? FontWeight.bold : FontWeight.normal,

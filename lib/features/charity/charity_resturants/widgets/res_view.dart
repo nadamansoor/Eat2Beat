@@ -1,5 +1,4 @@
 import 'package:eat2beat/features/charity/charity_resturants/controllers/res_controller.dart';
-import 'package:eat2beat/features/charity/charity_resturants/resturants_charity.dart';
 import 'package:eat2beat/features/charity/charity_resturants/widgets/colors_res.dart';
 import 'package:eat2beat/features/charity/charity_resturants/widgets/res_app_bar.dart';
 import 'package:eat2beat/features/charity/charity_resturants/widgets/res_empty_state.dart';
@@ -47,19 +46,26 @@ class RestaurantsView extends StatelessWidget {
 
           // ── Restaurant list ───────────────────────────────────────────────
           Expanded(
-            child: ctrl.filteredRestaurants.isEmpty
-                ? const EmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 24),
-                    itemCount: ctrl.filteredRestaurants.length,
-                    itemBuilder: (context, index) {
-                      final restaurant = ctrl.filteredRestaurants[index];
-                      return RestaurantListTile(
-                        restaurant: restaurant,
-                        onTap: () => ctrl.onRestaurantTap(context, restaurant),
-                      );
-                    },
-                  ),
+            child: ctrl.isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                    ),
+                  )
+                : ctrl.filteredRestaurants.isEmpty
+                    ? const EmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        itemCount: ctrl.filteredRestaurants.length,
+                        itemBuilder: (context, index) {
+                          final restaurant = ctrl.filteredRestaurants[index];
+                          return RestaurantListTile(
+                            restaurant: restaurant,
+                            onTap: () =>
+                                ctrl.onRestaurantTap(context, restaurant),
+                          );
+                        },
+                      ),
           ),
         ],
       ),

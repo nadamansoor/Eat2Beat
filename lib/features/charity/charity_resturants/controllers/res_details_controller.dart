@@ -1,10 +1,11 @@
 import 'package:eat2beat/features/charity/charity_resturants/models/charity_res_details_model.dart';
 import 'package:eat2beat/features/charity/charity_resturants/models/charity_res_model.dart';
+import 'package:eat2beat/features/charity/presentation/cubit/charity_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
 class RestaurantDetailController extends ChangeNotifier {
+  final CharityCubit charityCubit;
   RestaurantDetail? _detail;
   bool _isLoading = true;
   String? _error;
@@ -13,14 +14,53 @@ class RestaurantDetailController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  Future<void> load(RestaurantModel restaurant) async {
+  RestaurantDetailController(this.charityCubit);
+
+  Future<void> load(String restaurantId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 600)); // fake network
-      _detail = _mockDetail(restaurant);
+      await charityCubit.loadRestaurantProfileDetails(restaurantId);
+      final state = charityCubit.state;
+      if (state is CharityLoaded && state.selectedRestaurant != null) {
+        final pr = state.selectedRestaurant!;
+        final recent = (pr.donations ?? []).map((d) {
+          return RecentDonation(
+            id: d.id,
+            itemName: d.description ?? 'Surplus Food',
+            imageAsset: d.donationImgUrl,
+            meals: 1, // Default to 1 meal, or parse from description
+            timeLabel: d.createdAt,
+            received: d.pickedUp == 'picked_up',
+          );
+        }).toList();
+
+        _detail = RestaurantDetail(
+          restaurant: RestaurantModel(
+            id: pr.id,
+            name: pr.name,
+            location: pr.address ?? 'No Address',
+            mealsDoanted: recent.length,
+            status: pr.acceptingOrders ? RestaurantStatus.active : RestaurantStatus.inactive,
+            imageAsset: pr.imgUrl ?? '',
+          ),
+          mealsThisMonth: recent.where((d) => d.received).length,
+          reliabilityPercent: 95,
+          about: pr.description ?? '${pr.name} is proud to support the community by sharing surplus food.',
+          pickupSchedule: 'Daily\n5:00 PM – 7:00 PM',
+          address: pr.address ?? 'No address available',
+          contactName: 'Manager',
+          contactPhone: '+20 100 000 0000',
+          joinedDate: 'June 2026',
+          recentDonations: recent,
+        );
+      } else if (state is CharityError) {
+        _error = state.message;
+      } else {
+        _error = 'Failed to load restaurant details.';
+      }
     } catch (e) {
       _error = 'Failed to load details. Please try again.';
     } finally {
@@ -39,75 +79,5 @@ class RestaurantDetailController extends ChangeNotifier {
 
   void onViewAllDonations() {
     debugPrint('View all donations for ${_detail?.restaurant.name}');
-  }
-
-  RestaurantDetail _mockDetail(RestaurantModel r) {
-    final seedMap = <String, RestaurantDetail>{
-      '1': RestaurantDetail(
-        restaurant: r,
-        mealsThisMonth: 24,
-        reliabilityPercent: 98,
-        about:
-            'Good Eats Cafe is committed to reducing food waste and helping the community.',
-        pickupSchedule: 'Daily\n5:00 PM – 7:00 PM',
-        address: '123 Main St, Downtown',
-        contactName: 'John Smith',
-        contactPhone: '+20 123 456 7890',
-        joinedDate: 'May 2024',
-        recentDonations: const [
-          RecentDonation(
-            id: 'd1',
-            itemName: 'Caesar Salad Bowl',
-            imageAsset: 'assets/images/caesar_salad.jpg',
-            meals: 10,
-            timeLabel: 'Today, 5:30 PM',
-            received: true,
-          ),
-          RecentDonation(
-            id: 'd2',
-            itemName: 'Grilled Chicken Wrap',
-            imageAsset: 'assets/images/wrap.jpg',
-            meals: 8,
-            timeLabel: 'Yesterday, 6:00 PM',
-            received: true,
-          ),
-        ],
-      ),
-      '2': RestaurantDetail(
-        restaurant: r,
-        mealsThisMonth: 18,
-        reliabilityPercent: 91,
-        about: 'Burger House supports local food banks with daily surplus.',
-        pickupSchedule: 'Mon–Sat\n4:00 PM – 6:00 PM',
-        address: '45 City Center Blvd',
-        contactName: 'Sara Lee',
-        contactPhone: '+20 111 222 3333',
-        joinedDate: 'August 2023',
-        recentDonations: const [
-          RecentDonation(
-            id: 'd3',
-            itemName: 'Classic Burger Combo',
-            imageAsset: 'assets/images/burger.jpg',
-            meals: 6,
-            timeLabel: 'Today, 4:45 PM',
-            received: false,
-          ),
-        ],
-      ),
-    };
-
-    return seedMap[r.id] ??
-        RestaurantDetail(
-          restaurant: r,
-          mealsThisMonth: 10,
-          reliabilityPercent: 85,
-          about: '${r.name} is proud to donate surplus food daily.',
-          pickupSchedule: 'Daily\n5:00 PM – 7:00 PM',
-          address: r.location,
-          contactName: 'Manager',
-          contactPhone: '+20 100 000 0000',
-          joinedDate: 'January 2024',
-          recentDonations: const [],
-        );
   }
 }

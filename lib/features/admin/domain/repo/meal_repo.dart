@@ -14,6 +14,8 @@ abstract class MealRepo {
     required String expiryTime,
     required String category,
     required String mealImgBase64,
+    String? cuisine,
+    List<String>? tags,
   });
 
   Future<Either<Failure, MealEntity>> updateMeal({
@@ -37,5 +39,22 @@ abstract class MealRepo {
   Future<Either<Failure, String>> updateRestaurantImage({
     required String token,
     required String imgUrl,
+  });
+
+  Future<Either<Failure, void>> addOffer({
+    required String token,
+    String? mealId,
+    required String title,
+    String? description,
+    String? offerImgUrl,
+    required double originalPrice,
+    required double offerPrice,
+    int? quantity,
+    required bool isActive,
+    String? category,
+    String? cuisine,
+    List<String>? tags,
+    String? startsAt,
+    String? expiresAt,
   });
 }

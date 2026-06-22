@@ -15,6 +15,8 @@ import 'package:eat2beat/features/admin/presentation/cubits/profile_cubit/profil
 import 'package:eat2beat/features/admin/presentation/cubits/orders_cubit/orders_cubit.dart';
 import 'package:eat2beat/features/admin/domain/usecases/get_orders_usecase.dart';
 import 'package:eat2beat/features/admin/domain/usecases/update_order_status_usecase.dart';
+import 'package:eat2beat/features/admin/presentation/cubits/admin_donation_cubit/admin_donation_cubit.dart';
+import 'package:eat2beat/features/admin/presentation/view/admin_donations/admin_donations_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -31,6 +33,7 @@ class _AdminRouteNameState extends State<AdminRouteName> {
   late final MealsCubit _mealsCubit;
   late final ProfileCubit _profileCubit;
   late final OrdersCubit _ordersCubit;
+  late final AdminDonationCubit _donationCubit;
 
   @override
   void initState() {
@@ -52,6 +55,8 @@ class _AdminRouteNameState extends State<AdminRouteName> {
       getOrdersUseCase: getIt<GetOrdersUseCase>(),
       updateOrderStatusUseCase: getIt<UpdateOrderStatusUseCase>(),
     );
+
+    _donationCubit = getIt<AdminDonationCubit>();
   }
 
   @override
@@ -59,6 +64,7 @@ class _AdminRouteNameState extends State<AdminRouteName> {
     _mealsCubit.close();
     _profileCubit.close();
     _ordersCubit.close();
+    _donationCubit.close();
     super.dispose();
   }
 
@@ -76,6 +82,7 @@ class _AdminRouteNameState extends State<AdminRouteName> {
         BlocProvider<MealsCubit>.value(value: _mealsCubit),
         BlocProvider<ProfileCubit>.value(value: _profileCubit),
         BlocProvider<OrdersCubit>.value(value: _ordersCubit),
+        BlocProvider<AdminDonationCubit>.value(value: _donationCubit),
       ],
       child: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, profileState) {
@@ -94,6 +101,7 @@ class _AdminRouteNameState extends State<AdminRouteName> {
             ),
             AdminUploadPage(onMealPublished: _onMealPublished),
             const OrdersPage(),
+            const AdminDonationPage(),
             const DashboardPage(),
           ];
 

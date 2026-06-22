@@ -9,6 +9,8 @@ import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/info
 import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/metric_cards.dart';
 import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/restu_selector.dart';
 import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/today_demand.dart';
+import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/charity_impact_chart.dart';
+import 'package:eat2beat/features/admin/presentation/view/analytics/widgets/recent_orders_list.dart';
 import 'package:eat2beat/features/admin/presentation/cubits/profile_cubit/profile_cubit.dart';
 import 'package:eat2beat/features/admin/presentation/cubits/profile_cubit/profile_state.dart';
 import 'package:eat2beat/features/admin/domain/usecases/get_demand_dashboard_usecase.dart';
@@ -65,8 +67,11 @@ class _DashboardView extends StatelessWidget {
                 children: [
                   const Icon(Icons.error_outline, color: AppColors.red, size: 48),
                   const SizedBox(height: 12),
-                  Text(state.message,
-                      style: const TextStyle(color: AppColors.textSecondary)),
+                  Text(
+                    state.message,
+                    style: const TextStyle(color: AppColors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => context.read<DashboardCubit>().refresh(),
@@ -82,6 +87,9 @@ class _DashboardView extends StatelessWidget {
             final data = state.data;
             final cubit = context.read<DashboardCubit>();
 
+            // If actual history and forecast are empty, display info panel gracefully
+            final bool hasNoDataYet = data.actual.isEmpty && data.weekForecast.isEmpty;
+
             return SafeArea(
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -94,60 +102,102 @@ class _DashboardView extends StatelessWidget {
                         const HeaderCard(),
                         const SizedBox(height: 14),
 
-                        // ── Restaurant Selector ──
+                        // ── Restaurant & Days Selector ──
                         RestaurantSelector(
                           restaurantId: data.restaurantId,
+                          days: state.days,
                           onRefresh: cubit.refresh,
+                          onDaysChanged: (newDays) {
+                            cubit.loadDashboard(
+                              restaurantId: data.restaurantId,
+                              days: newDays,
+                            );
+                          },
                         ),
                         const SizedBox(height: 14),
 
-                        // ── Date Info ──
-                        DateInfoRow(
-                          date: data.currentDate,
-                          dayName: data.dayName,
-                          isWeekend: data.isWeekend,
-                          isHoliday: data.isHoliday,
-                        ),
-                        const SizedBox(height: 14),
-
-                        // ── Metric Cards ──
-                        MetricCardsRow(
-                          todayVisitors: data.todayVisitors,
-                          orderLevel: data.orderLevel,
-                          sevenDayAvg: data.sevenDayAverage,
-                          visitorsLast7: data.visitorsLast7Days,
-                        ),
-                        const SizedBox(height: 14),
-
-                        // ── Today's Demand ──
-                        TodaysDemandCard(
-                          date: data.currentDate,
-                          orderLevel: data.orderLevel,
-                        ),
-                        const SizedBox(height: 14),
-
-                        // ── Week Forecast ──
-                        WeekForecastCard(
-                          days: data.weekForecast,
-                          selectedIndex: state.selectedForecastIndex,
-                          onSelect: cubit.selectForecastDay,
-                        ),
-                        const SizedBox(height: 14),
-
-                        // ── Historical + Summary ──
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: HistoricalVisitsCard(visits: data.historicalVisits),
+                        if (hasNoDataYet) ...[
+                          // Graceful Info Card matching Angular
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.border),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: DataSummaryCard(data: data),
+                            child: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 40),
+                                SizedBox(height: 12),
+                                Text(
+                                  'Not enough historical data yet',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  'More days of order transactions are required before predictive demand analytics can be calculated.',
+                                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
+                          ),
+                          const SizedBox(height: 24),
+                        ] else ...[
+                          // ── Date Info ──
+                          DateInfoRow(
+                            date: data.currentDate,
+                            dayName: data.dayName,
+                            isWeekend: data.isWeekend,
+                            isHoliday: data.isHoliday,
+                          ),
+                          const SizedBox(height: 14),
+
+                          // ── Metric Cards ──
+                          MetricCardsRow(
+                            todayVisitors: data.todayVisitors,
+                            todayOrders: data.todayOrders,
+                            conversionRate: data.conversionRate,
+                            totalOrders: data.totalOrders,
+                          ),
+                          const SizedBox(height: 14),
+
+                          // ── Today's Demand Card ──
+                          TodaysDemandCard(
+                            date: data.currentDate,
+                            orderLevel: data.orderLevel,
+                          ),
+                          const SizedBox(height: 14),
+
+                          // ── Week Forecast Card ──
+                          WeekForecastCard(
+                            days: data.weekForecast,
+                            selectedIndex: state.selectedForecastIndex,
+                            onSelect: cubit.selectForecastDay,
+                          ),
+                          const SizedBox(height: 14),
+
+                          // ── Weekly Performance Chart ──
+                          WeeklyPerformanceChart(actual: data.actual),
+                          const SizedBox(height: 14),
+
+                          // ── Charity Impact Chart ──
+                          CharityImpactChart(charityData: data.charityData),
+                          const SizedBox(height: 14),
+
+                          // ── Recent Activity Log List ──
+                          RecentOrdersListCard(actual: data.actual),
+                          const SizedBox(height: 14),
+
+                          // ── Data Summary details ──
+                          DataSummaryCard(data: data),
+                          const SizedBox(height: 24),
+                        ],
                       ]),
                     ),
                   ),

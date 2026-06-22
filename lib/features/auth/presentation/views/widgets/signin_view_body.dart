@@ -165,12 +165,6 @@ class _signinViewBodyState extends State<signinViewBody> {
                     SizedBox(height: 33),
                     CustomButton(
                       onPressed: () {
-                        if (selectedRole == 'charity') {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(S.of(context).charityPortalSoon)),
-                          );
-                          return;
-                        }
                         if (FormKey.currentState!.validate()) {
                           FormKey.currentState!.save();
                           context.read<SigninCubit>().SignIn(email, password, selectedRole);

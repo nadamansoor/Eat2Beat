@@ -3,14 +3,19 @@ import 'package:eat2beat/features/admin/presentation/view/analytics/entities/das
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class HistoricalVisitsCard extends StatelessWidget {
-  final List<HistoricalVisit> visits;
+class WeeklyPerformanceChart extends StatelessWidget {
+  final List<ActualRow> actual;
 
-  const HistoricalVisitsCard({super.key, required this.visits});
+  const WeeklyPerformanceChart({super.key, required this.actual});
 
   @override
   Widget build(BuildContext context) {
-    final maxVisitors = visits.map((v) => v.visitors).reduce((a, b) => a > b ? a : b);
+    if (actual.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Limit to the last 7 days to match the weekly view
+    final dataToShow = actual.length > 7 ? actual.sublist(actual.length - 7) : actual;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -25,75 +30,195 @@ class HistoricalVisitsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Flexible(
-                child: Text(
-                  'Visitors — Last 7 Occasions',
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+              const Text(
+                'Weekly Performance',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                    color: AppColors.greenLight, borderRadius: BorderRadius.circular(8)),
-                child: const Text('HISTORICAL',
-                    style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.green,
-                        letterSpacing: 0.5)),
-              )
+                  color: AppColors.primaryLight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  '7 DAYS',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-          ...visits.map((v) => _VisitRow(visit: v, maxVisitors: maxVisitors)),
+          const SizedBox(height: 16),
+          // Chart area
+          SizedBox(
+            height: 180,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: dataToShow.map((row) {
+                // Calculate height percentages based on max limits from Angular (orders: 90, sessions: 185, customers: 72)
+                final double ordersHeightRatio = (row.orders / 90.0).clamp(0.02, 1.0);
+                final double sessionsHeightRatio = (row.sessions / 185.0).clamp(0.02, 1.0);
+                final double customersHeightRatio = (row.customers / 72.0).clamp(0.02, 1.0);
+
+                final String dayLabel = DateFormat('E', 'en_US').format(row.date);
+
+                return Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Orders Bar
+                            _Bar(
+                              ratio: ordersHeightRatio,
+                              color: const Color(0xFF8966FA),
+                              value: row.orders.toString(),
+                            ),
+                            // Sessions Bar
+                            _Bar(
+                              ratio: sessionsHeightRatio,
+                              color: const Color(0xFF60A5FA),
+                              value: row.sessions.toString(),
+                            ),
+                            // Customers Bar
+                            _Bar(
+                              ratio: customersHeightRatio,
+                              color: const Color(0xFFFFC833),
+                              value: row.customers.toString(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        dayLabel,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Legend
+          const Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: [
+              _LegendItem(color: Color(0xFF8966FA), label: 'Orders'),
+              _LegendItem(color: Color(0xFF60A5FA), label: 'Sessions'),
+              _LegendItem(color: Color(0xFFFFC833), label: 'Unique Customers'),
+            ],
+          ),
         ],
       ),
     );
   }
 }
 
-class _VisitRow extends StatelessWidget {
-  final HistoricalVisit visit;
-  final int maxVisitors;
+class _Bar extends StatelessWidget {
+  final double ratio;
+  final Color color;
+  final String value;
 
-  const _VisitRow({required this.visit, required this.maxVisitors});
+  const _Bar({
+    required this.ratio,
+    required this.color,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final ratio = visit.visitors / maxVisitors;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: ratio,
-                minHeight: 10,
-                backgroundColor: const Color(0xFFEDE9FE),
-                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double availableHeight = constraints.maxHeight;
+            final double barHeight = (availableHeight - 20).clamp(0.0, availableHeight) * ratio;
+            return Tooltip(
+              message: value,
+              triggerMode: TooltipTriggerMode.tap,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (barHeight > 15)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          value,
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  Container(
+                    height: barHeight.clamp(4.0, double.infinity),
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(4),
+                        topRight: Radius.circular(4),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 28,
-            child: Text('${visit.visitors}',
-                style: const TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          ),
-          SizedBox(
-            width: 50,
-            child: Text(
-              '${DateFormat('MMM').format(visit.date)} ${visit.date.day}',
-              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _LegendItem({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+        ),
+      ],
     );
   }
 }

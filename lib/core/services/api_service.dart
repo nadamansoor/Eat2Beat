@@ -190,6 +190,28 @@ class ApiService {
     );
   }
 
+  Future<void> createRestaurantOffer(
+      String token, Map<String, dynamic> body) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/offers/create');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(body),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw CustomExceptions(
+        message: response.body.isNotEmpty
+            ? response.body
+            : 'Failed to create offer (${response.statusCode})',
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> updateMeal(
       String token, Map<String, dynamic> body) async {
     // Try primary endpoint first; fall back to alternate if Worker returns 404.
@@ -390,6 +412,41 @@ class ApiService {
           : 'Failed to load dashboard data (${response.statusCode})',
     );
   }
+
+  Future<List<dynamic>> getForecast(
+    String token,
+    String restaurantId, {
+    int days = 7,
+    bool save = false,
+  }) async {
+    final uri = Uri.parse(
+      '$_workerBaseUrl/demand/forecast/${Uri.encodeComponent(restaurantId)}?days=$days&save=${save ? 1 : 0}',
+    );
+    final response = await http.get(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data is List) {
+        return data;
+      } else if (data is Map && data['data'] is List) {
+        return data['data'];
+      }
+      return [];
+    }
+
+    throw CustomExceptions(
+      message: response.body.isNotEmpty
+          ? response.body
+          : 'Failed to load forecast data (${response.statusCode})',
+    );
+  }
+
 
   Future<String> getRestaurantId(String token) async {
     final uri = Uri.parse('$_workerBaseUrl/restaurant/meals?include_hidden=true&limit=1&offset=0');
@@ -976,6 +1033,538 @@ class ApiService {
           ? response.body
           : 'Failed to load offers (${response.statusCode})',
     );
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // CHARITY-SIDE APIS
+  // ═════════════════════════════════════════════════════════════════════════
+
+  Future<Map<String, dynamic>> getCharityProfile(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/profile');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      if (decoded is List && decoded.isNotEmpty) {
+        return decoded[0] as Map<String, dynamic>;
+      }
+      return decoded as Map<String, dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load profile');
+  }
+
+  Future<void> updateCharityProfile(String token, Map<String, dynamic> payload) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/profile/update');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(payload),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Update profile failed');
+    }
+  }
+
+  Future<List<dynamic>> getAvailableDonations(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/donations/available?limit=50');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load donations');
+  }
+
+  Future<List<dynamic>> getDonationItems(String token, String donationId) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/donation-items?donation_id=${Uri.encodeComponent(donationId)}');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load donation items');
+  }
+
+  Future<List<dynamic>> getCharityPickupsAll(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/pickups/all?limit=50');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load pickup requests');
+  }
+
+  Future<List<dynamic>> getCharityPickupsApproved(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/pickups/approved?limit=50');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load approved requests');
+  }
+
+  Future<List<dynamic>> getCharityPickupsPickedUp(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/pickups/picked-up?limit=50');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load picked up requests');
+  }
+
+  Future<List<dynamic>> getCharityPickupsRejected(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/pickups/rejected?limit=50');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load rejected requests');
+  }
+
+  Future<Map<String, dynamic>> requestPickup(String token, String donationId) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/pickup/request');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'donation_id': donationId}),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final decoded = json.decode(response.body);
+      if (decoded is List && decoded.isNotEmpty) {
+        return decoded[0] as Map<String, dynamic>;
+      }
+      return decoded as Map<String, dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Request pickup failed');
+  }
+
+  Future<void> cancelPickup(String token, String pickupId) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/pickup/cancel');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'pickup_id': pickupId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Cancel pickup failed');
+    }
+  }
+
+  Future<void> confirmPickup(String token, String pickupId) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/pickup/confirm');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'pickup_id': pickupId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Confirm pickup failed');
+    }
+  }
+
+  Future<Map<String, dynamic>> getCharityStats(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/stats');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      if (decoded is List && decoded.isNotEmpty) {
+        return decoded[0] as Map<String, dynamic>;
+      }
+      return decoded as Map<String, dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load stats');
+  }
+
+  Future<List<dynamic>> getCharityHistory(
+    String token, {
+    String time = 'all',
+    String? from,
+    String? to,
+    int? tzOffsetMinutes,
+  }) async {
+    var urlStr = '$_workerBaseUrl/charity/history?limit=50&time=$time';
+    if (from != null) {
+      urlStr += '&from=${Uri.encodeComponent(from)}';
+    }
+    if (to != null) {
+      urlStr += '&to=${Uri.encodeComponent(to)}';
+    }
+    if (tzOffsetMinutes != null) {
+      urlStr += '&tzOffsetMinutes=$tzOffsetMinutes';
+    }
+    final uri = Uri.parse(urlStr);
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load history');
+  }
+
+  Future<List<dynamic>> getCharitySchedules(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/schedules');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load schedules');
+  }
+
+  Future<void> confirmSchedule(String token, String scheduleId) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/pickup/schedule/confirm');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'schedule_id': scheduleId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Confirm schedule failed');
+    }
+  }
+
+  Future<void> cancelSchedule(String token, String scheduleId) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/pickup/schedule/cancel');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'schedule_id': scheduleId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Cancel schedule failed');
+    }
+  }
+
+  Future<List<dynamic>> searchRestaurants(String token, {String query = '', bool availableOnly = false}) async {
+    final qString = query.isNotEmpty ? 'q=${Uri.encodeComponent(query)}&' : '';
+    final availString = availableOnly ? 'available_only=true' : '';
+    final uri = Uri.parse('$_workerBaseUrl/charity/search/restaurants?${qString}${availString}');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to search restaurants');
+  }
+
+  Future<Map<String, dynamic>> getRestaurantProfile(String token, String restaurantId) async {
+    final uri = Uri.parse('$_workerBaseUrl/charity/restaurants/${Uri.encodeComponent(restaurantId)}');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load restaurant profile');
+  }
+
+  Future<List<dynamic>> getRestaurantDonations(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/donations?limit=50');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load restaurant donations');
+  }
+
+  Future<List<dynamic>> getRestaurantDonationItems(String token, String donationId) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/donation-items?donation_id=$donationId');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      if (decoded is List) return decoded;
+      if (decoded is Map && decoded['data'] is List) return decoded['data'] as List<dynamic>;
+      return [];
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load donation items');
+  }
+
+  Future<Map<String, dynamic>> addRestaurantDonation(String token, Map<String, dynamic> body) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/add-donation');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(body),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final decoded = json.decode(response.body);
+      if (decoded is List && decoded.isNotEmpty) return decoded[0] as Map<String, dynamic>;
+      return decoded as Map<String, dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to add donation');
+  }
+
+  Future<void> removeRestaurantDonation(String token, String donationId) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/remove-donation');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'donation_id': donationId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to remove donation');
+    }
+  }
+
+  Future<Map<String, dynamic>> addRestaurantDonationItem(String token, Map<String, dynamic> body) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/donation-items/add');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(body),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final decoded = json.decode(response.body);
+      if (decoded is List && decoded.isNotEmpty) return decoded[0] as Map<String, dynamic>;
+      return decoded as Map<String, dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to add donation item');
+  }
+
+  Future<void> removeRestaurantDonationItem(String token, String itemId) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/donation-items/remove');
+    final response = await http.delete(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'item_id': itemId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to remove donation item');
+    }
+  }
+
+  Future<List<dynamic>> getAdminPickupRequests(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/pickup-requests?limit=50');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load pickup requests');
+  }
+
+  Future<void> approvePickupRequest(String token, String pickupId) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/pickup/approve');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'pickup_id': pickupId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to approve pickup request');
+    }
+  }
+
+  Future<void> rejectPickupRequest(String token, String pickupId) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/pickup/reject');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({'pickup_id': pickupId}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to reject pickup request');
+    }
+  }
+
+  Future<Map<String, dynamic>> schedulePickup(String token, Map<String, dynamic> body) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/pickup/schedule');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(body),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final decoded = json.decode(response.body);
+      if (decoded is List && decoded.isNotEmpty) return decoded[0] as Map<String, dynamic>;
+      return decoded as Map<String, dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to schedule pickup');
+  }
+
+  Future<Map<String, dynamic>> reschedulePickup(String token, Map<String, dynamic> body) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/pickup/reschedule');
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(body),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final decoded = json.decode(response.body);
+      if (decoded is List && decoded.isNotEmpty) return decoded[0] as Map<String, dynamic>;
+      return decoded as Map<String, dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to reschedule pickup');
+  }
+
+  Future<List<dynamic>> getAdminSchedules(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/schedules');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load schedules');
+  }
+
+  Future<List<dynamic>> getAdminDonationHistory(String token) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/history/donations?limit=50');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load history');
+  }
+
+  Future<List<dynamic>> searchCharities(String token, String query) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/search/charities?q=${Uri.encodeComponent(query)}');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to search charities');
+  }
+
+  Future<Map<String, dynamic>> getAdminCharityProfile(String token, String charityId) async {
+    final uri = Uri.parse('$_workerBaseUrl/restaurant/charity/${Uri.encodeComponent(charityId)}');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load charity profile');
+  }
+
+  Future<List<dynamic>> getNotifications(String token, {bool unreadOnly = false}) async {
+    final qs = unreadOnly ? '?unread=true' : '';
+    final uri = Uri.parse('$_workerBaseUrl/notifications$qs');
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    }
+    throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to load notifications');
+  }
+
+  Future<void> markNotificationsAsRead(String token, {List<String>? ids}) async {
+    final uri = Uri.parse('$_workerBaseUrl/notifications/read');
+    final body = ids != null && ids.isNotEmpty ? {'ids': ids} : {};
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode(body),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw CustomExceptions(message: response.body.isNotEmpty ? response.body : 'Failed to mark notifications as read');
+    }
   }
 }
 

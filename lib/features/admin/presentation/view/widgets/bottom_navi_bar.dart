@@ -1,10 +1,14 @@
+import 'package:flutter/material.dart';
+
 class BottomNaviBar {
-  final String activeImage , inActiveImage;
+  final String? activeImage, inActiveImage;
+  final IconData? icon;
   final String name;
 
   BottomNaviBar({
-    required this.activeImage,
-    required this.inActiveImage,
+    this.activeImage,
+    this.inActiveImage,
+    this.icon,
     required this.name,
   });
 }
@@ -24,6 +28,10 @@ List<BottomNaviBar> get bottoomNavigationBarItems => [
     activeImage: 'assets/images/active_order.png',
     inActiveImage: 'assets/images/inactive_ordrs.png',
     name: 'Orders',
+  ),
+  BottomNaviBar(
+    icon: Icons.volunteer_activism,
+    name: 'Donation',
   ),
   BottomNaviBar(
     activeImage: 'assets/images/active_analytics.png',

@@ -10,6 +10,9 @@ class MealModel extends MealEntity {
     required super.expiryTime,
     required super.category,
     required super.imageUrl,
+    super.cuisine,
+    super.tags,
+    super.hasActiveOffer = false,
   });
 
   factory MealModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +34,17 @@ class MealModel extends MealEntity {
       }
     }
 
+    List<String>? parsedTags;
+    if (json['tags'] != null) {
+      if (json['tags'] is List) {
+        parsedTags = (json['tags'] as List).map((t) => t.toString()).toList();
+      }
+    }
+
+    final hasActiveOffer = json['has_active_offer'] == true ||
+        json['has_offer'] == true ||
+        json['active_offer'] != null;
+
     return MealModel(
       id: json['id']?.toString() ?? json['meal_id']?.toString() ?? '',
       name: json['title']?.toString() ?? json['name']?.toString() ?? '',
@@ -40,6 +54,9 @@ class MealModel extends MealEntity {
       expiryTime: json['expiry_time']?.toString() ?? json['expiryTime']?.toString() ?? '',
       category: json['category']?.toString() ?? '',
       imageUrl: json['meal_img_url']?.toString() ?? json['imageUrl']?.toString() ?? json['image']?.toString() ?? '',
+      cuisine: json['cuisine']?.toString(),
+      tags: parsedTags,
+      hasActiveOffer: hasActiveOffer,
     );
   }
 
@@ -53,6 +70,9 @@ class MealModel extends MealEntity {
       'expiry_time': expiryTime,
       'category': category,
       'meal_img_url': imageUrl,
+      'has_active_offer': hasActiveOffer,
+      if (cuisine != null) 'cuisine': cuisine,
+      if (tags != null) 'tags': tags,
     };
   }
 }

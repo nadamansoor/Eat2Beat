@@ -22,7 +22,7 @@ class MealsPage extends StatefulWidget {
 }
 
 class _MealsPageState extends State<MealsPage> {
-  FoodCategory _category = FoodCategory.all;
+  String _activeCategory = 'All';
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -32,10 +32,49 @@ class _MealsPageState extends State<MealsPage> {
     super.dispose();
   }
 
+  String _getCategoryDisplayName(String categoryValue) {
+    if (categoryValue.toLowerCase() == 'all') return 'All';
+    if (categoryValue.toLowerCase() == 'offers') return 'Offers';
+    const categoryMapping = {
+      'burgers': 'Burgers',
+      'pizza': 'Pizza',
+      'fried_chicken': 'Fried Chicken',
+      'shawarma': 'Shawarma',
+      'grills': 'Grills',
+      'sandwiches': 'Sandwiches',
+      'wraps': 'Wraps',
+      'koshary': 'Koshary',
+      'pasta': 'Pasta',
+      'rice_bowls': 'Rice Bowls',
+      'salads': 'Salads',
+      'soups': 'Soups',
+      'breakfast': 'Breakfast',
+      'desserts': 'Desserts',
+      'bakery': 'Bakery',
+      'coffee': 'Coffee',
+      'drinks': 'Drinks',
+      'snacks': 'Snacks',
+      'seafood_meals': 'Seafood Meals',
+      'healthy_meals': 'Healthy Meals',
+      'crepes': 'Crepes',
+      'waffles': 'Waffles',
+      'ice_cream': 'Ice Cream',
+      'hot_dogs': 'Hot Dogs',
+      'manakish': 'Manakish',
+    };
+    return categoryMapping[categoryValue.toLowerCase()] ?? 
+        (categoryValue.isNotEmpty 
+            ? categoryValue[0].toUpperCase() + categoryValue.substring(1) 
+            : categoryValue);
+  }
+
   List<MealEntity> _getFiltered(List<MealEntity> meals) {
     return meals.where((item) {
-      if (_category == FoodCategory.vegan && item.category.toLowerCase() != 'vegan') return false;
-      if (_category == FoodCategory.protein && item.category.toLowerCase() != 'protein') return false;
+      if (_activeCategory.toLowerCase() == 'offers') {
+        if (!item.hasActiveOffer) return false;
+      } else if (_activeCategory.toLowerCase() != 'all' && item.category.toLowerCase() != _activeCategory.toLowerCase()) {
+        return false;
+      }
       
       if (_searchQuery.isNotEmpty &&
           !item.name.toLowerCase().contains(_searchQuery.toLowerCase())) {
@@ -92,6 +131,16 @@ class _MealsPageState extends State<MealsPage> {
     final cubit = context.watch<MealsCubit>();
     final state = cubit.state;
 
+    final List<String> categories = ['All', 'Offers'];
+    if (state is MealsLoaded) {
+      final loadedCats = state.meals
+          .map((m) => m.category)
+          .where((cat) => cat.isNotEmpty && cat.toLowerCase() != 'all' && cat.toLowerCase() != 'offers')
+          .toSet()
+          .toList();
+      categories.addAll(loadedCats);
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: BlocListener<MealsCubit, MealsState>(
@@ -129,36 +178,39 @@ class _MealsPageState extends State<MealsPage> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: FoodCategory.values.map((cat) {
-                      final isSelected = _category == cat;
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _category = cat;
-                          });
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF2ECC87) : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isSelected ? const Color(0xFF2ECC87) : const Color(0xFFEEF0F4),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: categories.map((cat) {
+                        final isSelected = _activeCategory.toLowerCase() == cat.toLowerCase();
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _activeCategory = cat;
+                            });
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFF2ECC87) : Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected ? const Color(0xFF2ECC87) : const Color(0xFFEEF0F4),
+                              ),
+                            ),
+                            child: Text(
+                              _getCategoryDisplayName(cat),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected ? Colors.white : const Color(0xFF1A1D23),
+                              ),
                             ),
                           ),
-                          child: Text(
-                            cat.name[0].toUpperCase() + cat.name.substring(1),
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: isSelected ? Colors.white : const Color(0xFF1A1D23),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
               ),
